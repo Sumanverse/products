@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Poppins:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(220, 38, 38, 0.4);
+        }
+
+        /* THE TRIPLE GLOW LAMP SYSTEM */
+        .bubble-lamp {
+            position: absolute;
+            background: #b91c1c;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .lamp-center {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            filter: blur(220px);
+            opacity: 0.25;
+            z-index: 1;
+        }
+
+        .lamp-tl {
+            top: -100px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            filter: blur(150px);
+            opacity: 0.2;
+            z-index: 1;
+            background: #cc1111;
+        }
+
+        .lamp-br {
+            bottom: -100px;
+            right: -100px;
+            width: 600px;
+            height: 600px;
+            filter: blur(150px);
+            opacity: 0.2;
+            z-index: 1;
+            background: #cc1111;
+        }
+
+        .bubble-card {
+            background: #0d0d0d;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 1);
+        }
+
+        .editorial-title {
+            text-transform: uppercase;
+            font-weight: 950;
+            line-height: 0.85;
+            letter-spacing: -0.04em;
+            font-style: italic;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        .anim-scan {
+            animation: scan 2s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="custom-scroll">
+    <% 
+        const vehicleTypeName = (model.vehicle_type_name || 'car');
+        const countryName = (model.country_name || 'Nepal').toLowerCase();
+        const simplifiedUrl = `WWW.GADIDRIVE.COM`;
+        const nameLen = (model.model_name || '').length;
+
+        let identNameSize = "text-[95px]";
+        if (nameLen > 12) identNameSize = "text-[75px]";
+        if (nameLen > 18) identNameSize = "text-[60px]";
+
+        let posterTitleSize = "text-[160px]";
+        if (nameLen > 12) posterTitleSize = "text-[100px]";
+        if (nameLen > 22) posterTitleSize = "text-[80px]";
+
+        const currencySymbol = model.currency_symbol || 'रु';
+
+        const slug = (str) => (str || '').toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+        const modelUrl = `${simplifiedUrl}/${slug(model.country_name)}/${slug(model.vehicle_type_name)}/${slug(model.brand_name)}/${slug(model.model_name)}`.toUpperCase();
+    %>
+
+        <!-- STUDIO NAV -->
+        <nav
+            class="h-20 bg-[#0a0a0a] border-b border-white/5 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-[110]">
+            <div class="flex items-center gap-6">
+                <a href="/admin/model"
+                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-red-600 transition-all group">
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <div class="flex flex-col">
+                    <h2 class="text-xl font-black text-white uppercase italic tracking-tighter leading-none">Studio
+                        <span class="text-red-600">Bubble</span>
+                    </h2>
+                    <span class="text-[8px] font-bold text-gray-500 tracking-[0.6em] uppercase">CENTER ALIGN • VER
+                        26.0</span>
+                </div>
+            </div>
+            <button onclick="downloadAllPosts()"
+                class="bg-red-600 text-white px-10 h-12 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-red-600/20">
+                EXPORT ASSETS
+            </button>
+        </nav>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-5rem)] overflow-hidden">
+
+            <div
+                class="w-full lg:w-24 bg-[#0a0a0a] border-r border-white/5 flex lg:flex-col items-center py-4 lg:py-10 px-4 lg:px-0 gap-8 justify-center lg:justify-start">
+                <button onclick="switchStudioSlide(1)" id="slide-btn-1"
+                    class="w-16 h-16 rounded-2xl bg-red-600 flex flex-col items-center justify-center text-white transition-all shadow-lg shadow-red-600/30">
+                    <span class="text-xl font-black">01</span>
+                    <span class="text-[8px] font-bold uppercase">Identity</span>
+                </button>
+                <button onclick="switchStudioSlide(2)" id="slide-btn-2"
+                    class="w-16 h-16 rounded-2xl bg-white/5 flex flex-col items-center justify-center text-gray-500 hover:bg-white/10 transition-all">
+                    <span class="text-xl font-black">02</span>
+                    <span class="text-[8px] font-bold uppercase">Poster</span>
+                </button>
+                <button onclick="switchStudioSlide(3)" id="slide-btn-3"
+                    class="w-16 h-16 rounded-2xl bg-white/5 flex flex-col items-center justify-center text-gray-500 hover:bg-white/10 transition-all">
+                    <span class="text-xl font-black">03</span>
+                    <span class="text-[8px] font-bold uppercase">CTA</span>
+                </button>
+            </div>
+
+            <div class="flex-1 bg-black relative overflow-hidden flex items-center justify-center p-6 lg:p-10">
+                <div id="studio-scanner"
+                    class="absolute top-0 left-0 w-full h-[2px] bg-red-600 shadow-[0_0_20px_#dc2626] hidden z-40"></div>
+                <div id="canvas-container"
+                    class="bg-[#050505] border border-white/10 shadow-[0_60px_120px_rgba(0,0,0,1)] overflow-hidden relative z-10 flex items-center justify-center"
+                    style="height: 94%; aspect-ratio: 4/5;">
+                    <div id="studio-main-preview"
+                        class="w-full h-full flex items-center justify-center bg-black overflow-hidden pointer-events-none">
+                        <div class="flex flex-col items-center gap-6 opacity-40">
+                            <div
+                                class="w-16 h-16 border-[6px] border-red-600 border-t-transparent rounded-full animate-spin">
+                            </div>
+                            <span class="text-white font-black text-xs uppercase tracking-[0.5em]">Centering
+                                Content...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="w-full lg:w-[450px] bg-[#0a0a0a] border-l border-white/5 overflow-y-auto custom-scroll p-12 space-y-10">
+                <h3 class="text-white font-black text-3xl uppercase italic tracking-tighter">Social Logic</h3>
+                <div class="bg-[#0f0f0f] border border-white/5 p-10">
+                    <textarea id="caption-output"
+                        class="w-full bg-transparent text-gray-400 text-lg border-none focus:ring-0 resize-none min-h-[350px] custom-scroll"
+                        placeholder="Copy logic loading..."></textarea>
+                    <button onclick="copySocialCaption()"
+                        class="w-full mt-8 h-18 bg-white/5 hover:bg-emerald-600 text-white font-black uppercase tracking-widest transition-all border border-white/10 flex items-center justify-center gap-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                            </path>
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- HIDDEN RENDERING LAYER (PLAZEMENT CENTERED) -->
+        <div id="post-generator-container"
+            style="position: fixed; top: -9999px; left: -9999px; width: 1080px; z-index: -100; overflow: hidden;">
+
+            <!-- Slide 1: THE IDENTITY (Two-Block Selective Rounding) -->
+            <div id="post-1-template"
+                class="relative bg-black flex flex-col items-center justify-center py-24 overflow-hidden"
+                style="width: 1080px; height: 1350px; font-family: 'Outfit', sans-serif;">
+
+                <!-- CORNER GLOWS (TL + BR) -->
+                <div class="bubble-lamp lamp-center"></div>
+                <div class="bubble-lamp lamp-tl"></div>
+                <div class="bubble-lamp lamp-br"></div>
+
+                <!-- Header Absolute -->
+                <div class="absolute top-[55px] w-full px-[110px] flex items-center justify-between z-20">
+                    <span class="text-white/30 text-3xl font-black italic uppercase tracking-tighter text-left">
+                        <%= model.brand_name %>
+                    </span>
+                    <span class="text-white font-black text-6xl tracking-tighter text-right">Gadi<span
+                            class="text-red-700">Drive.</span></span>
+                </div>
+
+                <!-- BLOCK 1: MODEL BOX -->
+                <div
+                    class="relative z-10 w-[885px] bubble-card rounded-t-[4.5rem] rounded-b-none overflow-hidden flex flex-col mb-4">
+                    <div
+                        class="relative w-full h-[550px] flex items-center justify-center bg-gradient-to-b from-white/[0.04] to-transparent p-6 pb-10">
+                        
+                        <img src="<%= model.model_image %>"
+                            class="relative z-10 max-w-full max-h-full object-contain filter drop-shadow-[0_35px_50px_rgba(0,0,0,0.8)]"
+                            crossorigin="anonymous">
+                    </div>
+                    <div class="w-full p-16 px-20 flex flex-col gap-4 text-left">
+                        <span class="text-red-700 font-bold text-lg uppercase tracking-[0.5em] italic leading-none">
+                            <%= model.brand_name %>
+                        </span>
+                        <h3
+                            class="<%= identNameSize %> editorial-title text-white tracking-tighter w-full overflow-wrap break-word">
+                            <%= model.model_name %>
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- BLOCK 2: PRICE BOX (Visual Centering & Lift Fix) -->
+                <div
+                    class="relative z-10 w-[885px] h-[190px] bubble-card rounded-b-[4.5rem] rounded-t-none overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center gap-10 -translate-y-4">
+                        <!-- Typrographic Label -->
+                        <div class="flex flex-col items-end justify-center">
+                            <span
+                                class="text-white font-black text-[11px] uppercase tracking-[0.3em] italic mb-1.5 opacity-60">STARTING</span>
+                            <span
+                                class="text-red-700 font-black text-4xl uppercase tracking-[0.2em] italic leading-none">AT</span>
+                        </div>
+
+                        <!-- Integrated Price -->
+                        <div class="flex items-end gap-3 text-white leading-none tracking-tighter font-black">
+                            <span class="text-red-700 italic text-[90px] font-black leading-[0.8]">
+                                <%= currencySymbol %>
+                            </span>
+                            <span class="text-[90px] leading-[0.8]">
+                                <%= new Intl.NumberFormat('en-IN').format(model.starting_price) %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom URL Footer -->
+                <div class="absolute bottom-[90px] w-full flex items-center justify-center opacity-30 z-20">
+                    <div class="text-white text-xs font-bold italic tracking-[1.2em] uppercase">
+                        <%= simplifiedUrl %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: THE POSTER (Sophisticated SAT) -->
+            <div id="post-2-template"
+                class="relative bg-black flex flex-col p-28 text-white overflow-hidden justify-between"
+                style="width: 1080px; height: 1350px; font-family: 'Outfit', sans-serif;">
+
+                <!-- Corner Glow Atmosphere -->
+                <div class="bubble-lamp lamp-center opacity-15"></div>
+                <div class="bubble-lamp lamp-tl opacity-10"></div>
+                <div class="bubble-lamp lamp-br opacity-10"></div>
+
+                <!-- Header Assembly (Ultra-Lifted Hierarchy) -->
+                <div class="relative z-10 flex flex-col pt-0">
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="text-white font-black text-xl uppercase tracking-[0.6em]">KEY</span>
+                        <span class="text-[#cc1111] font-black text-xl uppercase tracking-[0.6em]">SPECIFICATIONS</span>
+                    </div>
+                    <div
+                        class="text-[#cc1111] text-[90px] font-black uppercase tracking-tighter leading-none mb-6 italic">
+                        <%= model.brand_name %>
+                    </div>
+                    <h3
+                        class="<%= posterTitleSize %> editorial-title text-white w-full uppercase font-black tracking-tighter italic leading-none">
+                        <%= model.model_name %>
+                    </h3>
+                </div>
+
+                <!-- Rounded Bubble-Card Spec Boxes -->
+                <div class="relative z-20 grid grid-cols-2 gap-10">
+                    <% keyspecs.slice(0, 4).forEach(spec=> { %>
+                        <div class="bubble-card rounded-[3rem] border border-white/5 p-12 shadow-2xl">
+                            <span
+                                class="text-[#cc1111] font-black text-base uppercase tracking-[0.5em] mb-6 block text-[13px]">
+                                <%= spec.key_spec %>
+                            </span>
+                            <div class="text-[52px] font-black text-white tracking-tighter leading-[0.9]">
+                                <%= spec.key_spec_data || '---' %>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+
+                <!-- Final Footer Positioning -->
+                <div class="relative z-10 flex items-center justify-center pt-20 border-t border-white/5 w-full">
+                    <span class="text-white/20 text-xs font-bold tracking-[1.2em] uppercase italic w-full text-center">
+                        <%= simplifiedUrl %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Slide 3: THE CALL (High Contrast + Dynamic URL) -->
+            <div id="post-3-template"
+                class="relative bg-black flex flex-col items-center justify-center p-28 text-center overflow-hidden"
+                style="width: 1080px; height: 1350px; font-family: 'Outfit', sans-serif;">
+
+                <!-- Corner Glow Atmosphere -->
+                <div class="bubble-lamp lamp-center opacity-25"></div>
+                <div class="bubble-lamp lamp-tl opacity-15"></div>
+                <div class="bubble-lamp lamp-br opacity-15"></div>
+
+                <div class="relative z-10 flex flex-col items-center gap-14 px-14">
+                    <h2 class="text-[145px] editorial-title text-white leading-none">
+                        WANT TO SEE<br />
+                        <span class="text-[#cc1111]">FULL DETAILS?</span>
+                    </h2>
+                    <div class="w-60 h-[4px] bg-[#cc1111] my-4 shadow-[0_0_25px_#cc1111]"></div>
+                    <div class="flex flex-col items-center gap-10">
+                        <span class="text-3xl font-black text-white/30 uppercase tracking-[0.8em] italic">GO TO</span>
+                        <div
+                            class="text-white font-black text-2xl italic uppercase tracking-[0.4em] border-b-4 border-[#cc1111]/50 pb-6 opacity-80">
+                            WWW.<span class="text-[#cc1111]">GADIDRIVE</span>.COM<%= modelUrl.split('GADIDRIVE.COM')[1]
+                                %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let post1Canvas = null, post2Canvas = null, post3Canvas = null;
+            let activeSlide = 1;
+
+            window.onload = async () => { await renderAll(); generateCaptions(); };
+
+            async function renderAll() {
+                const scanner = document.getElementById('studio-scanner');
+                scanner.classList.remove('hidden'); scanner.classList.add('anim-scan');
+                try {
+                    const options = { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#000000', logging: false };
+                    post1Canvas = await html2canvas(document.getElementById('post-1-template'), options);
+                    post2Canvas = await html2canvas(document.getElementById('post-2-template'), options);
+                    post3Canvas = await html2canvas(document.getElementById('post-3-template'), options);
+                    updatePreview();
+                } catch (err) { console.error('Design Polishing Error:', err); }
+                finally { scanner.classList.remove('anim-scan'); scanner.classList.add('hidden'); }
+            }
+
+            function updatePreview() {
+                const container = document.getElementById('studio-main-preview');
+                const canvases = [null, post1Canvas, post2Canvas, post3Canvas];
+                const canvas = canvases[activeSlide];
+                if (!canvas) return;
+                container.innerHTML = '';
+                const img = new Image();
+                img.src = canvas.toDataURL('image/jpeg', 0.98);
+                img.className = "max-w-full max-h-full object-contain";
+                container.appendChild(img);
+            }
+
+            function switchStudioSlide(n) {
+                activeSlide = n;
+                for (let i = 1; i <= 3; i++) {
+                    const btn = document.getElementById(`slide-btn-${i}`);
+                    if (btn) btn.className = (i === n) ? "w-16 h-16 rounded-2xl bg-red-600 flex flex-col items-center justify-center text-white transition-all shadow-lg shadow-red-600/30" : "w-16 h-16 rounded-2xl bg-white/5 flex flex-col items-center justify-center text-gray-500 hover:bg-white/10 transition-all";
+                }
+                updatePreview();
+            }
+
+            function downloadAllPosts() {
+                if (!post1Canvas || !post2Canvas || !post3Canvas) return;
+                const prefix = "studio_balanced_<%= model.model_name.replace(/ /g, '_') %>";
+                const download = (c, n) => { const l = document.createElement('a'); l.download = n; l.href = c.toDataURL('image/jpeg', 1.0); l.click(); };
+                download(post1Canvas, `${prefix}_01.jpg`);
+                setTimeout(() => download(post2Canvas, `${prefix}_02.jpg`), 800);
+                setTimeout(() => download(post3Canvas, `${prefix}_03.jpg`), 1600);
+            }
+
+            function generateCaptions() {
+                const brand = "<%= model.brand_name %>";
+                const model = "<%= model.model_name %>";
+                const cat = "<%= model.category_name %>";
+                const country = "<%= model.country_name %>";
+
+                const title = `🔥 ${brand.toUpperCase()} ${model.toUpperCase()}`;
+                const desc = `All details are in GadiDrive.com! Dive into the comprehensive breakdown of the beautiful ${brand} ${model}. Explore the exact performance metrics, design philosophy, safety features, and in-depth variants available in your region. Check out the link in bio or visit WWW.GADIDRIVE.COM to get started.`;
+
+                const tagsArr = [
+                    brand.replace(/ /g, ''),
+                    model.replace(/ /g, ''),
+                    (brand + model).replace(/ /g, ''),
+                    cat.replace(/ /g, ''),
+                    country.replace(/ /g, ''),
+                    'GadiDrive'
+                ];
+                const hashtags = tagsArr.map(t => `#${t}`).join(' ');
+
+                document.getElementById('caption-output').value = `${title}\n\n${desc}\n\n${hashtags}`;
+            }
+
+            function copySocialCaption() {
+                const text = document.getElementById('caption-output'); text.select(); document.execCommand('copy');
+                const btn = event.currentTarget; const orig = btn.innerHTML;
+                btn.innerHTML = `COPIED!`; btn.style.backgroundColor = '#059669';
+                setTimeout(() => { btn.innerHTML = orig; btn.style.backgroundColor = ''; }, 2000);
+            }
+        </script>
+</body>
+
+</html>

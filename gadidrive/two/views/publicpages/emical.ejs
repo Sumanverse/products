@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', {
+        title: typeof title !== 'undefined' ? title : 'EMI Calculator | Calculate Your Vehicle Loan EMI',
+        description: typeof description !== 'undefined' ? description : 'Calculate your vehicle loan EMI with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.',
+        keywords: typeof keywords !== 'undefined' ? keywords : 'EMI calculator, car loan EMI, bike loan calculator, vehicle finance',
+        url: currentUrl,
+        path: path,
+        country: country
+    }) %>
+
+    <script type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "FinancialCalculator",
+        "name": "GadiDrive Vehicle EMI Calculator",
+        "description": "Calculate monthly installments for vehicle loans in <%= countryDisplay %>.",
+        "url": "https://gadidrive.com<%= path %>",
+        "category": "Financial Tool"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "GadiDrive EMI Calculator",
+        "url": "https://gadidrive.com<%= path %>",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "description": "Calculate your vehicle loan EMI in <%= countryDisplay %> with detailed breakdown and charts."
+      }
+    ]
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart library will be loaded at the bottom -->
+    <style>
+        :root {
+            --primary-red: #dc2626;
+            --dark-red: #b91c1c;
+            --primary-blue: #3b82f6;
+            --dark-blue: #1d4ed8;
+            --primary-green: #10b981;
+            --dark-green: #059669;
+            --primary-yellow: #f59e0b;
+            --dark-yellow: #d97706;
+            --dark-bg: #000000;
+            --card-bg: #111111;
+            --text-light: #ffffff;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            color: white;
+        }
+        
+        /* Country badge हटाइयो */
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Main Card Styling */
+        .emi-main-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #374151;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            border-radius: 2px;
+        }
+        
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .input-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .required {
+            color: var(--primary-red);
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(55, 65, 81, 0.3);
+            border: 2px solid #374151;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+        
+        .input-field::placeholder {
+            color: #6b7280;
+        }
+        
+        /* Input with symbol */
+        .input-with-symbol {
+            position: relative;
+        }
+        
+        .input-symbol {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        
+        .input-symbol-percent {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        
+        .input-with-symbol .input-field {
+            padding-left: 2.5rem;
+        }
+        
+        .input-with-percent .input-field {
+            padding-right: 2.5rem;
+        }
+        
+        /* Down Payment Section Styling */
+        .down-payment-container {
+            background: rgba(55, 65, 81, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid #374151;
+        }
+        
+        .or-separator {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .or-separator::before,
+        .or-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #374151;
+        }
+        
+        .or-separator span {
+            padding: 0 1rem;
+        }
+        
+        .down-payment-info {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(55, 65, 81, 0.25);
+            border-radius: 8px;
+            border: 1px solid #374151;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        /* Radio Button Group */
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.25rem;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .radio-input {
+            display: none;
+        }
+        
+        .radio-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #374151;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .radio-input:checked + .radio-custom {
+            border-color: var(--primary-red);
+            background-color: var(--primary-red);
+        }
+        
+        .radio-input:checked + .radio-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .radio-label {
+            color: white;
+            font-weight: 500;
+        }
+        
+        /* Calculate Button */
+        .calculate-btn {
+            background: transparent;
+            border: 2px solid #10b981;
+            color: #10b981;
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 200px;
+            justify-content: center;
+        }
+        
+        .calculate-btn:hover {
+            background: #10b981;
+            border-color: #10b981;
+            color: black;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .calculate-btn svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .calculate-btn:hover svg {
+            transform: rotate(10deg);
+        }
+        
+        /* Results Section */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .result-card {
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #374151;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-3px);
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .result-unit {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        /* Conclusion Report */
+        .conclusion-report {
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--primary-red);
+        }
+        
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-content {
+            line-height: 1.6;
+            color: #d1d5db;
+            font-size: 1.05rem;
+        }
+        
+        .report-highlight {
+            color: var(--primary-red);
+            font-weight: 600;
+        }
+        
+        .report-green {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+        
+        .report-blue {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        
+        .report-yellow {
+            color: var(--primary-yellow);
+            font-weight: 600;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: linear-gradient(145deg, #0a0a0a, #141414);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .chart-wrapper {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid var(--primary-red);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            color: #fca5a5;
+            font-weight: 500;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .emi-main-card {
+                padding: 1.5rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .result-value {
+                font-size: 1.5rem;
+            }
+            
+            .calculate-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .chart-wrapper {
+                height: 350px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
+        
+        /* HIDDEN TITLE - For SEO purposes only */
+        .hidden-title {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        #emiChart {
+            border: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-black text-white">
+
+<%- include('../partials/navbar', { 
+    currentPage: 'emical',
+    country: country,
+    allVehicleTypes: []
+}) %>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-4 py-8">
+
+    <!-- Country badge हटाइयो -->
+    
+    <!-- HIDDEN TITLE for SEO -->
+    <h1 class="hidden-title">Vehicle Loan EMI Calculator - Calculate Car, Bike, SUV EMI in <%= countryDisplay %></h1>
+    
+    <!-- Visible Page Header -->
+    <div class="text-center mb-10">
+        <h2 class="text-4xl font-extrabold text-white mb-4">Vehicle Loan EMI Calculator</h2>
+        <p class="text-gray-300 text-lg max-w-3xl mx-auto">
+            Calculate your monthly EMI for car, bike, or any vehicle loan in <%= countryDisplay %>. 
+            Get detailed breakdown and charts for your loan analysis.
+        </p>
+    </div>
+
+    <% if (error) { %>
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <!-- EMI Calculator Form -->
+    <div class="emi-main-card">
+        <h3 class="section-title">Loan Details</h3>
+        
+        <form method="POST" action="<%= countryPrefix %>/emicalculator/calculate#results" id="emiForm">
+            
+            <!-- Country Selector -->
+            <div class="input-group mb-4">
+                <label class="input-label" for="emiCountrySelector">
+                    <i class="fas fa-globe"></i>
+                    Select Country / Currency
+                </label>
+                <select id="emiCountrySelector" class="input-field cursor-pointer" onchange="if(this.value) window.location.href='/' + this.value + '/emicalculator'">
+                    <% if (typeof allCountries !== 'undefined' && allCountries.length > 0) { %>
+                        <% allCountries.forEach(c => { %>
+                            <option value="<%= c.country_name.toLowerCase() %>" <%= (country && country.country_name === c.country_name) ? 'selected' : '' %>>
+                                <%= c.country_name %> (<%= c.currency_symbol %>)
+                            </option>
+                        <% }); %>
+                    <% } else { %>
+                        <option value="nepal" selected>Nepal (रू)</option>
+                        <option value="india">India (₹)</option>
+                        <option value="bangladesh">Bangladesh (৳)</option>
+                        <option value="pakistan">Pakistan (Rs)</option>
+                        <option value="usa">USA ($)</option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="form-grid">
+                <!-- Price (Optional) -->
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-tag"></i>
+                        Vehicle Price (<%= currencySymbol %>)
+                    </label>
+                    <div class="input-with-symbol">
+                        <span class="input-symbol"><%= currencySymbol %></span>
+                        <input type="text" 
+                               name="price" 
+                               id="price" 
+                               class="input-field" 
+                               placeholder="e.g., 25,00,000"
+                               value="<%= inputData?.price ? parseFloat(inputData.price).toLocaleString('en-IN') : '' %>"
+                               min="0"
+                               autocomplete="off">
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Optional - Total vehicle price</div>
+                </div>
+                
+                <!-- Down Payment & Percentage Section -->
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Down Payment Details
+                    </label>
+                    
+                    <div class="down-payment-container">
+                        <!-- Down Payment Amount -->
+                        <div class="input-with-symbol mb-3">
+                            <span class="input-symbol"><%= currencySymbol %></span>
+                            <input type="text" 
+                                   name="downPayment" 
+                                   id="downPayment" 
+                                   class="input-field" 
+                                   placeholder="Down payment amount"
+                                   value="<%= inputData?.downPayment ? parseFloat(inputData.downPayment).toLocaleString('en-IN') : '' %>"
+                                   min="0"
+                                   autocomplete="off">
+                        </div>
+                        
+                        <!-- OR Separator -->
+                        <div class="or-separator">
+                            <span>OR</span>
+                        </div>
+                        
+                        <!-- Down Payment Percentage -->
+                        <div class="input-with-percent">
+                            <input type="text" 
+                                   name="downPaymentPercentage" 
+                                   id="downPaymentPercentage" 
+                                   class="input-field" 
+                                   placeholder="Down payment percentage"
+                                   value="<%= inputData?.downPaymentPercentage || '' %>"
+                                   min="0"
+                                   max="100"
+                                   step="0.1"
+                                   autocomplete="off">
+                            <span class="input-symbol-percent">%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Information Display -->
+                    <div class="down-payment-info" id="downPaymentInfo">
+                        Enter vehicle price and either amount or percentage
+                    </div>
+                </div>
+                
+                <!-- Loan Amount (Mandatory) -->
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Loan Amount (<%= currencySymbol %>)
+                        <span class="required">*</span>
+                    </label>
+                    <div class="input-with-symbol">
+                        <span class="input-symbol"><%= currencySymbol %></span>
+                        <input type="text" 
+                               name="loanAmount" 
+                               id="loanAmount" 
+                               class="input-field" 
+                               placeholder="e.g., 20,00,000"
+                               value="<%= inputData?.loanAmount ? parseFloat(inputData.loanAmount).toLocaleString('en-IN') : '' %>"
+                               required
+                               min="1000"
+                               autocomplete="off">
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Required - Total loan amount (auto-calculated)</div>
+                </div>
+                
+                <!-- Interest Rate (Mandatory) -->
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-percentage"></i>
+                        Interest Rate (% per annum)
+                        <span class="required">*</span>
+                    </label>
+                    <div class="input-with-percent">
+                        <input type="text" 
+                               name="interestRate" 
+                               id="interestRate" 
+                               class="input-field" 
+                               placeholder="e.g., 10.5"
+                               value="<%= inputData?.interestRate || '' %>"
+                               required
+                               min="1"
+                               max="30"
+                               autocomplete="off">
+                        <span class="input-symbol-percent">%</span>
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Required - Annual interest rate</div>
+                </div>
+                
+                <!-- Tenure (Mandatory) -->
+                <div class="input-group">
+                    <label class="input-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Loan Tenure
+                        <span class="required">*</span>
+                    </label>
+                    <div class="flex gap-4">
+                        <input type="number" 
+                               name="tenure" 
+                               id="tenure" 
+                               class="input-field flex-1" 
+                               placeholder="e.g., 5"
+                               value="<%= inputData?.tenure || '' %>"
+                               required
+                               min="1"
+                               max="30">
+                        
+                        <!-- Tenure Type -->
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" 
+                                       name="tenureType" 
+                                       value="years" 
+                                       class="radio-input"
+                                       <%= (!inputData?.tenureType || inputData?.tenureType === 'years') ? 'checked' : '' %>>
+                                <span class="radio-custom"></span>
+                                <span class="radio-label">Years</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" 
+                                       name="tenureType" 
+                                       value="months" 
+                                       class="radio-input"
+                                       <%= inputData?.tenureType === 'months' ? 'checked' : '' %>>
+                                <span class="radio-custom"></span>
+                                <span class="radio-label">Months</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1">Required - Loan duration in years or months</div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" class="calculate-btn">
+                    <i class="fas fa-calculator"></i>
+                    Calculate EMI
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <% if (result) { %>
+        <!-- Results Section -->
+        <div class="emi-main-card" id="results">
+            <h3 class="section-title">EMI Calculation Results</h3>
+            
+            <!-- Quick Results with Colors -->
+            <div class="results-grid">
+                <div class="result-card" id="emiResultCard">
+                    <div class="result-label">Monthly EMI</div>
+                    <div class="result-value" id="emiValue"><%= currencySymbol %><%= result.emi.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></div>
+                    <div class="result-unit">Per Month</div>
+                </div>
+                
+                <div class="result-card" id="interestResultCard">
+                    <div class="result-label">Total Interest</div>
+                    <div class="result-value" id="interestValue"><%= currencySymbol %><%= result.totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></div>
+                    <div class="result-unit">For <%= result.tenureDisplay %></div>
+                </div>
+                
+                <div class="result-card" id="totalResultCard">
+                    <div class="result-label">Total Payment</div>
+                    <div class="result-value" id="totalValue"><%= currencySymbol %><%= result.totalPayment.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></div>
+                    <div class="result-unit">Principal + Interest</div>
+                </div>
+            </div>
+            
+            <!-- Professional Conclusion Report with Vehicle Price Info -->
+            <div class="conclusion-report">
+                <h4 class="report-title">Loan Analysis</h4>
+                <div class="report-content">
+                    <% if (result.price && result.downPaymentPercentage) { %>
+                        <p>
+                            For a vehicle priced at <span class="report-green"><%= currencySymbol %><%= result.price.toLocaleString('en-IN') %></span> 
+                            with a down payment of <span class="report-blue"><%= currencySymbol %><%= result.downPayment.toLocaleString('en-IN') %></span> 
+                            (<span class="report-yellow"><%= result.downPaymentPercentage %>%</span> of total price), 
+                            your loan amount is <span class="report-highlight"><%= currencySymbol %><%= result.loanAmount.toLocaleString('en-IN') %></span>.
+                        </p>
+                        
+                        <p class="mt-3">
+                            Your loan of <span class="report-highlight"><%= currencySymbol %><%= result.loanAmount.toLocaleString('en-IN') %></span> 
+                            at an annual interest rate of <span class="report-highlight"><%= result.interestRate %>%</span> 
+                            over <span class="report-highlight"><%= result.tenureDisplay %></span> (<%= result.tenure %> months) 
+                            results in a monthly EMI of <span class="report-green"><%= currencySymbol %><%= result.emi.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>.
+                        </p>
+                        
+                        <p class="mt-3">
+                            The total interest payable over the loan tenure of <span class="report-highlight"><%= result.tenureDisplay %></span> 
+                            is <span class="report-blue"><%= currencySymbol %><%= result.totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>, 
+                            which represents <span class="report-highlight"><%= ((result.totalInterest / result.totalPayment) * 100).toFixed(2) %>%</span> 
+                            of your total payment amount of <span class="report-highlight"><%= currencySymbol %><%= result.totalPayment.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>.
+                        </p>
+                        
+                        <p class="mt-3">
+                            <strong>Financial Breakdown:</strong><br>
+                            • Vehicle Price: <%= currencySymbol %><%= result.price.toLocaleString('en-IN') %><br>
+                            • Down Payment: <%= currencySymbol %><%= result.downPayment.toLocaleString('en-IN') %> (<%= result.downPaymentPercentage %>%%)<br>
+                            • Loan Amount: <%= currencySymbol %><%= result.loanAmount.toLocaleString('en-IN') %><br>
+                            • Total Interest (for <%= result.tenureDisplay %>): <%= currencySymbol %><%= result.totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 2}) %><br>
+                            • Total Payment: <%= currencySymbol %><%= result.totalPayment.toLocaleString('en-IN', {maximumFractionDigits: 2}) %>
+                        </p>
+                    <% } else { %>
+                        <p>
+                            Your loan of <span class="report-highlight"><%= currencySymbol %><%= result.loanAmount.toLocaleString('en-IN') %></span> 
+                            at an annual interest rate of <span class="report-highlight"><%= result.interestRate %>%</span> 
+                            over <span class="report-highlight"><%= result.tenureDisplay %></span> (<%= result.tenure %> months) 
+                            results in a monthly EMI of <span class="report-green"><%= currencySymbol %><%= result.emi.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>.
+                        </p>
+                        
+                        <p class="mt-3">
+                            The total interest payable over the loan tenure of <span class="report-highlight"><%= result.tenureDisplay %></span> 
+                            is <span class="report-blue"><%= currencySymbol %><%= result.totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>, 
+                            which represents <span class="report-highlight"><%= ((result.totalInterest / result.totalPayment) * 100).toFixed(2) %>%</span> 
+                            of your total payment amount of <span class="report-highlight"><%= currencySymbol %><%= result.totalPayment.toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span>.
+                        </p>
+                    <% } %>
+                    
+                    <p class="mt-3">
+                        <strong>Financial Insight:</strong> To reduce your EMI burden, consider increasing your down payment by 10-20% 
+                        or negotiating for a lower interest rate. A 1% reduction in interest rate could save you approximately 
+                        <span class="report-highlight"><%= currencySymbol %><%= (result.totalInterest * 0.1).toLocaleString('en-IN', {maximumFractionDigits: 2}) %></span> 
+                        over the loan period of <%= result.tenureDisplay %>.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Chart Container -->
+            <% if (chartData && chartData !== 'null') { %>
+            <div class="chart-container">
+                <h4 class="chart-title">Loan Breakdown Visualization</h4>
+                <div class="chart-wrapper" style="position: relative; height:400px; width:100%;">
+                    <canvas id="emiChart"></canvas>
+                </div>
+                <!-- Store chart data in hidden input for reliable retrieval -->
+                <input type="hidden" id="chartDataStore" value='<%- chartData %>'>
+                <input type="hidden" id="monthlyEmiStore" value="<%= result.emi %>">
+            </div>
+            <% } %>
+            
+        </div>
+    <% } %>
+    
+    <!-- Suggestions and Recommendations -->
+    <div class="recommendations-container mt-16 space-y-16 max-w-7xl mx-auto px-4">
+        
+        <!-- 1. Similar Models (Based on Price Range) -->
+        <% if (typeof similarModels !== 'undefined' && similarModels && similarModels.length > 0) { %>
+            <section class="suggestions-section">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4 flex items-center gap-2">
+                        <span class="text-gray-400">Vehicles in your</span>
+                        <span class="text-white">Price Range</span>
+                    </h2>
+                    <p class="text-gray-400 mt-2 pl-5 text-sm">Cars matching your calculated vehicle price.</p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <% similarModels.slice(0, 16).forEach(m => { %>
+                        <%- include('../partials/modelbox', { model: m, country: country }) %>
+                    <% }) %>
+                </div>
+            </section>
+        <% } %>
+    </div>
+</main>
+
+<%- include('../partials/footer', { 
+    country: country,
+    allCountries: allCountries,
+    allVehicleTypes: []
+}) %>
+
+<script>
+    // Helper function to parse Indian number format
+    function parseIndianNumber(numStr) {
+        if (!numStr) return 0;
+        return parseFloat(numStr.replace(/,/g, ''));
+    }
+    
+    // Helper function to format Indian number
+    function formatIndianNumber(num) {
+        if (!num && num !== 0) return '';
+        return num.toLocaleString('en-IN', {
+            maximumFractionDigits: 0
+        });
+    }
+    
+    // Update down payment information
+    function updateDownPaymentInfo() {
+        const priceInput = document.getElementById('price');
+        const downPaymentInput = document.getElementById('downPayment');
+        const downPaymentPercentageInput = document.getElementById('downPaymentPercentage');
+        const infoDiv = document.getElementById('downPaymentInfo');
+        
+        const price = parseIndianNumber(priceInput.value);
+        
+        if (price <= 0) {
+            infoDiv.innerHTML = 'Enter vehicle price to calculate down payment details';
+            infoDiv.style.color = '#9ca3af';
+            return;
+        }
+        
+        // If percentage is entered, calculate amount
+        if (downPaymentPercentageInput.value && downPaymentPercentageInput.value.trim() !== '') {
+            const percentage = parseFloat(downPaymentPercentageInput.value.replace(/,/g, '')) || 0;
+            if (percentage >= 0 && percentage <= 100) {
+                const calculatedAmount = (price * percentage) / 100;
+                downPaymentInput.value = formatIndianNumber(Math.round(calculatedAmount));
+                updateLoanAmount();
+                infoDiv.innerHTML = `Down payment: <%= currencySymbol %>${formatIndianNumber(calculatedAmount)} (${percentage}% of <%= currencySymbol %>${formatIndianNumber(price)})`;
+                infoDiv.style.color = '#10b981';
+                return;
+            }
+        }
+        
+        // If amount is entered, calculate percentage
+        if (downPaymentInput.value && downPaymentInput.value.trim() !== '') {
+            const amount = parseIndianNumber(downPaymentInput.value);
+            if (amount >= 0) {
+                const calculatedPercentage = (amount / price) * 100;
+                downPaymentPercentageInput.value = calculatedPercentage.toFixed(2);
+                updateLoanAmount();
+                infoDiv.innerHTML = `Down payment: ${calculatedPercentage.toFixed(2)}% (<%= currencySymbol %>${formatIndianNumber(amount)} of <%= currencySymbol %>${formatIndianNumber(price)})`;
+                infoDiv.style.color = '#3b82f6';
+                return;
+            }
+        }
+        
+        infoDiv.innerHTML = 'Enter either down payment amount or percentage';
+        infoDiv.style.color = '#9ca3af';
+    }
+    
+    // Update loan amount based on price and down payment
+    function updateLoanAmount() {
+        const priceInput = document.getElementById('price');
+        const downPaymentInput = document.getElementById('downPayment');
+        const loanAmountInput = document.getElementById('loanAmount');
+        
+        const price = parseIndianNumber(priceInput.value);
+        const downPayment = parseIndianNumber(downPaymentInput.value) || 0;
+        
+        if (price > 0 && downPayment >= 0 && downPayment <= price) {
+            const loanAmount = price - downPayment;
+            if (loanAmount > 0) {
+                loanAmountInput.value = formatIndianNumber(Math.round(loanAmount));
+            } else {
+                loanAmountInput.value = '';
+            }
+        }
+    }
+    
+    // Clear other field when one is being typed
+    function clearOtherField(event) {
+        const targetId = event.target.id;
+        if (targetId === 'downPayment') {
+            const percentageInput = document.getElementById('downPaymentPercentage');
+            percentageInput.value = '';
+        } else if (targetId === 'downPaymentPercentage') {
+            const amountInput = document.getElementById('downPayment');
+            amountInput.value = '';
+        }
+    }
+    
+    // Format input with commas on blur
+    function formatInputWithCommas(event) {
+        const input = event.target;
+        let value = parseIndianNumber(input.value);
+        
+        if (!isNaN(value) && value >= 0) {
+            if (input.id === 'price' || input.id === 'downPayment' || input.id === 'loanAmount') {
+                value = Math.round(value);
+            }
+            else if (input.id === 'interestRate') {
+                value = parseFloat(value.toFixed(2));
+            }
+            
+            input.value = formatIndianNumber(value);
+        }
+    }
+    
+    // Remove commas on focus
+    function removeCommasOnFocus(event) {
+        const input = event.target;
+        const value = parseIndianNumber(input.value);
+        if (!isNaN(value)) {
+            input.value = value;
+        }
+    }
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('EMI Calculator page loaded');
+        
+        // Get all input elements
+        const priceInput = document.getElementById('price');
+        const downPaymentInput = document.getElementById('downPayment');
+        const downPaymentPercentageInput = document.getElementById('downPaymentPercentage');
+        const loanAmountInput = document.getElementById('loanAmount');
+        const interestRateInput = document.getElementById('interestRate');
+        const tenureInput = document.getElementById('tenure');
+        
+        // Handle URL Parameters for pre-filling
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlPrice = urlParams.get('price');
+        
+        if (urlPrice && priceInput) {
+            console.log('Pre-filling from URL price:', urlPrice);
+            priceInput.value = formatIndianNumber(parseIndianNumber(urlPrice));
+            
+            // Set demo values if price is provided via URL
+            if (downPaymentPercentageInput) {
+                downPaymentPercentageInput.value = "20"; // Demo 20% down payment
+            }
+            if (interestRateInput) {
+                interestRateInput.value = "10.5"; // Demo 10.5% interest rate
+            }
+            if (tenureInput) {
+                tenureInput.value = "5"; // Demo 5 years tenure
+            }
+            
+            // Trigger calculations
+            setTimeout(() => {
+                updateDownPaymentInfo();
+                updateLoanAmount();
+                console.log('EMI pre-fill calculations triggered');
+            }, 100);
+        }
+        
+        // Add event listeners
+        if (priceInput) {
+            priceInput.addEventListener('input', function() {
+                updateDownPaymentInfo();
+                updateLoanAmount();
+            });
+            priceInput.addEventListener('blur', formatInputWithCommas);
+            priceInput.addEventListener('focus', removeCommasOnFocus);
+        }
+        
+        if (downPaymentInput) {
+            downPaymentInput.addEventListener('input', function(e) {
+                clearOtherField(e);
+                updateDownPaymentInfo();
+                updateLoanAmount();
+            });
+            downPaymentInput.addEventListener('blur', formatInputWithCommas);
+            downPaymentInput.addEventListener('focus', removeCommasOnFocus);
+        }
+        
+        if (downPaymentPercentageInput) {
+            downPaymentPercentageInput.addEventListener('input', function(e) {
+                clearOtherField(e);
+                updateDownPaymentInfo();
+                updateLoanAmount();
+            });
+            downPaymentPercentageInput.addEventListener('blur', formatInputWithCommas);
+            downPaymentPercentageInput.addEventListener('focus', removeCommasOnFocus);
+        }
+        
+        if (loanAmountInput) {
+            loanAmountInput.addEventListener('blur', formatInputWithCommas);
+            loanAmountInput.addEventListener('focus', removeCommasOnFocus);
+        }
+        
+        if (interestRateInput) {
+            interestRateInput.addEventListener('blur', formatInputWithCommas);
+            interestRateInput.addEventListener('focus', removeCommasOnFocus);
+        }
+        
+        // Apply colors to result cards
+        setTimeout(function() {
+            const emiValue = document.getElementById('emiValue');
+            const interestValue = document.getElementById('interestValue');
+            const totalValue = document.getElementById('totalValue');
+            
+            if (emiValue) emiValue.style.color = '#10b981';
+            if (interestValue) interestValue.style.color = '#3b82f6';
+            if (totalValue) totalValue.style.color = '#dc2626';
+            
+            console.log('Result card colors applied');
+        }, 100);
+        
+        // Initialize down payment info if there are existing results
+        <% if (result && result.price && result.downPaymentPercentage) { %>
+            setTimeout(function() {
+                const infoDiv = document.getElementById('downPaymentInfo');
+                if (infoDiv) {
+                    infoDiv.innerHTML = `Down payment: <%= currencySymbol %>${(<%= result.downPayment %>).toLocaleString('en-IN')} (<%= result.downPaymentPercentage %>% of <%= currencySymbol %>${(<%= result.price %>).toLocaleString('en-IN')})`;
+                    infoDiv.style.color = '#10b981';
+                }
+            }, 200);
+        <% } %>
+        
+    <% if (result) { %>
+    // results section is handled by #results anchor
+    console.log('Results loaded, anchored to #results');
+    <% } %>
+
+        // Initialize chart if results exist
+        <% if (result && chartData && chartData !== 'null') { %>
+            console.log('Initializing Bar Chart v2.9.4...');
+            
+            setTimeout(function() {
+                try {
+                    const canvas = document.getElementById('emiChart');
+                    const dataStore = document.getElementById('chartDataStore');
+                    
+                    if (!canvas || !dataStore) return;
+                    
+                    const ctx = canvas.getContext('2d');
+                    const chartData = JSON.parse(dataStore.value);
+                    
+                    if (window.emiChartInstance) {
+                        window.emiChartInstance.destroy();
+                    }
+
+                    window.emiChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: chartData,
+                        plugins: [{
+                            beforeDraw: function(chart) {
+                                var width = chart.chart.width,
+                                    height = chart.chart.height,
+                                    ctx = chart.chart.ctx;
+                                ctx.restore();
+                                var fontSize = (height / 220).toFixed(2);
+                                ctx.font = fontSize + "em sans-serif";
+                                ctx.textBaseline = "middle";
+                                ctx.fillStyle = "white";
+                                var text = "Monthly EMI",
+                                    textX = Math.round((width - ctx.measureText(text).width) / 2),
+                                    textY = height / 2.4;
+                                ctx.fillText(text, textX, textY);
+                                
+                                ctx.font = "bold " + (fontSize * 1.2) + "em sans-serif";
+                                ctx.fillStyle = "#10b981";
+                                
+                                // Read EMI from store safely and clean it
+                                var emiElement = document.getElementById('monthlyEmiStore');
+                                var emiValue = emiElement ? emiElement.value : '0';
+                                // Clean value: remove commas and any non-numeric chars except dot
+                                emiValue = emiValue.replace(/[^\d.]/g, '');
+                                
+                                var numericEmi = parseFloat(emiValue) || 0;
+                                var valText = "<%= currencySymbol %>" + numericEmi.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                
+                                var valX = Math.round((width - ctx.measureText(valText).width) / 2),
+                                    valY = height / 1.85;
+                                ctx.fillText(valText, valX, valY);
+                                
+                                ctx.font = (fontSize * 0.7) + "em sans-serif";
+                                ctx.fillStyle = "#9ca3af";
+                                var subText = "Per Month",
+                                    subX = Math.round((width - ctx.measureText(subText).width) / 2),
+                                    subY = height / 1.5;
+                                ctx.fillText(subText, subX, subY);
+                                ctx.save();
+                            }
+                        }],
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutoutPercentage: 80,
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    fontColor: 'white',
+                                    fontSize: 12,
+                                    padding: 20,
+                                    generateLabels: function(chart) {
+                                        var data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            return data.labels.map(function(label, i) {
+                                                var value = data.datasets[0].data[i];
+                                                return {
+                                                    text: label + ': <%= currencySymbol %>' + value.toLocaleString('en-IN'),
+                                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                                    strokeStyle: data.datasets[0].borderColor[i],
+                                                    lineWidth: 2,
+                                                    index: i
+                                                };
+                                            });
+                                        }
+                                        return [];
+                                    }
+                                }
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    label: function(tooltipItem, data) {
+                                        var label = data.labels[tooltipItem.index] || '';
+                                        var value = data.datasets[0].data[tooltipItem.index];
+                                        return label + ': <%= currencySymbol %>' + value.toLocaleString('en-IN');
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('Chart error:', err);
+                }
+            }, 1000);
+        <% } %>
+});
+    
+    // Form validation and submission
+    document.getElementById('emiForm')?.addEventListener('submit', function(e) {
+        // Remove commas from all number inputs before submission
+        const numberInputs = this.querySelectorAll('input[type="text"], input[type="number"]');
+        numberInputs.forEach(input => {
+            if (input.value) {
+                input.value = input.value.replace(/,/g, '');
+            }
+        });
+        
+        // Validate required fields
+        const loanAmount = this.querySelector('[name="loanAmount"]');
+        const interestRate = this.querySelector('[name="interestRate"]');
+        const tenure = this.querySelector('[name="tenure"]');
+        
+        // Check if loan amount is valid
+        if (!loanAmount.value || parseIndianNumber(loanAmount.value) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid loan amount');
+            loanAmount.focus();
+            return;
+        }
+        
+        // Check if interest rate is valid
+        if (!interestRate.value || parseFloat(interestRate.value.replace(/,/g, '')) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid interest rate');
+            interestRate.focus();
+            return;
+        }
+        
+        // Check if tenure is valid
+        if (!tenure.value || parseInt(tenure.value) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid tenure');
+            tenure.focus();
+            return;
+        }
+        
+        // Validate down payment percentage if entered
+        const downPaymentPercentage = this.querySelector('[name="downPaymentPercentage"]');
+        if (downPaymentPercentage.value) {
+            const percentage = parseFloat(downPaymentPercentage.value.replace(/,/g, ''));
+            if (percentage < 0 || percentage > 100) {
+                e.preventDefault();
+                alert('Down payment percentage must be between 0 and 100');
+                downPaymentPercentage.focus();
+                return;
+            }
+        }
+        
+        // Validate price if entered
+        const price = this.querySelector('[name="price"]');
+        if (price.value) {
+            const priceValue = parseIndianNumber(price.value);
+            if (priceValue <= 0) {
+                e.preventDefault();
+                alert('Vehicle price must be greater than 0');
+                price.focus();
+                return;
+            }
+        }
+    });
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+</body>
+</html>

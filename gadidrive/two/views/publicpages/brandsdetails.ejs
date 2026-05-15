@@ -1,0 +1,715 @@
+<% 
+const currentYear = new Date().getFullYear();
+const vehicleTypeName = vehicleType.vehicle_type_name || 'Vehicle';
+const pluralType = vehicleTypeName.endsWith('s') ? vehicleTypeName : vehicleTypeName + 's';
+const countryDisplay = country ? country.country_name : 'Nepal';
+const pageTitleSEO = brand.name + ' ' + pluralType + ' Price in ' + countryDisplay + ' ' + currentYear + ' | New Models & Specs';
+const pageDescSEO = 'Check latest ' + currentYear + ' ' + brand.name + ' ' + pluralType.toLowerCase() + ' price list in ' + countryDisplay + '. Get detailed technical specs, mileage, features, and on-road price for all ' + brand.name + ' models at GadiDrive.';
+const timestamp = Date.now();
+const isMismatch = typeof brandVehicleTypeMismatch !== 'undefined' && brandVehicleTypeMismatch === true;
+%>
+<% var pageKeywords = brand.name + ' price in ' + countryDisplay.toLowerCase() + ', ' + brand.name + ' ' + pluralType.toLowerCase() + ', ' + brand.name + ' showroom, GadiDrive ' + brand.name; %>
+<% var headPath = (typeof path !== 'undefined') ? path : ((typeof currentUrl !== 'undefined') ? currentUrl : '/'); %>
+<% var headCountry = (typeof country !== 'undefined') ? country : null; %>
+<%- include('../partials/head', { title: pageTitleSEO, description: pageDescSEO, keywords: pageKeywords, path: headPath, country: headCountry }) %>
+
+<% 
+    const countryPrefixBread = country ? '/' + country.country_name.toLowerCase() : '';
+    const vtSlugBread = vehicleType.vehicle_type_name.toLowerCase();
+    const brandSlugBread = brand.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+    
+    const breadcrumbs = [
+        { name: vehicleTypeName + 's', url: `${countryPrefixBread}/${vtSlugBread}` },
+        { name: 'Brands', url: `${countryPrefixBread}/${vtSlugBread}/brands` },
+        { name: brand.name, url: `${countryPrefixBread}/${vtSlugBread}/brand/${brandSlugBread}` }
+    ];
+%>
+
+<% var currentPathBrand = (typeof path !== 'undefined') ? path : ((typeof currentUrl !== 'undefined') ? currentUrl : '/'); %>
+            <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gadidrive.com/" },
+        { "@type": "ListItem", "position": 2, "name": "<%= countryDisplay %>", "item": "https://gadidrive.com/<%= typeof country !== 'undefined' && country ? country.country_name.toLowerCase() : '' %>/" },
+        { "@type": "ListItem", "position": 3, "name": "<%= typeof vehicleType !== 'undefined' ? vehicleType.vehicle_type_name : 'Vehicle' %> Brands", "item": "https://gadidrive.com/<%= typeof country !== 'undefined' && country ? country.country_name.toLowerCase() + '/' : '' %><%= typeof vehicleType !== 'undefined' ? vehicleType.vehicle_type_name.toLowerCase() : 'car' %>/brands/" },
+        { "@type": "ListItem", "position": 4, "name": "<%= brand.name %>", "item": "https://gadidrive.com<%= currentPathBrand %>" }
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "name": "All <%= brand.name %> <%= pluralType %> in <%= countryDisplay %>",
+      "description": "Latest prices and specifications of <%= brand.name %> vehicles in <%= countryDisplay %>.",
+      "publisher": { "@type": "Organization", "name": "GadiDrive" }
+    },
+    {
+      "@type": "Brand",
+      "name": "<%= brand.name %>",
+      "url": "https://gadidrive.com<%= currentPathBrand %>",
+      "logo": "https://gadidrive.com<%= brand.brand_image %>"
+    }
+  ]
+}
+</script>
+
+<% 
+// Helper to generate ItemList for models
+function generateItemListSchema(models, name) {
+    if (!models || models.length === 0) return '';
+    const items = models.map((m, index) => {
+        const brandSlug = m.brand_name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+        const modelSlug = m.model_name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+        const countryPrefix = typeof country !== 'undefined' && country ? '/' + country.country_name.toLowerCase() : '';
+        const vtName = (m.vehicle_type_name || 'car').toLowerCase();
+        const detailUrl = countryPrefix ? `/${country.country_name.toLowerCase()}/${vtName}/${brandSlug}/${modelSlug}/` : `/${vtName}/${brandSlug}/${modelSlug}/`;
+        
+        return {
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "Product",
+                "name": m.brand_name + ' ' + m.model_name,
+                "url": 'https://gadidrive.com' + detailUrl,
+                "image": m.model_image ? 'https://gadidrive.com' + m.model_image : '',
+                "description": m.model_name + " price and specifications in " + countryDisplay,
+                "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": typeof country !== 'undefined' && country && country.currency_code ? country.currency_code : 'NPR',
+                    "price": m.starting_price || 0,
+                    "availability": "https://schema.org/InStock"
+                }
+            }
+        };
+    });
+
+    return `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "${brand.name} ${name} in ${countryDisplay}",
+      "numberOfItems": ${models.length},
+      "itemListElement": ${JSON.stringify(items)}
+    }
+    </script>`;
+}
+%>
+
+<%- generateItemListSchema(electricModels, 'Electric Models') %>
+<%- generateItemListSchema(hybridModels, 'Hybrid Models') %>
+<%- generateItemListSchema(phevModels, 'Plug-in Hybrid Models') %>
+<%- generateItemListSchema(iceModels, 'Petrol/Diesel Models') %>
+
+            <style>
+                body {
+                    background-color: #000000;
+                }
+
+                /* Brand Header with Image */
+                .brand-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 2.5rem;
+                    margin: 1rem 0 0.5rem 0;
+                    max-width: 1200px;
+                }
+
+                /* Square Brand Logo - Black Background */
+                .brand-logo {
+                    width: 160px;
+                    height: 160px;
+                    border-radius: 16px;
+                    border: 4px solid #DC2626;
+                    background: #1a1a1a;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    flex-shrink: 0;
+                    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+                }
+
+                .brand-logo img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    padding: 15px;
+                    background: #1a1a1a;
+                }
+
+                .brand-logo .placeholder {
+                    font-size: 4rem;
+                    font-weight: 800;
+                    color: #DC2626;
+                    background: #1a1a1a;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .brand-title-section {
+                    flex: 1;
+                }
+
+                /* H1 Main Title */
+                .brand-main-title {
+                    font-size: 3.2rem;
+                    font-weight: 800;
+                    color: white;
+                    line-height: 1.2;
+                    letter-spacing: -0.025em;
+                    margin-bottom: 0.5rem;
+                }
+
+                .brand-main-title span {
+                    color: #DC2626;
+                }
+
+                /* H2 Section Headers */
+                .section-header {
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    color: white;
+                    margin: 3rem 0 1.5rem 0;
+                    position: relative;
+                }
+
+                /* Engine Type - Red */
+                .section-header .engine-type {
+                    color: #DC2626;
+                    font-weight: 800;
+                }
+
+                /* Vehicle Type - White */
+                .section-header .vehicle-type {
+                    color: white;
+                    font-weight: 700;
+                }
+
+                .model-count {
+                    font-size: 1rem;
+                    font-weight: 400;
+                    color: #9ca3af;
+                    margin-left: 0.75rem;
+                }
+
+                /* Brand Description */
+                .brand-description {
+                    font-size: 0.95rem;
+                    color: #d1d5db;
+                    line-height: 1.7;
+                    max-width: 800px;
+                    margin: 1rem 0 0 0;
+                    text-align: justify;
+                }
+
+                .seo-keyword {
+                    color: #f0f0f0;
+                    font-weight: 600;
+                    font-style: italic;
+                }
+
+                /* Models Grid */
+                .models-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    gap: 1.8rem;
+                    margin-top: 1rem;
+                    margin-bottom: 2rem;
+                }
+
+                /* Mismatch Message */
+                .mismatch-message {
+                    text-align: center;
+                    padding: 4rem 1rem;
+                    color: #9ca3af;
+                    border: 2px dashed #2a2a2a;
+                    border-radius: 16px;
+                    margin: 3rem 0;
+                }
+
+                .mismatch-message p {
+                    font-size: 1.3rem;
+                    font-weight: 500;
+                    margin-bottom: 0.75rem;
+                    color: #d1d5db;
+                }
+
+                .mismatch-message .small {
+                    font-size: 1rem;
+                    color: #6b7280;
+                }
+
+                /* Empty State */
+                .empty-state {
+                    text-align: center;
+                    padding: 5rem 1rem;
+                    color: #6b7280;
+                    grid-column: 1 / -1;
+                    width: 100%;
+                    border-top: 1px solid #2a2a2a;
+                    border-bottom: 1px solid #2a2a2a;
+                }
+
+                .empty-state p {
+                    font-size: 1.3rem;
+                    font-weight: 400;
+                    margin-bottom: 0.5rem;
+                    color: #9ca3af;
+                }
+
+                .empty-state .small {
+                    font-size: 1rem;
+                    color: #6b7280;
+                }
+
+                /* Wheel Animation */
+                .wheel {
+                    animation: spin 12s linear infinite;
+                    transition: all 0.4s ease;
+                    filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.5));
+                }
+
+                .wheel:hover {
+                    animation: spin 0.5s linear infinite;
+                    filter: drop-shadow(0 0 50px rgba(220, 38, 38, 1));
+                }
+
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                .smoke {
+                    position: absolute;
+                    bottom: -120px;
+                    left: 50%;
+                    width: 560px;
+                    height: 220px;
+                    background: linear-gradient(to top, rgba(255, 255, 255, 0.4), transparent);
+                    filter: blur(40px);
+                    border-radius: 50%;
+                    opacity: 0;
+                    transform: translateX(-50%);
+                    pointer-events: none;
+                    transition: opacity 1.8s ease-out, bottom 1.8s ease-out;
+                    z-index: 1;
+                }
+
+                .smoke.active {
+                    opacity: 0.9;
+                    bottom: -40px;
+                }
+
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .brand-header {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 1.5rem;
+                    }
+
+                    .brand-logo {
+                        width: 140px;
+                        height: 140px;
+                        border-radius: 12px;
+                    }
+
+                    .brand-logo img {
+                        padding: 12px;
+                    }
+
+                    .brand-main-title {
+                        font-size: 2.3rem;
+                    }
+
+                    .section-header {
+                        font-size: 1.5rem;
+                    }
+
+                    .models-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 1rem;
+                    }
+
+                    .suggestions-scroll-track {
+                        grid-template-columns: repeat(8, 200px) !important;
+                        overflow-x: auto;
+                        scroll-snap-type: x mandatory;
+                        -webkit-overflow-scrolling: touch;
+                        scrollbar-width: thin;
+                        scrollbar-color: #DC2626 #1a1a1a;
+                    }
+
+                    .suggestion-card-wrap {
+                        scroll-snap-align: start;
+                    }
+                }
+
+                /* ═══════════════════════════════════════════ */
+                /* SUGGESTIONS SECTIONS STYLES */
+                /* ═══════════════════════════════════════════ */
+
+                .suggestions-section {
+                    margin-top: 3rem;
+                    padding-top: 2.5rem;
+                    border-top: 1px solid rgba(220, 38, 38, 0.15);
+                    position: relative;
+                }
+
+                .suggestions-section::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.4), transparent);
+                }
+
+                .suggestions-header {
+                    margin-bottom: 1.5rem;
+                }
+
+                .suggestions-subtitle {
+                    font-size: 0.9rem;
+                    color: #6b7280;
+                    margin-top: 0.25rem;
+                    font-weight: 400;
+                }
+
+                .suggestions-scroll-container {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .suggestions-scroll-track {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 1.5rem;
+                }
+
+                .suggestion-card-wrap {
+                    min-width: 0;
+                }
+
+                /* Custom scrollbar for horizontal scroll */
+                .suggestions-scroll-track::-webkit-scrollbar {
+                    height: 4px;
+                }
+
+                .suggestions-scroll-track::-webkit-scrollbar-track {
+                    background: #1a1a1a;
+                    border-radius: 4px;
+                }
+
+                .suggestions-scroll-track::-webkit-scrollbar-thumb {
+                    background: #DC2626;
+                    border-radius: 4px;
+                }
+
+                .suggestions-scroll-track::-webkit-scrollbar-thumb:hover {
+                    background: #ef4444;
+                }
+
+                /* Tablet breakpoint */
+                @media (max-width: 1024px) and (min-width: 769px) {
+                    .suggestions-scroll-track {
+                        grid-template-columns: repeat(8, 240px);
+                        overflow-x: auto;
+                        scroll-snap-type: x mandatory;
+                        -webkit-overflow-scrolling: touch;
+                        scrollbar-width: thin;
+                        scrollbar-color: #DC2626 #1a1a1a;
+                    }
+
+                    .suggestion-card-wrap {
+                        scroll-snap-align: start;
+                    }
+                }
+            </style>
+            </head>
+
+            <body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+
+                <%- include('../partials/navbar', { currentPage: 'brands' , country: country, allVehicleTypes:
+                    [vehicleType] }) %>
+
+                    <main class="flex-grow container mx-auto px-4 py-2 max-w-screen-2xl">
+
+                        <%- include('../partials/breadcrumb', { breadcrumbs, countryPrefix: countryPrefixBread }) %>
+
+                        <!-- Brand Header with Logo -->
+                        <div class="brand-header">
+                            <!-- Square Brand Logo - Black Background -->
+                            <div class="brand-logo">
+                                <% var hasImage = brand.image_path && brand.image_path.trim() !== '' && brand.image_path !== 'null' && brand.image_path !== 'undefined'; %>
+                                    <% if (hasImage) { %>
+                                        <img src="<%= brand.image_path %><%= brand.image_path.includes('?') ? '&' : '?' %>t=<%= timestamp %>"
+                                            alt="<%= brand.name %> logo"
+                                            onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'placeholder\'>' + '<%= brand.name.charAt(0).toUpperCase() %>' + '</div>';">
+                                        <% } else { %>
+                                            <div class="placeholder">
+                                                <%= brand.name.charAt(0).toUpperCase() %>
+                                            </div>
+                                            <% } %>
+                            </div>
+
+                            <!-- Title Section -->
+                            <div class="brand-title-section">
+                                <!-- H1 Main Title -->
+                                <h1 class="brand-main-title">
+                                    All <span>
+                                        <%= brand.name %>
+                                    </span>
+                                    <%= pluralType %> in <%= countryDisplay %>
+                                </h1>
+
+                                <!-- SEO Description -->
+                                <div class="brand-description">
+                                    Explore the complete range of <span class="seo-keyword">
+                                        <%= brand.name %>
+                                            <%= pluralType.toLowerCase() %>
+                                    </span> available in <%= countryDisplay %> with updated <span class="seo-keyword">
+                                            <%= brand.name %>
+                                                <%= pluralType.toLowerCase() %> price <%= currentYear %>
+                                        </span>. Get detailed specifications, fuel efficiency metrics, feature
+                                        comparisons, and expert reviews. Discover <span class="seo-keyword">
+                                            <%= brand.name %>
+                                                <%= pluralType.toLowerCase() %> price in <%=
+                                                        countryDisplay.toLowerCase() %>
+                                        </span> and compare all variants at GadiDrive - your trusted automotive guide.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Models Container -->
+                        <div id="modelsContainer">
+
+                            <% if (isMismatch) { %>
+                                <!-- Brand-Vehicle Type Mismatch Message -->
+                                <div class="mismatch-message">
+                                    <p>
+                                        <%= brand.name %> does not have any <%= pluralType.toLowerCase() %> in <%=
+                                                    countryDisplay %>
+                                    </p>
+                                    <div class="small">Browse other vehicle types or brands</div>
+                                </div>
+                                <% } else { %>
+
+                                    <!-- Electric Models Section -->
+                                    <% if (electricModels?.length> 0) { %>
+                                        <div class="engine-section">
+                                            <h2 class="section-header">
+                                                <span class="engine-type">Electric</span> <span class="vehicle-type">
+                                                    <%= vehicleType.vehicle_type_name %>
+                                                </span> <span class="model-count">(<%= electricModels.length %>
+                                                        models)</span>
+                                            </h2>
+                                            <div class="models-grid">
+                                                <% electricModels.forEach(model=> { %>
+                                                    <%- include('../partials/modelbox', { model, country: country }) %>
+                                                        <% }) %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <!-- Hybrid Models Section -->
+                                            <% if (hybridModels?.length> 0) { %>
+                                                <div class="engine-section">
+                                                    <h2 class="section-header">
+                                                        <span class="engine-type">Hybrid</span> <span
+                                                            class="vehicle-type">
+                                                            <%= vehicleType.vehicle_type_name %>
+                                                        </span> <span class="model-count">(<%= hybridModels.length %>
+                                                                models)</span>
+                                                    </h2>
+                                                    <div class="models-grid">
+                                                        <% hybridModels.forEach(model=> { %>
+                                                            <%- include('../partials/modelbox', { model, country:
+                                                                country }) %>
+                                                                <% }) %>
+                                                    </div>
+                                                </div>
+                                                <% } %>
+
+                                                    <!-- PHEV Models Section -->
+                                                    <% if (phevModels?.length> 0) { %>
+                                                        <div class="engine-section">
+                                                            <h2 class="section-header">
+                                                                <span class="engine-type">Plug-in Hybrid</span> <span
+                                                                    class="vehicle-type">
+                                                                    <%= vehicleType.vehicle_type_name %>
+                                                                </span> <span class="model-count">(<%= phevModels.length
+                                                                        %> models)</span>
+                                                            </h2>
+                                                            <div class="models-grid">
+                                                                <% phevModels.forEach(model=> { %>
+                                                                    <%- include('../partials/modelbox', { model,
+                                                                        country: country }) %>
+                                                                        <% }) %>
+                                                            </div>
+                                                        </div>
+                                                        <% } %>
+
+                                                            <!-- ICE Models Section (Petrol/Diesel) -->
+                                                            <% if (iceModels?.length> 0) { %>
+                                                                <div class="engine-section">
+                                                                    <h2 class="section-header">
+                                                                        <span class="engine-type">Petrol/Diesel</span>
+                                                                        <span class="vehicle-type">
+                                                                            <%= vehicleType.vehicle_type_name %>
+                                                                        </span> <span class="model-count">(<%=
+                                                                                iceModels.length %> models)</span>
+                                                                    </h2>
+                                                                    <div class="models-grid">
+                                                                        <% iceModels.forEach(model=> { %>
+                                                                            <%- include('../partials/modelbox', { model,
+                                                                                country: country }) %>
+                                                                                <% }) %>
+                                                                    </div>
+                                                                </div>
+                                                                <% } %>
+
+                                                                    <!-- No Models Available -->
+                                                                    <% if (electricModels?.length===0 &&
+                                                                        iceModels?.length===0 &&
+                                                                        hybridModels?.length===0 &&
+                                                                        phevModels?.length===0) { %>
+                                                                        <div class="empty-state">
+                                                                            <div
+                                                                                class="relative flex items-center justify-center mb-5 cursor-pointer group">
+                                                                                <span
+                                                                                    class="text-9xl md:text-[180px] lg:text-[200px] font-extrabold error-glow select-none -mr-8 md:-mr-12">S</span>
+
+                                                                                <div class="relative">
+                                                                                    <svg id="wheel" width="180"
+                                                                                        height="180" viewBox="0 0 24 24"
+                                                                                        class="wheel z-10" fill="none"
+                                                                                        stroke="#DC2626"
+                                                                                        stroke-width="1.8">
+                                                                                        <circle cx="12" cy="12" r="10"
+                                                                                            stroke="#666"
+                                                                                            stroke-width="2.8" />
+                                                                                        <circle cx="12" cy="12" r="7"
+                                                                                            stroke="#222"
+                                                                                            stroke-width="2.2"
+                                                                                            fill="#111" />
+                                                                                        <circle cx="12" cy="12" r="3.2"
+                                                                                            fill="#DC2626" />
+                                                                                        <path
+                                                                                            d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+                                                                                            stroke="#DC2626"
+                                                                                            stroke-width="2.4" />
+                                                                                    </svg>
+                                                                                    <div id="smoke" class="smoke"></div>
+                                                                                </div>
+
+                                                                                <span
+                                                                                    class="text-9xl md:text-[180px] lg:text-[200px] font-extrabold error-glow select-none -ml-8 md:-ml-12">RRY</span>
+                                                                            </div>
+                                                                            <p>No models available for <%= brand.name %>
+                                                                                    in <%= countryDisplay %>
+                                                                            </p>
+                                                                            <div class="small">Check back soon for
+                                                                                updates</div>
+                                                                        </div>
+                                                                        <% } %>
+
+                                                                            <% } %>
+
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════════════ -->
+                        <!-- SUGGESTIONS SECTION -->
+                        <!-- ═══════════════════════════════════════════════════════ -->
+                        <!-- Section 1: Similar Brands -->
+                        <div class="suggestions-section" id="suggestedBrandsSection" style="margin-top: 4rem; border-top: 1px solid #333; padding-top: 2rem;">
+                            <div class="suggestions-header">
+                                <h2 class="section-header">
+                                    More <span class="engine-type">brands</span> you may like
+                                </h2>
+                                <p class="suggestions-subtitle">
+                                    Explore other <%= vehicleType.vehicle_type_name.toLowerCase() %> brands
+                                </p>
+                            </div>
+                            <div class="suggestions-scroll-container">
+                                <div class="suggestions-scroll-track">
+                                    <% if (typeof suggestedBrands !== 'undefined' && suggestedBrands && suggestedBrands.length > 0) { %>
+                                        <% suggestedBrands.forEach(function(sb) { 
+                                            var sbSlug = sb.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+                                            var sbCountryPrefix = (typeof country !== 'undefined' && country) ? '/' + country.country_name.toLowerCase() : '';
+                                            var sbVtName = vehicleType.vehicle_type_name.toLowerCase();
+                                            var sbLink = sbCountryPrefix ? sbCountryPrefix + '/' + sbVtName + '/' + sbSlug + '/' : '/' + sbVtName + '/' + sbSlug + '/';
+                                        %>
+                                            <div class="suggestion-card-wrap">
+                                                <%- include('../partials/categoryandbrandsbox', { item: sb, link: sbLink }) %>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p style="color: #666; font-size: 0.9rem;">No similar brands found.</p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Models in Similar Price Range -->
+                        <div class="suggestions-section" id="suggestedModelsSection" style="margin-top: 4rem; border-top: 1px solid #333; padding-top: 2rem;">
+                            <div class="suggestions-header">
+                                <h2 class="section-header">
+                                    Suggested <span class="engine-type">models</span>
+                                </h2>
+                                <p class="suggestions-subtitle">
+                                    Other <%= vehicleType.vehicle_type_name.toLowerCase() %>s you might like
+                                </p>
+                            </div>
+                            <div class="suggestions-scroll-container">
+                                <div class="suggestions-scroll-track">
+                                    <% if (typeof suggestedModels !== 'undefined' && suggestedModels && suggestedModels.length > 0) { %>
+                                        <% suggestedModels.forEach(function(sm) { %>
+                                            <div class="suggestion-card-wrap">
+                                                <%- include('../partials/modelbox', { model: sm, country: country }) %>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p style="color: #666; font-size: 0.9rem;">No similar models found.</p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                    </main>
+
+                    <%- include('../partials/footer', { country: country, allCountries: allCountries, allVehicleTypes:
+                        [vehicleType] }) %>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                // Smoke animation for empty state
+                                const wheel = document.getElementById('wheel');
+                                const smoke = document.getElementById('smoke');
+
+                                if (wheel && smoke) {
+                                    wheel.addEventListener('mouseenter', () => smoke.classList.add('active'));
+                                    wheel.addEventListener('mouseleave', () => smoke.classList.remove('active'));
+                                }
+
+                                // Force image reload by adding timestamp to src
+                                const brandLogo = document.querySelector('.brand-logo img');
+                                if (brandLogo) {
+                                    const currentSrc = brandLogo.src;
+                                    if (!currentSrc.includes('t=')) {
+                                        brandLogo.src = currentSrc + (currentSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
+                                    }
+                                }
+                            });
+                        </script>
+            </body>
+
+            </html>

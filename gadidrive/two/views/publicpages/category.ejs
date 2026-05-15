@@ -1,0 +1,467 @@
+<% 
+    // SEO Variables
+    const countryName = country ? country.country_name : 'Nepal';
+    const countryNameCapitalized = countryName.charAt(0).toUpperCase() + countryName.slice(1);
+    const countryLower = countryName.toLowerCase();
+    const currentYear = new Date().getFullYear();
+    const vehicleTypeName = selectedVehicleType ? selectedVehicleType.vehicle_type_name : 'Vehicle';
+    const vehicleTypeCapitalized = vehicleTypeName.charAt(0).toUpperCase() + vehicleTypeName.slice(1);
+    const vehicleTypeLower = vehicleTypeName.toLowerCase();
+    const categoryCount = categories ? categories.length : 0;
+    const baseUrl = 'https://gadidrive.com';
+    const currentUrl = country ? `/${countryLower}/${vehicleTypeLower}/category` : `/${vehicleTypeLower}/category`;
+    
+    // Dynamic Title
+    let pageTitle = '';
+    if (selectedVehicleType) {
+        const categoryNames = categories && categories.length > 0 
+            ? categories.slice(0, 3).map(c => c.name).join(', ') + ' & More'
+            : 'All Types';
+        pageTitle = `${vehicleTypeCapitalized} Categories in ${countryNameCapitalized} ${currentYear} | ${categoryNames}`;
+    } else {
+        pageTitle = `All Vehicle Categories ${currentYear} | Cars, Bikes, Scooters & More`;
+    }
+    
+    // Dynamic Description
+    let pageDescription = '';
+    if (selectedVehicleType) {
+        pageDescription = `Explore all ${vehicleTypeLower} categories in ${countryNameCapitalized} for ${currentYear}. Find ${vehicleTypeLower} by body type including SUV, Sedan, Hatchback, Coupe, Convertible, MUV, MPV and more. Compare ${vehicleTypeLower} types, features, and find the perfect vehicle for your budget only on GadiDrive.`;
+    } else {
+        pageDescription = `Browse all vehicle categories including Cars, Bikes, Scooters, and Electric Vehicles for ${currentYear}. Find vehicles by type, body style, budget, and features. Compare categories and discover your perfect ride on GadiDrive.`;
+    }
+    
+    // Dynamic Keywords
+    const keywordsArray = [];
+    if (selectedVehicleType) {
+        keywordsArray.push(`${vehicleTypeLower} categories in ${countryLower} ${currentYear}`);
+        keywordsArray.push(`${vehicleTypeLower} types`);
+        keywordsArray.push(`${vehicleTypeLower} body styles`);
+        keywordsArray.push(`all ${vehicleTypeLower} categories`);
+        if (categories && categories.length > 0) {
+            categories.slice(0, 5).forEach(cat => {
+                keywordsArray.push(`${cat.name} ${vehicleTypeLower} in ${countryLower}`);
+            });
+        }
+        keywordsArray.push(`${countryLower} ${vehicleTypeLower} category list`);
+        keywordsArray.push(`GadiDrive ${vehicleTypeLower} categories`);
+    } else {
+        keywordsArray.push('vehicle categories, car types, bike types, scooter types, GadiDrive categories');
+    }
+    const pageKeywords = keywordsArray.join(', ');
+%>
+
+<%- include('../partials/head', { 
+    title: pageTitle,
+    description: pageDescription,
+    keywords: pageKeywords,
+    path: currentUrl,
+    country: country,
+    ogImage: '/images/mainlogo.png'
+}) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+      <% categories.forEach((category, index) => { 
+        const categoryNameFixed = category.name.toLowerCase() === 'sportcar' ? 'Sports Car' : category.name;
+      %>
+      {
+        "@type": "ListItem",
+        "position": <%= index + 1 %>,
+        "url": "https://gadidrive.com<%= (country ? '/' + country.country_name.toLowerCase() : '') + '/' + (selectedVehicleType ? selectedVehicleType.vehicle_type_name.toLowerCase() : 'car') + '/category/' + category.name.toLowerCase().replace(/ /g, '-') %>",
+        "name": "<%= categoryNameFixed %>"
+      }<%= index < categories.length - 1 ? ',' : '' %>
+      <% }) %>
+  ]
+}
+</script>
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "<%= baseUrl %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "<%= countryNameCapitalized %>",
+      "item": "<%= baseUrl %>/<%= countryLower %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "<%= vehicleTypeCapitalized %> Categories",
+      "item": "<%= baseUrl %><%= currentUrl %>"
+    }
+  ]
+}
+</script>
+
+<!-- ItemList Schema for Categories -->
+<% if (categories && categories.length > 0) { %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "<%= vehicleTypeCapitalized %> Categories in <%= countryNameCapitalized %> <%= currentYear %>",
+  "numberOfItems": <%= categoryCount %>,
+  "description": "<%= pageDescription %>",
+  "itemListElement": [
+    <% categories.forEach((category, index) => { 
+        const catUrl = baseUrl + (country ? '/' + countryLower : '') + '/' + vehicleTypeLower + '/category/' + category.name.toLowerCase().replace(/ /g, '-') + '/';
+    %>
+    {
+      "@type": "ListItem",
+      "position": <%= index + 1 %>,
+      "item": {
+        "@type": "Thing",
+        "name": "<%= category.name %>",
+        "description": "Explore <%= category.name %> <%= vehicleTypeLower %> in <%= countryNameCapitalized %>. Find prices, specifications, and compare models.",
+        "url": "<%= catUrl %>"
+        <% if (category.image_path) { %>
+        ,"image": "<%= category.image_path.startsWith('http') ? category.image_path : baseUrl + category.image_path %>"
+        <% } %>
+      }
+    }<%= index < categories.length - 1 ? ',' : '' %>
+    <% }) %>
+  ]
+}
+</script>
+<% } %>
+
+<style>
+    body { background-color: #000000; }
+    
+    /* SEO Intro Section */
+    .seo-intro {
+        max-width: 900px;
+        margin: 0 auto 2rem;
+        text-align: center;
+        padding: 0 1rem;
+    }
+    
+    .seo-intro p {
+        color: #9ca3af;
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    
+    .seo-intro strong {
+        color: #DC2626;
+        font-weight: 700;
+    }
+    
+    /* Modern Vehicle Type Navbar */
+    .vehicle-nav-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 2rem 0 1rem 0;
+    }
+    
+    .vehicle-nav {
+        background: rgba(17, 17, 17, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(220, 38, 38, 0.1);
+        border-radius: 60px;
+        padding: 0.4rem;
+        display: inline-flex;
+        max-width: 100%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    .vehicle-nav-container {
+        display: flex;
+        gap: 0.25rem;
+        overflow-x: auto;
+        padding: 0.2rem;
+        scrollbar-width: thin;
+        scrollbar-color: #DC2626 #2a2a2a;
+        border-radius: 60px;
+    }
+    
+    .vehicle-nav-container::-webkit-scrollbar {
+        height: 3px;
+    }
+    
+    .vehicle-nav-container::-webkit-scrollbar-track {
+        background: #2a2a2a;
+        border-radius: 10px;
+    }
+    
+    .vehicle-nav-container::-webkit-scrollbar-thumb {
+        background: #DC2626;
+        border-radius: 10px;
+    }
+    
+    .vehicle-nav-item {
+        flex: 0 0 auto;
+        padding: 0.7rem 2rem;
+        background: transparent;
+        border: none;
+        border-radius: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: #9ca3af;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.3px;
+        position: relative;
+        white-space: nowrap;
+        text-transform: capitalize;
+    }
+    
+    .vehicle-nav-item:hover {
+        color: #ffffff;
+        background: rgba(220, 38, 38, 0.08);
+    }
+    
+    .vehicle-nav-item.active {
+        background: #DC2626;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    /* Page Title */
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin: 1.5rem 0 1rem 0;
+        text-align: center;
+        letter-spacing: -0.5px;
+        background: linear-gradient(to right, #ffffff, #e5e5e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .page-title span {
+        color: #DC2626;
+        font-weight: 800;
+        -webkit-text-fill-color: #DC2626;
+    }
+    
+    /* Category Count Badge */
+    .category-count {
+        display: inline-block;
+        margin-left: 0.75rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #6b7280;
+        -webkit-text-fill-color: #6b7280;
+    }
+    
+    /* Categories Grid */
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.8rem;
+        margin-top: 2rem;
+    }
+    
+    /* Professional Empty Message */
+    .empty-message {
+        text-align: center;
+        padding: 5rem 1rem;
+        color: #6b7280;
+        grid-column: 1 / -1;
+        width: 100%;
+        border-top: 1px solid #2a2a2a;
+        border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .empty-message p {
+        font-size: 1.3rem;
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+        color: #9ca3af;
+    }
+    
+    .empty-message .small {
+        font-size: 1rem;
+        color: #6b7280;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .vehicle-nav-item {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .seo-intro p {
+            font-size: 1rem;
+        }
+        
+        .categories-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+    
+    <%- include('../partials/navbar', { 
+        currentPage: 'category',
+        country: country,
+        allVehicleTypes: vehicleTypes
+    }) %>
+
+    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
+        <%
+        const breadcrumbs = [
+            { name: vehicleTypeCapitalized + 's', url: `${country ? '/' + countryLower : ''}/${vehicleTypeLower}` },
+            { name: 'Categories', url: currentUrl }
+        ];
+        %>
+        <%- include('../partials/breadcrumb', { breadcrumbs: breadcrumbs, countryPrefix: country ? '/' + countryLower : '' }) %>
+
+        <!-- Centered Vehicle Type Navigation -->
+        <div class="vehicle-nav-wrapper">
+            <div class="vehicle-nav">
+                <div class="vehicle-nav-container" id="vehicle-nav-container">
+                    <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+                        <% 
+                            const uniqueVehicleTypes = [];
+                            const seenTypes = new Set();
+                            for (const vt of vehicleTypes) {
+                                const typeKey = vt.vehicle_type_name.trim().toLowerCase();
+                                if (!seenTypes.has(typeKey)) {
+                                    seenTypes.add(typeKey);
+                                    uniqueVehicleTypes.push(vt);
+                                }
+                            }
+                        %>
+                        <% uniqueVehicleTypes.forEach((vehicleType) => { %>
+                            <a href="<%= country ? '/' + countryLower + '/' + vehicleType.vehicle_type_name + '/category' : '/' + vehicleType.vehicle_type_name + '/category' %>" 
+                               class="vehicle-nav-item <%= (selectedVehicleType && selectedVehicleType.vehicle_type_id == vehicleType.vehicle_type_id) ? 'active' : '' %>">
+                                <%= vehicleType.vehicle_type_name %>
+                            </a>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="vehicle-nav-item">No vehicle types</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Title -->
+        <h1 class="page-title">
+            <% if (selectedVehicleType) { %>
+                All <span><%= vehicleTypeCapitalized %></span> Categories in <%= countryNameCapitalized %> <%= currentYear %>
+                <span class="category-count">(<%= categoryCount %> categories)</span>
+            <% } else { %>
+                All Vehicle Categories <%= currentYear %>
+                <span class="category-count">(<%= categoryCount %> categories)</span>
+            <% } %>
+        </h1>
+
+        <!-- SEO Intro Paragraph -->
+        <div class="seo-intro">
+            <p>
+                <% if (selectedVehicleType) { %>
+                    Explore all <strong><%= vehicleTypeLower %></strong> categories available in 
+                    <strong><%= countryNameCapitalized %></strong> for <%= currentYear %>. 
+                    Whether you're looking for a <strong>SUV</strong>, <strong>Sedan</strong>, 
+                    <strong>Hatchback</strong>, <strong>Coupe</strong>, <strong>Convertible</strong>, 
+                    <strong>MUV</strong>, or <strong>MPV</strong>, GadiDrive helps you compare body styles, 
+                    features, and find the perfect <%= vehicleTypeLower %> for your needs and budget.
+                <% } else { %>
+                    Explore all <strong>vehicle categories</strong> available on GadiDrive for <%= currentYear %>. 
+                    Browse <strong>Cars</strong>, <strong>Bikes</strong>, <strong>Scooters</strong>, 
+                    and <strong>Electric Vehicles</strong>. Compare body styles, features, and find your perfect ride.
+                <% } %>
+            </p>
+        </div>
+
+        <!-- Categories Grid -->
+        <section class="categories-grid">
+            <% if (categories && categories.length > 0) { %>
+                <% categories.forEach(category => { 
+                    const categoryUrl = (country ? '/' + countryLower : '') + '/' + vehicleTypeLower + '/category/' + category.name.toLowerCase().replace(/ /g, '-') + '/';
+                %>
+                    <article>
+                        <% 
+                            const categoryNameDisplay = category.name.toLowerCase() === 'sportcar' ? 'Sports Car' : category.name;
+                            const catWithFixedName = { ...category, name: categoryNameDisplay };
+                        %>
+                        <%- include('../partials/categoryandbrandsbox', { 
+                            item: catWithFixedName, 
+                            link: categoryUrl,
+                            country: country
+                        }) %>
+                    </article>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-message">
+                    <p>No categories available</p>
+                    <div class="small">Check back soon for updates</div>
+                </div>
+            <% } %>
+        </section>
+
+        <!-- Hidden SEO Content for Additional Keyword Coverage -->
+        <div style="display: none;" aria-hidden="true">
+            <h2>Popular <%= vehicleTypeCapitalized %> Categories in <%= countryNameCapitalized %></h2>
+            <ul>
+                <% if (categories && categories.length > 0) { %>
+                    <% categories.forEach(category => { 
+                        const categoryNameList = category.name.toLowerCase() === 'sportcar' ? 'Sports Car' : category.name;
+                    %>
+                        <li><%= categoryNameList %> <%= vehicleTypeLower %> in <%= countryNameCapitalized %></li>
+                    <% }) %>
+                <% } %>
+            </ul>
+            <p>
+                GadiDrive provides the most comprehensive list of <%= vehicleTypeLower %> categories in <%= countryNameCapitalized %>.
+                Find detailed specifications, prices, and comparisons for all <%= vehicleTypeLower %> body types.
+            </p>
+        </div>
+
+    </main>
+
+    <%- include('../partials/footer', { 
+        country: country,
+        allCountries: allCountries,
+        allVehicleTypes: vehicleTypes
+    }) %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const vehicleNavItems = document.querySelectorAll('.vehicle-nav-item');
+            
+            // Auto-scroll to active vehicle type on page load
+            const activeItem = document.querySelector('.vehicle-nav-item.active');
+            if (activeItem) {
+                setTimeout(() => {
+                    activeItem.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest', 
+                        inline: 'center' 
+                    });
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

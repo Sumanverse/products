@@ -1,0 +1,348 @@
+<%- include('partials/head', { 
+    title: title, 
+    description: description, 
+    keywords: keywords, 
+    path: path, 
+    country: null 
+}) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Privacy Policy - GadiDrive",
+  "url": "https://gadidrive.com/privacy-policy",
+  "description": "<%= description %>",
+  "publisher": {
+    "@type": "Organization",
+    "name": "GadiDrive",
+    "url": "https://gadidrive.com"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gadidrive.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://gadidrive.com/privacy-policy" }
+    ]
+  }
+}
+</script>
+
+<style>
+    body { background-color: #000000; }
+
+    .legal-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    .legal-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .legal-breadcrumb a {
+        color: #9ca3af;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .legal-breadcrumb a:hover {
+        color: #DC2626;
+    }
+
+    .legal-breadcrumb .separator {
+        color: #4b5563;
+    }
+
+    .legal-breadcrumb .current {
+        color: #DC2626;
+        font-weight: 600;
+    }
+
+    .legal-hero {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 3rem 0;
+        border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .legal-hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+
+    .legal-hero h1 span {
+        color: #DC2626;
+    }
+
+    .legal-hero .last-updated {
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .legal-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .legal-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+        padding-left: 1rem;
+        border-left: 4px solid #DC2626;
+    }
+
+    .legal-section h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        margin: 1.5rem 0 0.75rem;
+    }
+
+    .legal-section p {
+        color: #d1d5db;
+        line-height: 1.8;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .legal-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+
+    .legal-section ul li {
+        color: #d1d5db;
+        padding: 0.5rem 0 0.5rem 1.5rem;
+        position: relative;
+        line-height: 1.7;
+    }
+
+    .legal-section ul li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.85rem;
+        width: 8px;
+        height: 8px;
+        background: #DC2626;
+        border-radius: 50%;
+    }
+
+    .legal-section a {
+        color: #DC2626;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .legal-section a:hover {
+        color: #ef4444;
+        text-decoration: underline;
+    }
+
+    .legal-highlight {
+        background: rgba(220, 38, 38, 0.08);
+        border: 1px solid rgba(220, 38, 38, 0.15);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .legal-highlight p {
+        margin: 0;
+        color: #e5e7eb;
+    }
+
+    .legal-contact-box {
+        background: linear-gradient(135deg, #111111, #1a1a1a);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .legal-contact-box h3 {
+        color: white;
+        font-size: 1.3rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .legal-contact-box p {
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
+
+    .legal-contact-box a {
+        color: #DC2626;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .legal-hero h1 {
+            font-size: 2rem;
+        }
+
+        .legal-section h2 {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+
+    <%- include('partials/navbar-minimal') %>
+
+    <main class="flex-grow">
+        <div class="legal-page">
+
+            <!-- Breadcrumb -->
+            <nav class="legal-breadcrumb" aria-label="Breadcrumb">
+                <a href="/">Home</a>
+                <span class="separator">›</span>
+                <span class="current">Privacy Policy</span>
+            </nav>
+
+            <!-- Hero -->
+            <div class="legal-hero">
+                <h1>Privacy <span>Policy</span></h1>
+                <p class="last-updated">Last Updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+            </div>
+
+            <!-- Introduction -->
+            <section class="legal-section">
+                <h2>Introduction</h2>
+                <p>Welcome to GadiDrive ("we," "our," or "us"). At GadiDrive, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <a href="https://gadidrive.com">gadidrive.com</a> (the "Site").</p>
+                <p>By accessing or using GadiDrive, you agree to the terms of this Privacy Policy. If you do not agree with the terms of this policy, please do not access the Site.</p>
+            </section>
+
+            <!-- Information We Collect -->
+            <section class="legal-section">
+                <h2>Information We Collect</h2>
+                
+                <h3>Information You Provide</h3>
+                <p>We may collect information that you voluntarily provide when you:</p>
+                <ul>
+                    <li>Create an account or sign in to our platform</li>
+                    <li>Subscribe to our newsletter or notifications</li>
+                    <li>Contact us through our contact form or email</li>
+                    <li>Submit feedback, reviews, or comments on vehicle listings</li>
+                    <li>Use our comparison tools, EMI calculator, or other interactive features</li>
+                </ul>
+
+                <h3>Information Automatically Collected</h3>
+                <p>When you visit GadiDrive, we automatically collect certain information about your device and browsing activity:</p>
+                <ul>
+                    <li><strong>Device Information:</strong> Browser type, operating system, device type, and screen resolution</li>
+                    <li><strong>Usage Data:</strong> Pages visited, time spent on pages, click patterns, and navigation paths</li>
+                    <li><strong>Location Data:</strong> Country and region based on IP address (used to show relevant vehicle information)</li>
+                    <li><strong>Referral Data:</strong> How you arrived at our site (search engine, social media, direct link)</li>
+                </ul>
+            </section>
+
+            <!-- Cookie Policy -->
+            <section class="legal-section">
+                <h2>Cookie Policy</h2>
+                <p>GadiDrive uses cookies and similar tracking technologies to enhance your browsing experience. Cookies are small data files stored on your device.</p>
+
+                <h3>Types of Cookies We Use</h3>
+                <ul>
+                    <li><strong>Essential Cookies:</strong> Required for the website to function properly (session management, security)</li>
+                    <li><strong>Analytics Cookies:</strong> Help us understand how visitors interact with our site (Google Analytics)</li>
+                    <li><strong>Preference Cookies:</strong> Remember your settings such as preferred country and language</li>
+                    <li><strong>Advertising Cookies:</strong> Used to deliver relevant advertisements (Google Ads)</li>
+                </ul>
+
+                <div class="legal-highlight">
+                    <p>You can control and manage cookies through your browser settings. Please note that disabling certain cookies may affect the functionality of GadiDrive.</p>
+                </div>
+            </section>
+
+            <!-- How We Use Your Information -->
+            <section class="legal-section">
+                <h2>How We Use Your Information</h2>
+                <p>We use the information we collect for the following purposes:</p>
+                <ul>
+                    <li>To provide and maintain our automotive information services across Nepal, India, Bangladesh, Pakistan, and USA</li>
+                    <li>To personalize your experience based on your country and vehicle preferences</li>
+                    <li>To improve our website, content, and user experience through analytics</li>
+                    <li>To communicate with you about updates, new features, or respond to inquiries</li>
+                    <li>To detect, prevent, and address technical issues or fraudulent activity</li>
+                    <li>To comply with legal obligations and enforce our terms of service</li>
+                </ul>
+            </section>
+
+            <!-- Third-Party Services -->
+            <section class="legal-section">
+                <h2>Third-Party Services</h2>
+                <p>GadiDrive integrates with the following third-party services that may collect information:</p>
+                <ul>
+                    <li><strong>Google Analytics:</strong> Web analytics service to track and report website traffic</li>
+                    <li><strong>Google Ads:</strong> Advertising platform that may use cookies for ad targeting</li>
+                    <li><strong>Google Search Console:</strong> Used to monitor and maintain our site's presence in search results</li>
+                    <li><strong>Cloudflare:</strong> Content delivery network and security service</li>
+                </ul>
+                <p>These third-party services have their own privacy policies. We encourage you to review them.</p>
+            </section>
+
+            <!-- Data Security -->
+            <section class="legal-section">
+                <h2>Data Security</h2>
+                <p>We implement appropriate technical and organizational security measures to protect your personal information. These include encrypted connections (HTTPS/SSL), secure session management, and regular security reviews. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.</p>
+            </section>
+
+            <!-- Your Rights -->
+            <section class="legal-section">
+                <h2>Your Rights</h2>
+                <p>Depending on your location, you may have certain rights regarding your personal information:</p>
+                <ul>
+                    <li><strong>Right of Access:</strong> Request a copy of the personal data we hold about you</li>
+                    <li><strong>Right to Rectification:</strong> Request correction of inaccurate personal data</li>
+                    <li><strong>Right to Erasure:</strong> Request deletion of your personal data</li>
+                    <li><strong>Right to Restrict Processing:</strong> Request limitation of data processing</li>
+                    <li><strong>Right to Data Portability:</strong> Receive your data in a structured, machine-readable format</li>
+                    <li><strong>Right to Object:</strong> Object to data processing based on legitimate interests</li>
+                </ul>
+                <p>To exercise any of these rights, please contact us at <a href="mailto:contact@gadidrive.com">contact@gadidrive.com</a>.</p>
+            </section>
+
+            <!-- Children's Privacy -->
+            <section class="legal-section">
+                <h2>Children's Privacy</h2>
+                <p>GadiDrive is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected personal data from a child under 13, we will take steps to delete that information promptly.</p>
+            </section>
+
+            <!-- Changes to This Policy -->
+            <section class="legal-section">
+                <h2>Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time to reflect changes in our practices or applicable laws. We will notify you of any material changes by posting the new Privacy Policy on this page with an updated "Last Updated" date. We encourage you to review this policy periodically.</p>
+            </section>
+
+            <!-- Contact -->
+            <div class="legal-contact-box">
+                <h3>Questions About Our Privacy Policy?</h3>
+                <p>If you have any questions or concerns about this Privacy Policy, please reach out to us:</p>
+                <p>Email: <a href="mailto:contact@gadidrive.com">contact@gadidrive.com</a></p>
+                <p>Or visit our <a href="/contact">Contact Page</a></p>
+            </div>
+
+        </div>
+    </main>
+
+    <%- include('partials/footer', { country: null, allCountries: allCountries, allVehicleTypes: allVehicleTypes || [], minimal: true }) %>
+
+</body>
+</html>

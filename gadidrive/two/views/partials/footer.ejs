@@ -1,0 +1,565 @@
+<footer class="w-full mt-24 gadidrive-footer" role="contentinfo">
+
+  <style>
+    .gadidrive-footer {
+      background: #0A0A0A;
+      border-top-left-radius: 48px;
+      border-top-right-radius: 48px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Subtle red glow at top edge */
+    .gadidrive-footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #DC2626 30%, #FF4444 50%, #DC2626 70%, transparent 100%);
+      z-index: 2;
+    }
+
+    /* Background texture */
+    .gadidrive-footer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220,38,38,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 90% 80%, rgba(220,38,38,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .footer-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 64px 48px 40px;
+    }
+
+    /* ── BRAND ── */
+    .footer-brand-name {
+      font-family: 'Bebas Neue', 'Arial Black', Impact, sans-serif;
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: 2px;
+      color: #FFFFFF;
+    }
+    .footer-brand-name span { color: #DC2626; }
+
+    .footer-tagline-primary {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-top: 10px;
+    }
+
+    .footer-tagline-sub {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* ── SOCIAL ICONS ── */
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .footer-social-link {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .footer-social-link:hover {
+      background: #DC2626;
+      border-color: #DC2626;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .footer-social-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ── COLUMN HEADINGS ── */
+    .footer-col-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #DC2626;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(220,38,38,0.25);
+    }
+
+    /* ── LINKS ── */
+    .footer-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 5px 0;
+      transition: all 0.2s ease;
+      border-bottom: none;
+    }
+
+    .footer-link::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(220,38,38,0.4);
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: #fff;
+      padding-left: 4px;
+    }
+
+    .footer-link:hover::before {
+      background: #DC2626;
+    }
+
+    /* ── COUNTRY SELECTOR ── */
+    .footer-select-wrapper {
+      position: relative;
+    }
+
+    .footer-country-select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 40px 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .footer-country-select:hover,
+    .footer-country-select:focus {
+      border-color: rgba(220,38,38,0.5);
+      background: rgba(220,38,38,0.06);
+    }
+
+    .footer-country-select option {
+      background: #1a1a1a;
+      color: #fff;
+    }
+
+    .footer-select-chevron {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .footer-current-country {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 10px;
+    }
+
+    .footer-current-country strong {
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* ── NEWSLETTER PILL ── */
+    .footer-newsletter {
+      margin-top: 24px;
+      background: rgba(220,38,38,0.08);
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .footer-newsletter p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin: 0 0 10px;
+      line-height: 1.5;
+    }
+
+    .footer-newsletter-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .footer-newsletter-input {
+      flex: 1;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      color: #fff;
+      outline: none;
+      min-width: 0;
+      transition: border-color 0.2s;
+    }
+
+    .footer-newsletter-input::placeholder { color: rgba(255,255,255,0.25); }
+    .footer-newsletter-input:focus { border-color: rgba(220,38,38,0.5); }
+
+    .footer-newsletter-btn {
+      background: #DC2626;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 14px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .footer-newsletter-btn:hover { background: #b91c1c; transform: scale(1.02); }
+
+    /* ── DIVIDER ── */
+    .footer-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 20%, rgba(255,255,255,0.07) 80%, transparent);
+      margin: 40px 0 24px;
+    }
+
+    /* ── BOTTOM BAR ── */
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-copyright {
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    .footer-copyright strong { color: rgba(255,255,255,0.5); }
+
+    .footer-made-with {
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    .footer-made-with span { color: #DC2626; }
+
+    /* ── MINIMAL VARIANT ── */
+    .footer-minimal-brand {
+      font-family: 'Bebas Neue', 'Arial Black', Impact, sans-serif;
+      font-size: 64px;
+      line-height: 1;
+      letter-spacing: 3px;
+      color: #FFFFFF;
+    }
+
+    .footer-minimal-brand span { color: #DC2626; }
+
+    .footer-minimal-tagline {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-top: 10px;
+    }
+
+    .footer-minimal-sub {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .footer-minimal-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0 32px;
+      margin-top: 28px;
+    }
+
+    .footer-minimal-nav-link {
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 6px 0;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .footer-minimal-nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 0; right: 0;
+      height: 1px;
+      background: #DC2626;
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .footer-minimal-nav-link:hover { color: #fff; }
+    .footer-minimal-nav-link:hover::after { transform: scaleX(1); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .footer-inner { padding: 48px 24px 32px; }
+      .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 36px !important; }
+      .footer-brand-col { grid-column: 1 / -1; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid { grid-template-columns: 1fr !important; }
+      .footer-brand-name { font-size: 44px; }
+    }
+
+    /* Bebas Neue font */
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  </style>
+
+  <div class="footer-inner">
+    <% if (typeof minimal !== 'undefined' && minimal) { %>
+
+      <!-- ═══ MINIMAL VARIANT ═══ -->
+      <div style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+
+        <div class="footer-minimal-brand" aria-label="GadiDrive">
+          Gadi<span>Drive</span>
+        </div>
+
+        <p class="footer-minimal-tagline">Hub for Automotive Information Worldwide</p>
+        <p class="footer-minimal-sub">— Built for Vehicle Enthusiasts —</p>
+
+        <!-- Socials -->
+        <div class="footer-socials" style="margin-top:28px;">
+          <a href="https://www.facebook.com/share/1AL5zK3bHj/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="footer-social-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/gadidrivenepal?igsh=bHc3MjZoZXlkajFt" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="footer-social-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="https://youtube.com/@gadidrivenepal?si=0y11NMWIZBOZayPG" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="footer-social-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@gadidrivenepal?_r=1&_t=ZS-926kgCR1Fg5" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="footer-social-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.33 6.33 0 0 0-1-.05A6.34 6.34 0 0 0 5 20.1a6.34 6.34 0 0 0 11.58-3.35v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.76-.16z"/></svg>
+          </a>
+        </div>
+
+        <!-- Nav links -->
+        <nav class="footer-minimal-nav" aria-label="Footer navigation">
+          <a href="/about" class="footer-minimal-nav-link">About GadiDrive</a>
+          <a href="/contact" class="footer-minimal-nav-link">Contact Us</a>
+          <a href="/privacy-policy" class="footer-minimal-nav-link">Privacy Policy</a>
+          <a href="/terms" class="footer-minimal-nav-link">Terms of Service</a>
+          <a href="/signin" class="footer-minimal-nav-link">Sign In</a>
+        </nav>
+
+        <div class="footer-divider" style="width:100%; margin:32px 0 20px;"></div>
+
+        <p class="footer-copyright">
+          © <%= new Date().getFullYear() %> <strong>GadiDrive</strong> &nbsp;·&nbsp;
+          <span class="footer-made-with">Made with <span>♥</span> for automotive lovers worldwide</span>
+        </p>
+      </div>
+
+    <% } else { %>
+
+      <!-- ═══ STANDARD FULL LAYOUT ═══ -->
+      <div class="footer-grid" style="display:grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap:48px; align-items:start;">
+
+        <!-- Col 1: Brand + Socials + Newsletter -->
+        <div class="footer-brand-col">
+          <a href="/" style="text-decoration:none; display:inline-block;">
+            <div class="footer-brand-name" aria-label="GadiDrive">
+              Gadi<span>Drive</span>
+            </div>
+          </a>
+          <p class="footer-tagline-primary">Hub for Automotive Information Worldwide</p>
+          <p class="footer-tagline-sub">— Built for Vehicle Enthusiasts —</p>
+
+          <div class="footer-socials">
+            <a href="https://www.facebook.com/share/1AL5zK3bHj/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="footer-social-link">
+              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/gadidrivenepal?igsh=bHc3MjZoZXlkajFt" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="footer-social-link">
+              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://youtube.com/@gadidrivenepal?si=0y11NMWIZBOZayPG" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="footer-social-link">
+              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/@gadidrivenepal?_r=1&_t=ZS-926kgCR1Fg5" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="footer-social-link">
+              <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.33 6.33 0 0 0-1-.05A6.34 6.34 0 0 0 5 20.1a6.34 6.34 0 0 0 11.58-3.35v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.76-.16z"/></svg>
+            </a>
+          </div>
+
+          <!-- Newsletter -->
+          <div class="footer-newsletter">
+            <p>Get the latest car launches, prices &amp; news — straight to your inbox.</p>
+            <div class="footer-newsletter-row">
+              <input type="email" class="footer-newsletter-input" placeholder="your@email.com" aria-label="Email for newsletter">
+              <button class="footer-newsletter-btn" type="button">Subscribe</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Quick Links -->
+        <nav aria-label="Quick links">
+          <div class="footer-col-title">Quick Links</div>
+          <div style="display:flex; flex-direction:column;">
+            <%
+              const footerVehicleTypes = (typeof allVehicleTypes !== 'undefined') ? allVehicleTypes : [];
+              const footerDefaultType = (footerVehicleTypes.length > 0) ? footerVehicleTypes[0].vehicle_type_name : 'car';
+              const footerCountryPrefix = (typeof country !== 'undefined' && country) ? '/' + country.country_name.toLowerCase() : '';
+            %>
+            <a href="<%= footerCountryPrefix || '/' %>" class="footer-link">Home</a>
+            <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/brands" class="footer-link">Brands</a>
+            <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/category" class="footer-link">Categories</a>
+            <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/price-list/" class="footer-link">Price List</a>
+            <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/compare' : '/compare' %>" class="footer-link">Compare</a>
+            <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/news' : '/news' %>" class="footer-link">News</a>
+            <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/emicalculator' : '/emicalculator' %>" class="footer-link">EMI Calculator</a>
+          </div>
+        </nav>
+
+        <!-- Col 3: Company -->
+        <nav aria-label="Company links">
+          <div class="footer-col-title">Company</div>
+          <div style="display:flex; flex-direction:column;">
+            <a href="/about" class="footer-link">About GadiDrive</a>
+            <a href="/contact" class="footer-link">Contact Us</a>
+            <a href="/privacy-policy" class="footer-link">Privacy Policy</a>
+            <a href="/terms" class="footer-link">Terms of Service</a>
+            <a href="/about#services" class="footer-link">Services</a>
+            <a href="/signin" class="footer-link">Sign In</a>
+          </div>
+        </nav>
+
+        <!-- Col 4: Country Selector -->
+        <div>
+          <div class="footer-col-title">Switch Country</div>
+          <%
+            const displayCountries = (typeof allCountries !== 'undefined' && allCountries.length > 0)
+              ? allCountries
+              : (typeof locals !== 'undefined' && locals.allCountries ? locals.allCountries : []);
+          %>
+          <% if (displayCountries && displayCountries.length > 0) { %>
+            <div class="footer-select-wrapper">
+              <label for="footer-country-selector" class="sr-only">Select Country</label>
+              <select id="footer-country-selector" class="footer-country-select">
+                <option value="" disabled selected>🌍 Select Country</option>
+                <% displayCountries.forEach(c => { %>
+                  <option value="<%= c.country_name.toLowerCase() %>"
+                    <%= typeof country !== 'undefined' && country && country.country_name === c.country_name ? 'selected' : '' %>>
+                    <%= c.country_name %> (<%= c.currency_symbol %>)
+                  </option>
+                <% }); %>
+              </select>
+              <div class="footer-select-chevron">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+            <p class="footer-current-country">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Currently viewing:
+              <strong><%= typeof country !== 'undefined' && country ? country.country_name + ' (' + country.currency_symbol + ')' : 'Global' %></strong>
+            </p>
+          <% } else { %>
+            <p style="font-size:13px; color:rgba(255,255,255,0.3);">No countries available</p>
+          <% } %>
+
+          <!-- Vehicle type pills if available -->
+          <% if (footerVehicleTypes && footerVehicleTypes.length > 1) { %>
+            <div style="margin-top:28px;">
+              <div class="footer-col-title">Browse By Type</div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <% footerVehicleTypes.forEach(vt => { %>
+                  <a href="<%= footerCountryPrefix %>/<%= vt.vehicle_type_name %>/brands"
+                     style="display:inline-block; padding:6px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; font-size:11px; font-weight:600; color:rgba(255,255,255,0.5); text-decoration:none; letter-spacing:0.05em; text-transform:capitalize; transition:all 0.2s;"
+                     onmouseover="this.style.background='rgba(220,38,38,0.15)';this.style.borderColor='rgba(220,38,38,0.4)';this.style.color='#fff';"
+                     onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.5)';">
+                    <%= vt.vehicle_type_name %>
+                  </a>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="footer-divider"></div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="footer-copyright">
+          © <%= new Date().getFullYear() %> <strong>GadiDrive</strong>. All rights reserved.
+        </p>
+        <p class="footer-made-with">
+          Made with <span>♥</span> for automotive lovers worldwide
+        </p>
+      </div>
+
+    <% } %>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const countrySelector = document.getElementById('footer-country-selector');
+    if (countrySelector) {
+      countrySelector.addEventListener('change', function () {
+        const selectedCountry = this.value;
+        if (selectedCountry) {
+          window.location.href = '/' + selectedCountry + '/';
+        }
+      });
+    }
+  });
+</script>

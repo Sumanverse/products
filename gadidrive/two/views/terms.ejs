@@ -1,0 +1,81 @@
+<%- include('partials/head', { title: title, description: description, keywords: keywords, path: path, country: null }) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Terms of Service - GadiDrive",
+  "url": "https://gadidrive.com/terms",
+  "description": "<%= description %>",
+  "publisher": { "@type": "Organization", "name": "GadiDrive", "url": "https://gadidrive.com" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gadidrive.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://gadidrive.com/terms" }
+    ]
+  }
+}
+</script>
+
+<style>
+    body { background-color: #000; }
+    .legal-page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .legal-breadcrumb { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem; color: #6b7280; }
+    .legal-breadcrumb a { color: #9ca3af; text-decoration: none; transition: color 0.3s ease; }
+    .legal-breadcrumb a:hover { color: #DC2626; }
+    .legal-breadcrumb .separator { color: #4b5563; }
+    .legal-breadcrumb .current { color: #DC2626; font-weight: 600; }
+    .legal-hero { text-align: center; margin-bottom: 3rem; padding: 3rem 0; border-bottom: 1px solid rgba(220, 38, 38, 0.2); }
+    .legal-hero h1 { font-size: 3rem; font-weight: 800; color: white; margin-bottom: 1rem; }
+    .legal-hero h1 span { color: #DC2626; }
+    .legal-hero .last-updated { color: #6b7280; font-size: 0.95rem; }
+    .legal-section { margin-bottom: 2.5rem; }
+    .legal-section h2 { font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem; padding-left: 1rem; border-left: 4px solid #DC2626; }
+    .legal-section h3 { font-size: 1.15rem; font-weight: 600; color: #e5e7eb; margin: 1.5rem 0 0.75rem; }
+    .legal-section p { color: #d1d5db; line-height: 1.8; font-size: 1rem; margin-bottom: 1rem; }
+    .legal-section ul { list-style: none; padding: 0; margin: 1rem 0; }
+    .legal-section ul li { color: #d1d5db; padding: 0.5rem 0 0.5rem 1.5rem; position: relative; line-height: 1.7; }
+    .legal-section ul li::before { content: ''; position: absolute; left: 0; top: 0.85rem; width: 8px; height: 8px; background: #DC2626; border-radius: 50%; }
+    .legal-section a { color: #DC2626; text-decoration: none; font-weight: 500; }
+    .legal-section a:hover { color: #ef4444; text-decoration: underline; }
+    .legal-highlight { background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.15); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+    .legal-highlight p { margin: 0; color: #e5e7eb; }
+    .legal-contact-box { background: linear-gradient(135deg, #111, #1a1a1a); border: 1px solid rgba(220,38,38,0.2); border-radius: 16px; padding: 2rem; text-align: center; margin-top: 3rem; }
+    .legal-contact-box h3 { color: white; font-size: 1.3rem; margin-bottom: 0.75rem; }
+    .legal-contact-box p { color: #9ca3af; margin-bottom: 0.5rem; }
+    .legal-contact-box a { color: #DC2626; font-weight: 600; }
+    @media (max-width: 768px) { .legal-hero h1 { font-size: 2rem; } .legal-section h2 { font-size: 1.25rem; } }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+<%- include('partials/navbar-minimal') %>
+<main class="flex-grow">
+<div class="legal-page">
+<nav class="legal-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="separator">›</span><span class="current">Terms of Service</span></nav>
+<div class="legal-hero"><h1>Terms of <span>Service</span></h1><p class="last-updated">Last Updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p></div>
+
+<section class="legal-section"><h2>Agreement to Terms</h2><p>By accessing GadiDrive (<a href="https://gadidrive.com">gadidrive.com</a>), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the website.</p></section>
+
+<section class="legal-section"><h2>About GadiDrive</h2><p>GadiDrive is an automotive information platform providing vehicle specifications, pricing, comparison tools, EMI calculators, and news across Nepal, India, Bangladesh, Pakistan, and USA.</p><div class="legal-highlight"><p><strong>Important:</strong> GadiDrive is an information platform. We do not sell vehicles, provide loans, or facilitate transactions.</p></div></section>
+
+<section class="legal-section"><h2>Acceptable Use</h2><ul><li>Use the platform only for lawful purposes</li><li>Do not attempt unauthorized access to any part of the website</li><li>Do not use bots or scrapers to extract data without permission</li><li>Do not reproduce or resell our content without authorization</li><li>Do not interfere with the proper functioning of the website</li><li>Do not upload viruses, malware, or harmful code</li></ul></section>
+
+<section class="legal-section"><h2>Content Disclaimer</h2><h3>Vehicle Information</h3><p>While we strive for accuracy, GadiDrive does not guarantee the completeness or reliability of vehicle specifications, prices, or features. Always verify with the manufacturer or authorized dealer.</p><h3>Pricing</h3><p>Prices shown are indicative. Actual prices may differ based on taxes, registration, insurance, and dealer charges.</p><h3>EMI Calculator</h3><p>The EMI calculator is for informational purposes only. Actual loan terms will be determined by your financial institution.</p><h3>Safety Ratings</h3><p>Safety ratings are sourced from independent testing organizations and may vary by market and variant.</p></section>
+
+<section class="legal-section"><h2>Intellectual Property</h2><ul><li>GadiDrive name, logo, and original content are our intellectual property</li><li>Vehicle images and brand logos belong to their respective owners</li><li>Users may not copy or distribute our content without permission</li><li>Linking to our pages is permitted in a non-misleading way</li></ul></section>
+
+<section class="legal-section"><h2>User Accounts</h2><p>If you create an account, you are responsible for maintaining credential confidentiality and all activities under your account. We may suspend accounts violating these Terms.</p></section>
+
+<section class="legal-section"><h2>Limitation of Liability</h2><p>GadiDrive shall not be liable for indirect, incidental, or consequential damages including loss of profits, errors in information, or decisions made based on our content.</p><div class="legal-highlight"><p>GadiDrive is provided "AS IS" and "AS AVAILABLE" without warranties of any kind.</p></div></section>
+
+<section class="legal-section"><h2>Governing Law</h2><p>These Terms are governed by the laws of Nepal. Disputes shall be resolved through good-faith negotiation or the appropriate courts of Nepal.</p></section>
+
+<section class="legal-section"><h2>Changes to Terms</h2><p>We may modify these Terms at any time. Continued use after changes constitutes acceptance of the new Terms.</p></section>
+
+<div class="legal-contact-box"><h3>Questions About Our Terms?</h3><p>Email: <a href="mailto:contact@gadidrive.com">contact@gadidrive.com</a></p><p>Visit our <a href="/contact">Contact Page</a></p></div>
+</div>
+</main>
+<%- include('partials/footer', { country: null, allCountries: allCountries, allVehicleTypes: allVehicleTypes || [], minimal: true }) %>
+</body>
+</html>

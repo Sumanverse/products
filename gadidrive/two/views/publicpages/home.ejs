@@ -1,0 +1,257 @@
+<%- include('../partials/head.ejs', { 
+    title: country ? country.country_name + ' - GadiDrive Automotive Information' : 'GadiDrive | Hub for Automotive Information',
+    description: 'Explore the latest car models, bike prices, and automotive news in ' + (country ? country.country_name : 'Nepal') + '. GadiDrive is your complete guide for vehicle enthusiasts.',
+    keywords: 'GadiDrive, cars ' + (country ? country.country_name.toLowerCase() : 'nepal') + ', automotive, car prices, bikes, vehicle enthusiast',
+    path: path || '/',
+    image: 'https://gadidrive.com/images/mainlogo.png' 
+}) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "GadiDrive",
+  "url": "https://gadidrive.com/",
+  "image": "https://gadidrive.com/images/mainlogo.png",
+  "description": "The ultimate hub for Automotive information in <%= country ? country.country_name : 'Nepal' %>",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://gadidrive.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<style>
+    .hover-lift { transition: all 0.4s ease; }
+    .hover-lift:hover { transform: translateY(-8px); }
+    
+    .empty-state {
+        background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+        border: 2px dashed #333;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        color: #666;
+    }
+    
+    .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        color: #444;
+    }
+    
+    /* Section Title with Red Underline */
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 2.5rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 80px;
+        height: 4px;
+        background-color: #DC2626;
+        border-radius: 2px;
+    }
+    
+    @media (max-width: 640px) {
+        .section-title {
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+        
+        .section-title::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+    
+    /* Country Name in Red */
+    .country-name-red {
+        color: #DC2626;
+        font-weight: 600;
+    }
+    
+    /* Grid for 4 boxes only */
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    @media (min-width: 640px) {
+        .grid-4 {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+    }
+    
+    /* Articles grid - 2 columns only */
+    .grid-articles {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    @media (min-width: 1024px) {
+        .grid-articles {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+
+    <%- include('../partials/navbar') %>
+
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-screen-2xl">
+
+        <!-- Hero Section - Country Name Dynamic with Red -->
+        <section class="text-center py-16">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-tight">
+                Welcome to <span class="text-red-600">Gadi</span>Drive
+            </h1>
+            <p class="mt-4 text-gray-400 text-lg max-w-3xl mx-auto">
+                The ultimate hub for Automotive information in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span> — Built for Vehicle enthusiasts.
+            </p>
+        </section>
+
+        <!-- Vehicle Types Section - 4 boxes only -->
+        <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">Explore Vehicle Types in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-4">
+                <% vehicleTypes.slice(0, 4).forEach(vehicleType => { %>
+                    <%- include('../partials/categoryandbrandsbox', { 
+                        item: vehicleType, 
+                        link: (country ? '/' + country.country_name.toLowerCase() : '') + '/' + vehicleType.vehicle_type_name + '/brands/',
+                        country: country 
+                    }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } else { %>
+        <!-- Empty State for Vehicle Types -->
+        <section class="my-16">
+            <h2 class="section-title">Vehicle Types</h2>
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h3 class="text-2xl font-bold text-gray-400 mb-2">No Vehicle Types Found</h3>
+                <p class="text-gray-600">There are no vehicle types available for <%= country ? country.country_name : 'Nepal' %> at the moment.</p>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Articles Section - 2 articles only -->
+        <% if (articlesAfterVehicleTypes && articlesAfterVehicleTypes.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">Latest Automotive News in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-articles">
+                <% articlesAfterVehicleTypes.slice(0, 2).forEach(article => { %>
+                    <%- include('../partials/articlebox', { article, country: country }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Categories Section - 4 boxes only -->
+        <% if (categories && categories.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">Popular Categories in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-4">
+                <% categories.slice(0, 4).forEach(category => { 
+                    const categoryUrl = (country ? '/' + country.country_name.toLowerCase() : '') + '/' + category.vehicle_type_name + '/' + category.name.toLowerCase().replace(/ /g, '-') + '/';
+                %>
+                    <%- include('../partials/categoryandbrandsbox', { 
+                        item: category, 
+                        link: categoryUrl,
+                        country: country 
+                    }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Brands Section - 4 boxes only -->
+        <% if (brands && brands.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">Popular Brands in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-4">
+                <% brands.slice(0, 4).forEach(brand => { 
+                    const brandUrl = (country ? '/' + country.country_name.toLowerCase() : '') + '/' + brand.vehicle_type_name + '/' + brand.name.toLowerCase().replace(/ /g, '-') + '/';
+                %>
+                    <%- include('../partials/categoryandbrandsbox', { 
+                        item: brand, 
+                        link: brandUrl,
+                        country: country 
+                    }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Featured Models Section - 4 boxes only -->
+        <% if (models && models.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">Featured Models in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-4">
+                <% models.slice(0, 4).forEach(model => { %>
+                    <%- include('../partials/modelbox', { model, country: country }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- More Articles Section - 2 articles only -->
+        <% if (articlesAfterModels && articlesAfterModels.length > 0) { %>
+        <section class="my-16">
+            <h2 class="section-title">More Automotive Updates in <span class="country-name-red"><%= country ? country.country_name : 'Nepal' %></span></h2>
+            <div class="grid-articles">
+                <% articlesAfterModels.slice(0, 2).forEach(article => { %>
+                    <%- include('../partials/articlebox', { article, country: country }) %>
+                <% }) %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- If no data at all -->
+        <% if ((!vehicleTypes || vehicleTypes.length === 0) && 
+              (!categories || categories.length === 0) && 
+              (!brands || brands.length === 0) && 
+              (!models || models.length === 0)) { %>
+        <section class="my-16">
+            <div class="empty-state py-16">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M12 4v16"></path>
+                </svg>
+                <h3 class="text-2xl font-bold text-gray-400 mb-2">No Content Available</h3>
+                <p class="text-gray-600">There is no automotive information available for <%= country ? country.country_name : 'Nepal' %> at the moment.</p>
+                <p class="text-gray-600 mt-4">Please check back later or <a href="/" class="text-red-600 hover:underline">select another country</a>.</p>
+            </div>
+        </section>
+        <% } %>
+
+    </main>
+
+    <%- include('../partials/footer') %>

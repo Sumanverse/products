@@ -1,0 +1,1079 @@
+<%- include('../partials/head', { 
+    title: 'Super Account',
+    description: 'GadiDrive Super Admin Dashboard - Manage users, vehicle types, and countries',
+    keywords: 'admin, super account, dashboard, vehicle management',
+    path: '/admin/superaccount',
+    country: null
+}) %>
+
+<style>
+    body {
+        background-color: #000000;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    .table-container {
+        overflow-x: auto;
+    }
+    .table-container table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-container th {
+        background-color: #1F2937;
+        color: white;
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 2px solid #4B5563;
+    }
+    .table-container td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #4B5563;
+    }
+    .table-container tr:hover {
+        background-color: #374151;
+    }
+    .selector {
+        background-color: #1F2937;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        width: 200px;
+    }
+    .user-image, .vehicle-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.25rem;
+        object-fit: cover;
+    }
+    .country-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .country-badge.global {
+        background-color: #8B5CF6;
+        color: white;
+    }
+    .country-badge.specific {
+        background-color: #3B82F6;
+        color: white;
+    }
+    .notification-card {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        max-width: 400px;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        font-family: 'Poppins', sans-serif;
+        backdrop-filter: blur(10px);
+    }
+    .notification-card.show {
+        transform: translateX(0);
+    }
+    .notification-card.success {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #10B981;
+        color: #10B981;
+    }
+    .notification-card.error {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #EF4444;
+        color: #EF4444;
+    }
+    .notification-card h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .notification-card p {
+        margin: 0 0 1rem 0;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+    .notification-card.success h4::before {
+        content: "✓";
+        font-size: 1.3rem;
+    }
+    .notification-card.error h4::before {
+        content: "✗";
+        font-size: 1.3rem;
+    }
+    .notification-card .close-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    .notification-card .close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .error-details {
+        background-color: #374151;
+        border-left: 4px solid #EF4444;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0.375rem;
+        font-family: monospace;
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <div class="space-y-8">
+        <!-- Toggle Buttons -->
+        <div class="flex justify-center space-x-4 mb-6 flex-wrap gap-2">
+            <button class="toggle-item bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition" onclick="showContent('users')">Users</button>
+            <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('vehicleType')">Vehicle Types</button>
+            <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('countries')">Countries</button>
+        </div>
+        
+        <!-- Content Area -->
+        <div id="contentArea" class="bg-gray-800 rounded-lg shadow-lg p-6 border-bottom-left-to-right"></div>
+
+        <!-- ==================== MODALS ==================== -->
+
+        <!-- Create Author Modal -->
+        <div id="createAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold text-white mb-4 sticky top-0 bg-gray-800 py-2">Create Author</h3>
+                <form id="createAuthorFormData" class="space-y-6" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name *</label>
+                        <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username *</label>
+                        <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password *</label>
+                        <input type="password" name="password" placeholder="Enter Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Position *</label>
+                        <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <option value="">Select Position</option>
+                            <option value="level2">Level 2 Author</option>
+                            <option value="level1">Level 1 Author</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between sticky bottom-0 bg-gray-800 py-4 border-t border-gray-700">
+                        <button type="button" id="close-create-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Author Modal -->
+        <div id="editAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold text-white mb-4 sticky top-0 bg-gray-800 py-2">Edit Author</h3>
+                <form id="editAuthorFormData" class="space-y-6" enctype="multipart/form-data">
+                    <input type="hidden" name="user_id">
+                    
+                    <div id="currentProfilePic" class="mt-2 hidden">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Current Picture</label>
+                        <img id="currentPicPreview" src="" class="w-20 h-20 rounded-full object-cover border border-gray-600" alt="Current">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture (Optional)</label>
+                        <input type="file" name="profile_picture" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name *</label>
+                        <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username *</label>
+                        <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password (Leave blank to keep unchanged)</label>
+                        <input type="password" name="password" placeholder="Enter New Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Position *</label>
+                        <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <option value="">Select Position</option>
+                            <option value="level2">Level 2 Author</option>
+                            <option value="level1">Level 1 Author</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-between sticky bottom-0 bg-gray-800 py-4 border-t border-gray-700">
+                        <button type="button" id="close-edit-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Upload Vehicle Type Modal (with country selector) -->
+        <div id="uploadVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Upload Vehicle Type</h3>
+                <form id="uploadVehicleTypeFormData" class="space-y-6" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Image *</label>
+                        <input type="file" name="vehicle_type_photo" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name *</label>
+                        <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type (e.g. SUV)" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Select Country</label>
+                        <select name="country_id" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                            <option value="">Global (All Countries)</option>
+                            <% if (countries && countries.length > 0) { %>
+                                <% countries.forEach(country => { %>
+                                    <option value="<%= country.id %>"><%= country.country_name %> (<%= country.currency_symbol %>)</option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Select "Global" for vehicle types available in all countries</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-upload-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Vehicle Type Modal (with country selector) -->
+        <div id="editVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Vehicle Type</h3>
+                <form id="editVehicleTypeFormData" class="space-y-6" enctype="multipart/form-data">
+                    <input type="hidden" name="vehicle_type_id">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Current Image</label>
+                        <img id="currentVehicleImage" src="" class="w-24 h-24 object-cover rounded-lg border border-gray-600 mb-2 hidden" alt="Current">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">New Image (Optional)</label>
+                        <input type="file" name="vehicle_type_photo" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name *</label>
+                        <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type (e.g. SUV)" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Select Country</label>
+                        <select name="country_id" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                            <option value="">Global (All Countries)</option>
+                            <% if (countries && countries.length > 0) { %>
+                                <% countries.forEach(country => { %>
+                                    <option value="<%= country.id %>"><%= country.country_name %> (<%= country.currency_symbol %>)</option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Changing country may affect where this vehicle type appears</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-edit-vehicle-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Create Country Modal -->
+        <div id="createCountryModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Add New Country</h3>
+                <form id="createCountryFormData" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Country Name *</label>
+                        <input type="text" name="country_name" placeholder="e.g., Nepal, India, USA" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Name *</label>
+                        <input type="text" name="currency_name" placeholder="e.g., Nepalese Rupee, Indian Rupee, US Dollar" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Symbol *</label>
+                        <input type="text" name="currency_symbol" placeholder="e.g., NPR, ₹, $" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Code *</label>
+                        <input type="text" name="currency_code" placeholder="e.g., NPR, INR, USD" maxlength="10"
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-create-country-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Country</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Country Modal -->
+        <div id="editCountryModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Country</h3>
+                <form id="editCountryFormData" class="space-y-6">
+                    <input type="hidden" name="country_id">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Country Name *</label>
+                        <input type="text" name="country_name" placeholder="e.g., Nepal, India, USA" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Name *</label>
+                        <input type="text" name="currency_name" placeholder="e.g., Nepalese Rupee, Indian Rupee, US Dollar" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Symbol *</label>
+                        <input type="text" name="currency_symbol" placeholder="e.g., NPR, ₹, $" 
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Currency Code *</label>
+                        <input type="text" name="currency_code" placeholder="e.g., NPR, INR, USD" maxlength="10"
+                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-edit-country-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Update Country</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Logout Button Section -->
+<div class="container mx-auto px-4 py-8 max-w-screen-2xl">
+    <div class="border-t border-gray-700 pt-8 mt-8">
+        <div class="flex flex-col items-center justify-center space-y-4">
+            <div class="text-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-300 mb-2">Super Account Session</h3>
+                <p class="text-gray-400 text-sm">You are logged in as: <span class="text-red-400 font-medium"><%= user?.name || 'Super Admin' %></span></p>
+            </div>
+            
+            <button 
+                onclick="handleLogout()" 
+                class="group relative bg-gradient-to-r from-red-900 via-red-700 to-red-800 hover:from-red-800 hover:via-red-600 hover:to-red-700 text-white px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-3 shadow-2xl border border-red-600 hover:border-red-500 overflow-hidden"
+            >
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                <svg class="w-7 h-7 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span class="relative z-10">Logout from Super Account</span>
+                <svg class="w-5 h-5 relative z-10 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </button>
+            
+            <p class="text-gray-500 text-sm text-center mt-4">
+                Clicking logout will end your super admin session and redirect to login page.
+            </p>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded');
+
+        // EJS Data with safe fallbacks
+        const USERS_DATA = JSON.parse('<%- JSON.stringify(users || []) %>');
+        const VEHICLE_TYPES_DATA = JSON.parse('<%- JSON.stringify(vehicleTypes || []) %>');
+        const COUNTRIES_DATA = JSON.parse('<%- JSON.stringify(countries || []) %>');
+
+        console.log('Loaded data:', {
+            users: USERS_DATA.length,
+            vehicleTypes: VEHICLE_TYPES_DATA.length,
+            countries: COUNTRIES_DATA.length
+        });
+
+        // Notification Function
+        const showNotification = (message, type = 'success') => {
+            document.querySelectorAll('.notification-card').forEach(card => card.remove());
+            const card = document.createElement('div');
+            card.className = `notification-card ${type}`;
+            card.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h4>${type === 'success' ? 'Success!' : 'Error!'}</h4>
+                <p>${message}</p>
+            `;
+            document.body.appendChild(card);
+            setTimeout(() => card.classList.add('show'), 100);
+            setTimeout(() => {
+                card.style.animation = 'slideOut 0.4s forwards';
+                setTimeout(() => card.remove(), 400);
+            }, 4000);
+        };
+
+        // Confirmation Dialog
+        const showConfirmation = (title, message, onConfirm) => {
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10001]';
+            dialog.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold text-white mb-4">${title}</h3>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button id="confirm-delete" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+            document.getElementById('confirm-delete').onclick = async () => {
+                dialog.remove();
+                await onConfirm();
+            };
+        };
+
+        // Main Toggle Function
+        window.showContent = async (type) => {
+            const contentArea = document.getElementById('contentArea');
+            document.querySelectorAll('.toggle-item').forEach(item => {
+                const isActive = item.textContent.includes(type === 'users' ? 'Users' : 
+                                (type === 'vehicleType' ? 'Vehicle Types' : 'Countries'));
+                item.classList.toggle('bg-red-600', isActive);
+                item.classList.toggle('bg-gray-800', !isActive);
+            });
+
+            contentArea.innerHTML = '';
+
+            if (type === 'users') {
+                // Users Table
+                const usersRows = USERS_DATA.map(user => `
+                    <tr>
+                        <td>
+                            <img src="${user.profilePicture || '/images/default-avatar.png'}" 
+                                 alt="${user.name}" 
+                                 class="w-12 h-12 object-cover rounded-full border border-gray-600"
+                                 onerror="this.src='/images/default-avatar.png'">
+                        </td>
+                        <td>${user.name}</td>
+                        <td>${user.username}</td>
+                        <td>${user.position === 'level2' ? 'Level 2 Author' : 'Level 1 Author'}</td>
+                        <td>${new Date(user.created_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Position</th>
+                                    <th>Creation Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>${usersRows || '<tr><td colspan="6" class="text-center py-4">No users found</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-start mt-6">
+                        <button id="createAuthorButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Create Author</button>
+                    </div>
+                `;
+                
+                document.getElementById('createAuthorButton').onclick = () => {
+                    document.getElementById('createAuthorModal').classList.remove('hidden');
+                };
+
+            } else if (type === 'vehicleType') {
+                // Vehicle Types Table with Country
+                const vehicleRows = VEHICLE_TYPES_DATA.map(vehicle => `
+                    <tr>
+                        <td>${vehicle.vehicle_type_name}</td>
+                        <td>
+                            <img src="${vehicle.vehicle_type_photo_path || 'https://via.placeholder.com/50'}" 
+                                 alt="${vehicle.vehicle_type_name}" 
+                                 class="vehicle-image"
+                                 onerror="this.src='https://via.placeholder.com/50'">
+                        </td>
+                        <td>
+                            ${vehicle.country_name ? 
+                                `<span class="country-badge specific">${vehicle.country_name} ${vehicle.currency_symbol || ''}</span>` : 
+                                '<span class="country-badge global">Global</span>'}
+                        </td>
+                        <td>${new Date(vehicle.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>Admin</td>
+                        <td>N/A</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editVehicleType(${vehicle.vehicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteVehicleType(${vehicle.vehicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Image</th>
+                                    <th>Country</th>
+                                    <th>Published</th>
+                                    <th>By</th>
+                                    <th>Edited</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>${vehicleRows || '<tr><td colspan="7" class="text-center py-4">No vehicle types found</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <button id="uploadVehicleTypeButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-6">
+                        Upload Vehicle Type
+                    </button>
+                `;
+                
+                document.getElementById('uploadVehicleTypeButton').onclick = () => {
+                    document.getElementById('uploadVehicleTypeModal').classList.remove('hidden');
+                };
+
+            } else if (type === 'countries') {
+                // Countries Table
+                const countriesRows = COUNTRIES_DATA.map(country => `
+                    <tr>
+                        <td>${country.id}</td>
+                        <td>${country.country_name}</td>
+                        <td>${country.currency_name}</td>
+                        <td class="font-bold text-xl">${country.currency_symbol}</td>
+                        <td class="font-semibold text-gray-300">${country.currency_code || '-'}</td>
+                        <td>${new Date(country.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editCountry(${country.id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteCountry(${country.id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Country Name</th>
+                                    <th>Currency Name</th>
+                                    <th>Symbol</th>
+                                    <th>Code</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${countriesRows || '<tr><td colspan="6" class="text-center py-4">No countries found</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="createCountryButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-6">
+                        Add New Country
+                    </button>
+                `;
+                
+                document.getElementById('createCountryButton').onclick = () => {
+                    document.getElementById('createCountryModal').classList.remove('hidden');
+                };
+            }
+        };
+
+        // User Functions
+        window.editUser = async (userId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-user/${userId}`);
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    const user = result.user;
+                    const form = document.getElementById('editAuthorFormData');
+                    form.querySelector('[name="user_id"]').value = user.user_id;
+                    form.querySelector('[name="name"]').value = user.name;
+                    form.querySelector('[name="username"]').value = user.username;
+                    form.querySelector('[name="position"]').value = user.position;
+
+                    const previewDiv = document.getElementById('currentProfilePic');
+                    const previewImg = document.getElementById('currentPicPreview');
+                    if (user.profile_picture) {
+                        previewImg.src = user.profile_picture;
+                        previewDiv.classList.remove('hidden');
+                    } else {
+                        previewDiv.classList.add('hidden');
+                    }
+
+                    document.getElementById('editAuthorModal').classList.remove('hidden');
+                } else {
+                    showNotification('User not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load user', 'error');
+                console.error(error);
+            }
+        };
+
+        window.deleteUser = (userId) => {
+            showConfirmation('Delete User', 'Are you sure you want to delete this user? This action cannot be undone!', async () => {
+                try {
+                    const response = await fetch(`/admin/superaccount/delete-user/${userId}`, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showNotification('User deleted successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showNotification(result.message || 'Delete failed', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Network error', 'error');
+                }
+            });
+        };
+
+        // Vehicle Type Functions
+        window.editVehicleType = async (vehicleId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-vehicle-type/${vehicleId}`);
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    const vehicle = result.vehicleType;
+                    const form = document.getElementById('editVehicleTypeFormData');
+                    
+                    form.querySelector('[name="vehicle_type_id"]').value = vehicle.vehicle_type_id;
+                    form.querySelector('[name="vehicleTypeName"]').value = vehicle.vehicle_type_name;
+                    
+                    // Set country select value
+                    const countrySelect = form.querySelector('[name="country_id"]');
+                    countrySelect.value = vehicle.country_id || '';
+                    
+                    // Show current image
+                    const currentImage = document.getElementById('currentVehicleImage');
+                    if (vehicle.vehicle_type_photo_path) {
+                        currentImage.src = vehicle.vehicle_type_photo_path;
+                        currentImage.classList.remove('hidden');
+                    } else {
+                        currentImage.classList.add('hidden');
+                    }
+                    
+                    document.getElementById('editVehicleTypeModal').classList.remove('hidden');
+                } else {
+                    showNotification('Vehicle type not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load vehicle type', 'error');
+            }
+        };
+
+        window.deleteVehicleType = (vehicleId) => {
+            showConfirmation('Delete Vehicle Type', 'Are you sure you want to delete this vehicle type? This action cannot be undone!', async () => {
+                try {
+                    const response = await fetch(`/admin/superaccount/delete-vehicle-type/${vehicleId}`, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showNotification('Vehicle type deleted successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        // Show detailed error message
+                        const errorDialog = document.createElement('div');
+                        errorDialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10001]';
+                        errorDialog.innerHTML = `
+                            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-lg">
+                                <h3 class="text-xl font-bold text-red-500 mb-4">Cannot Delete Vehicle Type</h3>
+                                <div class="error-details text-gray-300 mb-6">${result.message.replace(/\n/g, '<br>')}</div>
+                                <div class="flex justify-end">
+                                    <button onclick="this.closest('.fixed').remove()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">OK</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(errorDialog);
+                    }
+                } catch (error) {
+                    showNotification('Network error', 'error');
+                }
+            });
+        };
+
+        // Country Functions
+        window.editCountry = async (countryId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/country/${countryId}`);
+                const result = await response.json();
+                if (result.success) {
+                    const country = result.country;
+                    const form = document.getElementById('editCountryFormData');
+                    form.querySelector('[name="country_id"]').value = country.id;
+                    form.querySelector('[name="country_name"]').value = country.country_name;
+                    form.querySelector('[name="currency_name"]').value = country.currency_name;
+                    form.querySelector('[name="currency_symbol"]').value = country.currency_symbol;
+                    form.querySelector('[name="currency_code"]').value = country.currency_code || '';
+                    
+                    document.getElementById('editCountryModal').classList.remove('hidden');
+                } else {
+                    showNotification('Country not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load country', 'error');
+                console.error(error);
+            }
+        };
+
+        window.deleteCountry = (countryId) => {
+            // First, show confirmation dialog
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10001]';
+            dialog.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold text-white mb-4">Delete Country</h3>
+                    <p class="text-gray-300 mb-4">Are you sure you want to permanently delete this country?</p>
+                    <p class="text-yellow-400 text-sm mb-6">Note: Country with associated content cannot be deleted.</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button id="confirm-delete" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+            
+            document.getElementById('confirm-delete').onclick = async () => {
+                dialog.remove();
+                
+                try {
+                    const response = await fetch(`/admin/superaccount/country/delete/${countryId}`, { 
+                        method: 'DELETE' 
+                    });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showNotification('Country deleted successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        // Show detailed error message
+                        const errorDialog = document.createElement('div');
+                        errorDialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10001]';
+                        errorDialog.innerHTML = `
+                            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-lg">
+                                <h3 class="text-xl font-bold text-red-500 mb-4">Cannot Delete Country</h3>
+                                <div class="error-details text-gray-300 mb-6">${result.message.replace(/\n/g, '<br>')}</div>
+                                <div class="flex justify-end">
+                                    <button onclick="this.closest('.fixed').remove()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">OK</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(errorDialog);
+                    }
+                } catch (error) {
+                    showNotification('Network error: ' + error.message, 'error');
+                }
+            };
+        };
+
+        // Form Submissions
+        document.getElementById('createAuthorFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/admin/superaccount/save-user', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Author created successfully!', 'success');
+                    document.getElementById('createAuthorModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Create failed', 'error');
+            }
+        };
+
+        document.getElementById('editAuthorFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userId = formData.get('user_id');
+            try {
+                const response = await fetch(`/admin/superaccount/update-user/${userId}`, { method: 'PUT', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Author updated successfully!', 'success');
+                    document.getElementById('editAuthorModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed', 'error');
+            }
+        };
+
+        document.getElementById('uploadVehicleTypeFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Show loading
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Uploading...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/admin/superaccount/save-vehicle-type', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification(result.message || 'Vehicle type uploaded successfully!', 'success');
+                    document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Upload failed: ' + error.message, 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        };
+
+        document.getElementById('editVehicleTypeFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const vehicleId = formData.get('vehicle_type_id');
+            
+            // Show loading
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Updating...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`/admin/superaccount/update-vehicle-type/${vehicleId}`, { 
+                    method: 'PUT', 
+                    body: formData 
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification(result.message || 'Vehicle type updated successfully!', 'success');
+                    document.getElementById('editVehicleTypeModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed: ' + error.message, 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        };
+
+        document.getElementById('createCountryFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/admin/superaccount/country/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Country added successfully!', 'success');
+                    document.getElementById('createCountryModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Create failed', 'error');
+            }
+        };
+
+        document.getElementById('editCountryFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const countryId = formData.get('country_id');
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch(`/admin/superaccount/country/update/${countryId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Country updated successfully!', 'success');
+                    document.getElementById('editCountryModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed', 'error');
+            }
+        };
+
+        // Modal Close buttons
+        document.getElementById('close-create-modal').onclick = () => {
+            document.getElementById('createAuthorModal').classList.add('hidden');
+            document.getElementById('createAuthorFormData').reset();
+        };
+
+        document.getElementById('close-edit-modal').onclick = () => {
+            document.getElementById('editAuthorModal').classList.add('hidden');
+            document.getElementById('editAuthorFormData').reset();
+        };
+
+        document.getElementById('close-upload-modal').onclick = () => {
+            document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+            document.getElementById('uploadVehicleTypeFormData').reset();
+        };
+
+        document.getElementById('close-edit-vehicle-modal').onclick = () => {
+            document.getElementById('editVehicleTypeModal').classList.add('hidden');
+            document.getElementById('editVehicleTypeFormData').reset();
+        };
+
+        document.getElementById('close-create-country-modal').onclick = () => {
+            document.getElementById('createCountryModal').classList.add('hidden');
+            document.getElementById('createCountryFormData').reset();
+        };
+
+        document.getElementById('close-edit-country-modal').onclick = () => {
+            document.getElementById('editCountryModal').classList.add('hidden');
+            document.getElementById('editCountryFormData').reset();
+        };
+
+        // Initial load
+        showContent('users');
+    });
+
+    // Logout function
+    function handleLogout() {
+        const dialog = document.createElement('div');
+        dialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10001]';
+        dialog.innerHTML = `
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold text-white mb-4">Confirm Logout</h3>
+                <p class="text-gray-300 mb-6">Are you sure you want to logout from Super Account?</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="this.closest('.fixed').remove()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                    <button id="confirm-logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Logout</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+        
+        document.getElementById('confirm-logout').onclick = () => {
+            window.location.href = '/admin/logout';
+        };
+    }
+</script>
+
+</body>
+</html>

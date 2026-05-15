@@ -1,0 +1,295 @@
+<%- include('../partials/head', { title: (function() { const countryName=country ? country.country_name : 'Nepal' ;
+    const currentYear=new Date().getFullYear(); if (selectedVehicleType) { const
+    vehicleName=selectedVehicleType.vehicle_type_name; const vehicleNameCapitalized=vehicleName.charAt(0).toUpperCase()
+    + vehicleName.slice(1).toLowerCase(); return `${vehicleNameCapitalized} Brands in ${countryName} ${currentYear} |
+    Price List & Showrooms`; } else { return `Vehicle Brands in ${countryName} ${currentYear} | Cars, Bikes & EVs`; }
+    })(), description: (function() { const countryName=country ? country.country_name : 'Nepal' ; const currentYear=new
+    Date().getFullYear(); if (selectedVehicleType) { const vehicleName=selectedVehicleType.vehicle_type_name; const
+    vehicleNameLower=vehicleName.toLowerCase(); return `Find the complete list of ${vehicleNameLower} brands in
+    ${countryName} for ${currentYear}. ✓ Check updated on-road price in ${countryName}, key specifications, mileage, and
+    find authorized ${vehicleNameLower} dealers near you. Compare popular brands only on GadiDrive.`; } else { return
+    `Discover all major vehicle brands in ${countryName} for ${currentYear}. Browse the latest models of Cars, Bikes,
+    Scooters, and Electric Vehicles (EVs). Compare prices, specs, and find nearest showrooms in ${countryName} on
+    GadiDrive.`; } })(), keywords: (function() { const countryLower=country ? country.country_name.toLowerCase()
+    : 'nepal' ; const currentYear=new Date().getFullYear(); if (selectedVehicleType) { const
+    vehicleName=selectedVehicleType.vehicle_type_name; const vehicleNameLower=vehicleName.toLowerCase(); return
+    `${vehicleNameLower} price in ${countryLower} ${currentYear}, ${vehicleNameLower} brands list, new
+    ${vehicleNameLower} in ${countryLower}, best ${vehicleNameLower} ${currentYear}, ${vehicleNameLower} showroom
+    ${countryLower}, ${vehicleNameLower} on road price, latest ${vehicleNameLower} models, compare ${vehicleNameLower},
+    GadiDrive ${vehicleNameLower}, top ${vehicleNameLower} brands ${countryLower}`; } else { return `car price in nepal,
+    bike price in nepal ${currentYear}, scooter brands nepal, ev price nepal, new car launch nepal, vehicle showroom
+    kathmandu, electric vehicle brands, GadiDrive nepal, automotive brands list, two wheeler price nepal`; } })(), path:
+    path, country: country, currentUrl: currentUrl, allCountries: allCountries }) %>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "itemListElement": [
+        <% if (brands && brands.length > 0) { %>
+          <% brands.forEach((brand, index) => { %>
+          {
+            "@type": "ListItem",
+            "position": <%= index + 1 %>,
+            "url": "https://gadidrive.com<%= (country ? '/' + country.country_name.toLowerCase() : '') + '/' + (selectedVehicleType ? selectedVehicleType.vehicle_type_name.toLowerCase() : 'car') + '/' + brand.name.toLowerCase().replace(/ /g, '-') %>",
+            "name": "<%= brand.name %>"
+          }<%= index < brands.length - 1 ? ',' : '' %>
+          <% }) %>
+        <% } %>
+      ]
+    }
+    </script>
+
+    <style>
+        body {
+            background-color: #000000;
+        }
+
+        .vehicle-nav-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .vehicle-nav {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(220, 38, 38, 0.1);
+            border-radius: 60px;
+            padding: 0.4rem;
+            display: inline-flex;
+            max-width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .vehicle-nav-container {
+            display: flex;
+            gap: 0.25rem;
+            overflow-x: auto;
+            padding: 0.2rem;
+            scrollbar-width: thin;
+            scrollbar-color: #DC2626 #2a2a2a;
+            border-radius: 60px;
+        }
+
+        .vehicle-nav-container::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .vehicle-nav-container::-webkit-scrollbar-track {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+
+        .vehicle-nav-container::-webkit-scrollbar-thumb {
+            background: #DC2626;
+            border-radius: 10px;
+        }
+
+        .vehicle-nav-item {
+            flex: 0 0 auto;
+            padding: 0.7rem 2rem;
+            background: transparent;
+            border: none;
+            border-radius: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
+            position: relative;
+            white-space: nowrap;
+            text-transform: capitalize;
+        }
+
+        .vehicle-nav-item:hover {
+            color: #ffffff;
+            background: rgba(220, 38, 38, 0.08);
+        }
+
+        .vehicle-nav-item.active {
+            background: #DC2626;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            margin: 1.5rem 0 2rem 0;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title span {
+            color: #DC2626;
+            font-weight: 800;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            margin-top: 2rem;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 5rem 1rem;
+            color: #6b7280;
+            grid-column: 1 / -1;
+            width: 100%;
+            border-top: 1px solid #2a2a2a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .empty-message p {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: #9ca3af;
+        }
+
+        .empty-message .small {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .vehicle-nav-item {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .brands-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+    </style>
+    </head>
+
+    <body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+
+        <%- include('../partials/navbar', { currentPage: 'brands' , country: country, allVehicleTypes: vehicleTypes })
+            %>
+
+            <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
+            <%
+                const cLower = country ? country.country_name.toLowerCase() : '';
+                const vLower = selectedVehicleType ? selectedVehicleType.vehicle_type_name.toLowerCase() : 'vehicle';
+                const vCap = selectedVehicleType ? selectedVehicleType.vehicle_type_name.charAt(0).toUpperCase() + selectedVehicleType.vehicle_type_name.slice(1) : 'Vehicle';
+                const currentUrlBrands = country ? `/${cLower}/${vLower}/brands` : `/${vLower}/brands`;
+                const breadcrumbsBrands = [
+                    { name: vCap + 's', url: `${country ? '/' + cLower : ''}/${vLower}` },
+                    { name: 'Brands', url: currentUrlBrands }
+                ];
+            %>
+            <%- include('../partials/breadcrumb', { breadcrumbs: breadcrumbsBrands, countryPrefix: country ? '/' + cLower : '' }) %>
+
+                <div class="vehicle-nav-wrapper">
+                    <div class="vehicle-nav">
+                        <div class="vehicle-nav-container" id="vehicle-nav-container">
+                            <% if (vehicleTypes && vehicleTypes.length> 0) { %>
+                                <% 
+                                    const uniqueVehicleTypes = [];
+                                    const seenTypes = new Set();
+                                    for (const vt of vehicleTypes) {
+                                        const typeKey = vt.vehicle_type_name.trim().toLowerCase();
+                                        if (!seenTypes.has(typeKey)) {
+                                            seenTypes.add(typeKey);
+                                            uniqueVehicleTypes.push(vt);
+                                        }
+                                    }
+                                %>
+                                <% uniqueVehicleTypes.forEach((vehicleType)=> { %>
+                                    <a href="<%= country ? '/' + country.country_name.toLowerCase() + '/' + vehicleType.vehicle_type_name + '/brands' : '/' + vehicleType.vehicle_type_name + '/brands' %>"
+                                        class="vehicle-nav-item <%= (selectedVehicleType && selectedVehicleType.vehicle_type_id == vehicleType.vehicle_type_id) ? 'active' : '' %>">
+                                        <%= vehicleType.vehicle_type_name %>
+                                    </a>
+                                <% }); %>
+                                        <% } else { %>
+                                            <div class="vehicle-nav-item">No vehicle types</div>
+                                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <h1 class="page-title">
+                    <% const countryName=country ? country.country_name : 'Nepal' ; const currentYear=new
+                        Date().getFullYear(); if (selectedVehicleType) { const
+                        vehicleNameCapitalized=selectedVehicleType.vehicle_type_name.charAt(0).toUpperCase() +
+                        selectedVehicleType.vehicle_type_name.slice(1).toLowerCase(); %>
+                        <span>
+                            <%= vehicleNameCapitalized %>
+                        </span> Brands in <%= countryName %>
+                            <%= currentYear %>
+                                <% } else { %>
+                                    All Vehicle Brands in <%= countryName %>
+                                        <%= currentYear %>
+                                            <% } %>
+                </h1>
+
+                <section class="brands-grid">
+                    <% if (brands && brands.length> 0) { %>
+                        <% brands.forEach(brand=> { %>
+                            <article>
+                                <%- include('../partials/categoryandbrandsbox', { item: brand, link: (country ? '/' +
+                                    country.country_name.toLowerCase() : '' ) + '/' +
+                                    selectedVehicleType.vehicle_type_name + '/' + brand.name.replace(/ /g, '-' ) + '/' ,
+                                    country: country }) %>
+                            </article>
+                            <% }); %>
+                                <% } else { %>
+                                    <div class="empty-message">
+                                        <p>No brands available</p>
+                                        <div class="small">Check back soon for updates</div>
+                                    </div>
+                                    <% } %>
+                </section>
+
+                <% if (brands && brands.length> 0 && selectedVehicleType) { %>
+                    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "<%= selectedVehicleType.vehicle_type_name.charAt(0).toUpperCase() + selectedVehicleType.vehicle_type_name.slice(1).toLowerCase() %> Brands in <%= country ? country.country_name : 'Nepal' %> <%= new Date().getFullYear() %>",
+            "numberOfItems": <%= brands.length %>,
+            "itemListElement": [
+                <% brands.forEach((brand, index) => { %>
+                    {
+                        "@type": "ListItem",
+                        "position": <%= index + 1 %>,
+                        "item": {
+                            "@type": "Brand",
+                            "name": "<%= brand.name %>",
+                            "url": "https://gadidrive.com<%= (country ? '/' + country.country_name.toLowerCase() : '') + '/' + selectedVehicleType.vehicle_type_name + '/' + brand.name.replace(/ /g, '-') + '/' %>"
+                            <% if (brand.logo) { %>
+                            ,"logo": "https://gadidrive.com<%= brand.logo %>"
+                            <% } %>
+                        }
+                    }<%= index < brands.length - 1 ? ',' : '' %>
+                <% }); %>
+            ]
+        }
+        </script>
+                    <% } %>
+
+            </main>
+
+            <%- include('../partials/footer', { country: country, allCountries: allCountries, allVehicleTypes:
+                vehicleTypes }) %>
+    </body>
+
+    </html>

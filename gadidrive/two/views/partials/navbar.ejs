@@ -1,0 +1,160 @@
+<header class="fixed top-0 inset-x-0 z-50 font-['Poppins'] transition-all duration-300 py-5 lg:py-6" id="main-header">
+    <% const vehicleTypes=typeof allVehicleTypes !=='undefined' ? allVehicleTypes : []; const
+        defaultVehicleType=vehicleTypes.length> 0 ? vehicleTypes[0].vehicle_type_name : 'car';
+        const countryPrefix = typeof country !== 'undefined' && country ? '/' + country.country_name.toLowerCase() : '';
+
+        const navLinks = [
+        { name: 'Brands', path: `${countryPrefix}/${defaultVehicleType.toLowerCase()}/brands/`, page: 'brands' },
+        { name: 'Category', path: `${countryPrefix}/${defaultVehicleType.toLowerCase()}/category/`, page: 'category' },
+        { name: 'Price List', path: `${countryPrefix}/${defaultVehicleType.toLowerCase()}/price-list/`, page: 'priceList' },
+        { name: 'Compare', path: countryPrefix ? `${countryPrefix}/compare/` : '/compare/', page: 'compare' },
+        { name: 'News', path: countryPrefix ? `${countryPrefix}/news/` : '/news/', page: 'news' }
+        ];
+        %>
+
+        <div id="navbar-container" class="container mx-auto px-4 lg:px-10 transition-all duration-500">
+            <div id="navbar-body"
+                class="relative w-full bg-black/90 backdrop-blur-xl border border-white/10 rounded-[50px] px-8 py-3 flex items-center justify-between transition-all duration-300">
+
+                <div id="nav-content-wrapper"
+                    class="flex items-center justify-between w-full transition-all duration-300 gap-6 lg:gap-12">
+
+                    <button id="mobile-menu-button" aria-label="Open menu" class="lg:hidden text-white hover:text-red-600 transition-colors">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M4 8h16M4 16h16" />
+                        </svg>
+                    </button>
+
+                    <div class="flex-shrink-0 lg:static absolute left-1/2 -translate-x-1/2 lg:translate-x-0">
+                        <a href="<%= countryPrefix || '/' %>"
+                            class="text-2xl lg:text-3xl font-bold text-white tracking-tighter">
+                            Gadi<span class="text-red-600">Drive</span>
+                        </a>
+                    </div>
+
+                    <div
+                        class="hidden lg:flex items-center bg-white/[0.05] border border-white/5 p-1 rounded-[40px] gap-1">
+                        <% navLinks.forEach(item=> { %>
+                            <a href="<%= item.path %>" class="px-7 py-2 rounded-[35px] text-[15px] font-bold transition-all duration-300 
+                           <%= (typeof currentPage !== 'undefined' && currentPage === item.page) 
+                               ? 'bg-red-600 text-white' 
+                               : 'text-gray-200 hover:text-white hover:bg-[#2a0a0a]' %>">
+                                <%= item.name %>
+                            </a>
+                            <% }); %>
+                    </div>
+
+                    <button id="search-open-btn" aria-label="Search" class="text-red-600 hover:scale-110 transition-transform p-1">
+                        <svg class="w-8 h-8 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="pill-search-panel"
+                    class="absolute inset-x-2 inset-y-1.5 bg-[#0d0d0d] rounded-[50px] hidden items-center px-8 z-[60] border border-red-600/30">
+                    <form action="<%= countryPrefix %>/search/" method="GET" class="w-full flex items-center">
+                        <input type="text" name="q" id="pill-search-input" placeholder="Search..."
+                            class="w-full bg-transparent text-white text-lg outline-none placeholder-gray-600 font-bold">
+                        <button type="button" id="search-close-btn" aria-label="Close search" class="text-red-600 p-1">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+</header>
+
+<div class="h-28 lg:h-32"></div>
+
+<div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/80 hidden z-[110]"></div>
+<div id="mobile-menu-overlay"
+    class="fixed top-0 left-0 h-full w-[280px] bg-[#0d0d0d] border-r border-red-600/20 transform -translate-x-full transition-transform duration-300 z-[120]">
+    <div class="p-8 border-b border-white/5 flex justify-between items-center">
+        <div class="text-2xl font-bold text-white tracking-tighter" aria-hidden="true">Gadi<span class="text-red-600">Drive</span></div>
+        <button id="close-mobile-menu" aria-label="Close menu" class="text-red-600"><svg class="w-8 h-8" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+            </svg></button>
+    </div>
+    <div class="p-6 space-y-2">
+        <% navLinks.forEach(item=> { %>
+            <a href="<%= item.path %>"
+                class="block p-4 rounded-2xl text-[17px] font-bold transition-all <%= (typeof currentPage !== 'undefined' && currentPage === item.page) ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-red-600' %>">
+                <%= item.name %>
+            </a>
+            <% }); %>
+    </div>
+</div>
+
+<style>
+    /* Clean Scroll State */
+    .nav-scrolled {
+        padding-top: 0.8rem !important;
+        padding-bottom: 0.8rem !important;
+    }
+
+    .nav-scrolled #navbar-body {
+        border-color: rgba(220, 38, 38, 0.3);
+        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-scrolled #navbar-container {
+        max-width: 88% !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const header = document.getElementById('main-header');
+        const navContent = document.getElementById('nav-content-wrapper');
+        const searchPanel = document.getElementById('pill-search-panel');
+        const searchInput = document.getElementById('pill-search-input');
+        const openBtn = document.getElementById('search-open-btn');
+        const closeBtn = document.getElementById('search-close-btn');
+
+        const menuBtn = document.getElementById('mobile-menu-button');
+        const closeMenu = document.getElementById('close-mobile-menu');
+        const menuOverlay = document.getElementById('mobile-menu-overlay');
+        const menuBackdrop = document.getElementById('mobile-menu-backdrop');
+
+        // Search Interaction
+        openBtn?.addEventListener('click', () => {
+            navContent.style.opacity = '0';
+            searchPanel.classList.replace('hidden', 'flex');
+            setTimeout(() => searchInput.focus(), 150);
+        });
+
+        const hideSearch = () => {
+            navContent.style.opacity = '1';
+            searchPanel.classList.replace('flex', 'hidden');
+        };
+
+        closeBtn?.addEventListener('click', hideSearch);
+
+        // Sidebar
+        const toggleSidebar = (open) => {
+            menuOverlay.style.transform = open ? 'translateX(0)' : 'translateX(-100%)';
+            menuBackdrop.classList.toggle('hidden', !open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        };
+
+        menuBtn?.addEventListener('click', () => toggleSidebar(true));
+        closeMenu?.addEventListener('click', () => toggleSidebar(false));
+        menuBackdrop?.addEventListener('click', () => toggleSidebar(false));
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 30) header.classList.add('nav-scrolled');
+            else header.classList.remove('nav-scrolled');
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!searchPanel.contains(e.target) && !openBtn.contains(e.target)) hideSearch();
+        });
+    });
+</script>

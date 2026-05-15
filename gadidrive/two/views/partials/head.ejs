@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <% const siteUrl='https://gadidrive.com' ; const fullPath=typeof path !=='undefined' ? path : (typeof currentUrl
+    !=='undefined' ? currentUrl : '/' ); const canonicalUrl=siteUrl + fullPath.toLowerCase(); %>
+    <link rel="canonical" href="<%= canonicalUrl %>">
+
+    <% if (typeof allCountries !=='undefined' && allCountries.length> 0) {
+      // Robust path stripping for hreflang
+      let currentPathWithoutCountry = fullPath;
+      if (typeof country !== 'undefined' && country && country.country_name) {
+        const countryPart = '/' + country.country_name.toLowerCase();
+        if (fullPath.startsWith(countryPart)) {
+          currentPathWithoutCountry = fullPath.substring(countryPart.length);
+        }
+      }
+      if (!currentPathWithoutCountry.startsWith('/')) currentPathWithoutCountry = '/' + currentPathWithoutCountry;
+
+      // Filter countries if availableCountries is provided (Dynamic SEO)
+      let hreflangCountries = allCountries;
+      if (typeof availableCountries !== 'undefined' && availableCountries && availableCountries.length > 0) {
+        const availableIds = availableCountries.map(c => c ? c.id : null);
+        hreflangCountries = allCountries.filter(c => availableIds.includes(c.id));
+      }
+      %>
+      <link rel="alternate" hreflang="x-default" href="<%= siteUrl %>/nepal<%= currentPathWithoutCountry %>">
+      <% hreflangCountries.forEach(ct=> {
+        let langCode = 'en-NP'; // Default
+        const cname = ct.country_name.toLowerCase();
+        if (cname === 'india') langCode = 'en-IN';
+        else if (cname === 'pakistan') langCode = 'en-PK';
+        else if (cname === 'nepal') langCode = 'en-NP';
+        else if (cname === 'usa') langCode = 'en-US';
+        else if (cname === 'uk' || cname === 'united kingdom') langCode = 'en-GB';
+        %>
+        <link rel="alternate" hreflang="<%= langCode %>"
+          href="<%= siteUrl %>/<%= cname %><%= currentPathWithoutCountry %>">
+        <% }) %>
+    <% } %>
+
+            <% const displayTitle = (title && title.toLowerCase().includes('gadidrive')) ? title : (title + ' | GadiDrive'); %>
+            <title><%= displayTitle %></title>
+            <meta name="title" content="<%= displayTitle %>">
+            <meta name="description"
+              content="<%= typeof description !== 'undefined' ? description : 'GadiDrive provides the best automotive information, car prices, and bike services in ' + (typeof country !== 'undefined' && country ? country.country_name : 'Nepal') + '.' %>">
+            <meta name="keywords"
+              content="<%= typeof keywords !== 'undefined' ? keywords : 'Automotive ' + (typeof country !== 'undefined' && country ? country.country_name : 'Nepal') + ', GadiDrive, Vehicles, Car Price, Bike Price' %>">
+            <meta name="author" content="GadiDrive">
+
+            <link rel="icon" href="https://gadidrive.com/images/gadidrivefaviconimg.png" sizes="any">
+            <link rel="icon" type="image/png" sizes="32x32" href="https://gadidrive.com/images/gadidrivefaviconimg.png">
+            <link rel="apple-touch-icon" href="https://gadidrive.com/images/gadidrivefaviconimg.png">
+
+            <% const ogImageUrl = (typeof ogImage !== 'undefined' && ogImage) ? (ogImage.startsWith('http') ? ogImage : 'https://gadidrive.com' + ogImage) : 'https://gadidrive.com/images/mainlogo.png'; %>
+            <meta property="og:type" content="website">
+            <meta property="og:url"
+              content="https://gadidrive.com<%= typeof path !== 'undefined' ? path : (typeof currentUrl !== 'undefined' ? currentUrl : '/') %>">
+            <meta property="og:title" content="<%= displayTitle %>">
+            <meta property="og:description"
+              content="<%= typeof description !== 'undefined' ? description : 'GadiDrive provides the best automotive information in ' + (typeof country !== 'undefined' && country ? country.country_name : 'Nepal') + '.' %>">
+            <meta property="og:image" content="<%= ogImageUrl %>">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+
+            <meta property="twitter:card" content="summary_large_image">
+            <meta property="twitter:url"
+              content="https://gadidrive.com<%= typeof path !== 'undefined' ? path : (typeof currentUrl !== 'undefined' ? currentUrl : '/') %>">
+            <meta property="twitter:title" content="<%= displayTitle %>">
+            <meta property="twitter:description"
+              content="<%= typeof description !== 'undefined' ? description : 'GadiDrive provides the best automotive information in ' + (typeof country !== 'undefined' && country ? country.country_name : 'Nepal') + '.' %>">
+            <meta property="twitter:image" content="<%= ogImageUrl %>">
+
+            <script type="application/ld+json">
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Gadi Drive",
+        "alternateName": ["GadiDrive", "GadiDrive <%= typeof country !== 'undefined' && country ? country.country_name : 'Nepal' %>", "Gadi Drive <%= typeof country !== 'undefined' && country ? country.country_name : 'Nepal' %>"],
+        "url": "https://gadidrive.com/",
+        "logo": "https://gadidrive.com/images/mainlogo.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "GadiDrive",
+        "url": "https://gadidrive.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://gadidrive.com/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+    </script>
+
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link rel="stylesheet" href="/output.css">
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+            <style>

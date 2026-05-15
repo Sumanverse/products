@@ -1,0 +1,916 @@
+<%- include('../partials/head', { 
+    title: '@' + user.username,
+    description: `${user.name}'s profile on GadiDrive - Automotive enthusiast from Nepal`,
+    keywords: `${user.name}, ${user.username}, GadiDrive profile, automotive enthusiast`,
+    path: '/profile',
+    country: null
+}) %>
+
+<style>
+    body { background-color: #000000; }
+    .border-bottom-left-to-right { position: relative; border-radius: 0.75rem; }
+    .border-bottom-left-to-right:hover::after {
+        content: ""; position: absolute; bottom: 0; left: 0; width: 0; height: 2px;
+        background-color: #DC2626; animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight { to { width: 100%; } }
+    .icon-button { transition: transform 0.2s; }
+    .icon-button:hover { transform: scale(1.1); }
+    .error-message { color: #DC2626; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
+    .social-icon { width: 28px; height: 28px; fill: currentColor; }
+
+    /* SUCCESS POPUP */
+    #successPopup {
+        position: fixed; top: 20px; right: 20px; background-color: #16A34A; color: white;
+        padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        z-index: 9999; display: flex; align-items: center; gap: 0.75rem;
+        transform: translateX(120%); transition: transform 0.4s ease; font-weight: 600;
+    }
+    #successPopup.show { transform: translateX(0); }
+    #successPopup svg { width: 24px; height: 24px; }
+
+    /* MODAL: SCROLLABLE + STICKY SAVE/CANCEL */
+    .hidden { display: none !important; }
+    .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 50; padding: 1rem;
+    }
+    .modal-backdrop:not(.hidden) {
+        display: flex;
+    }
+    .modal-content {
+        background: #1F2937; border-radius: 0.5rem; width: 100%; max-width: 32rem; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .modal-header {
+        padding: 1.5rem; background: #1F2937; border-bottom: 1px solid #374151; position: sticky; top: 0; z-index: 10;
+    }
+    .modal-body {
+        padding: 1.5rem; flex-grow: 1; overflow-y: auto;
+    }
+    .modal-footer {
+        padding: 1rem 1.5rem; background: #1F2937; border-top: 1px solid #374151; position: sticky; bottom: 0; z-index: 10; display: flex; justify-content: space-between;
+    }
+
+    /* Animation for message display */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Spinner animation for logout button */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .animate-spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    /* Progress bar animation */
+    #logoutProgress {
+        transition: width 1s linear;
+    }
+    
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-6">
+        <a href="/" class="hover:text-red-600">gadidrive</a> 
+        <span class="mx-2">></span>
+        <a href="/profile" class="text-red-600 font-bold" id="breadcrumbUsername">@<%= user.username %></a>
+    </div>
+
+<!-- IMPROVED MESSAGE DISPLAY -->
+<% if (error_msg && error_msg.length > 0) { %>
+<div class="mb-6 p-4 bg-red-900/30 border-l-4 border-red-500 rounded-r-lg shadow-lg animate-fadeIn">
+    <div class="flex items-start">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <div class="ml-3 flex-1">
+            <p class="text-sm font-medium text-red-300"><%= error_msg %></p>
+        </div>
+        <button type="button" class="ml-auto -mx-1.5 -my-1.5 text-red-300 hover:text-red-400 rounded-lg p-1.5" onclick="this.parentElement.parentElement.remove()">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+    </div>
+</div>
+<% } %>
+
+<% if (success_msg && success_msg.length > 0) { %>
+<div class="mb-6 p-4 bg-green-900/30 border-l-4 border-green-500 rounded-r-lg shadow-lg animate-fadeIn">
+    <div class="flex items-start">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <div class="ml-3 flex-1">
+            <p class="text-sm font-medium text-green-300"><%= success_msg %></p>
+        </div>
+        <button type="button" class="ml-auto -mx-1.5 -my-1.5 text-green-300 hover:text-green-400 rounded-lg p-1.5" onclick="this.parentElement.parentElement.remove()">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+    </div>
+</div>
+<% } %>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- LEFT: PROFILE INFO -->
+        <div class="lg:w-1/3 bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+            <div class="flex flex-col items-center lg:items-start">
+                <!-- AVATAR + NAME -->
+                <div class="flex flex-col lg:flex-row items-center gap-4 w-full">
+                    <div class="relative w-32 h-32 rounded-full border-4 border-red-600 bg-gray-700 flex items-center justify-center text-4xl font-bold text-gray-400 overflow-hidden" id="profilePictureContainer">
+                        <% if (user.profilePicture && user.profilePicture !== '/images/default-avatar.png') { %>
+                            <img id="profilePicture" src="<%= user.profilePicture %>" alt="Profile Picture" class="w-full h-full object-cover">
+                        <% } else { %>
+                            <span id="profileInitial"><%= user.name.charAt(0).toUpperCase() %></span>
+                        <% } %>
+                        <% if (user.position === 'admin') { %>
+                            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold text-black">A</div>
+                        <% } %>
+                    </div>
+                    <div class="text-center lg:text-left">
+                        <h2 class="text-3xl font-bold mb-2" id="profileName"><%= user.name %></h2>
+                        <p class="text-gray-400 mb-4" id="profileUsername">@<%= user.username %></p>
+                    </div>
+                </div>
+
+                <!-- BIO -->
+                <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                    <h3 class="text-lg font-semibold mb-2">Bio</h3>
+                    <p class="text-gray-300" id="profileBio"><%= user.bio || 'Your bio goes here...' %></p>
+                </div>
+
+                <!-- SOCIALS -->
+                <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                    <h3 class="text-lg font-semibold mb-2">Socials</h3>
+                    <div class="flex justify-center lg:justify-start space-x-4" id="socialLinks">
+                        <% 
+                        const socials = Array.isArray(user.socialMedia) ? user.socialMedia : [];
+                        if (socials.length > 0) {
+                            socials.forEach(social => {
+                                let iconSvg = '';
+                                let platform = '';
+                                switch(social.type) {
+                                    case 'facebook': iconSvg = '<path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>'; platform = 'Facebook'; break;
+                                    case 'instagram': iconSvg = '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849c0 3.205-.011 3.584-.069 4.849-.148 3.225-1.664 4.771-4.919 4.919-.266.058-.646.069-4.849.069-3.205 0-3.584-.011-4.849-.069-3.225-.148-4.771-1.664-4.919-4.919-.058-.265-.069-.645-.069-4.849 0-3.204.011-3.584.069-4.849.148-3.225 1.664-4.771 4.919-4.919.265-.058.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.059 1.689.073 4.948.073 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>'; platform = 'Instagram'; break;
+                                    case 'twitter': iconSvg = '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231L18.244 2.25zM17.046 19.5h1.858L7.054 4.5H5.079L17.046 19.5z"/>'; platform = 'Twitter'; break;
+                                    case 'linkedin': iconSvg = '<path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>'; platform = 'LinkedIn'; break;
+                                    case 'youtube': iconSvg = '<path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 4-8 4z"/>'; platform = 'YouTube'; break;
+                                    case 'website': iconSvg = '<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>'; platform = 'Website'; break;
+                                    case 'other': iconSvg = '<path d="M12 0c-6.627 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>'; platform = 'Other'; break;
+                                }
+                                if (iconSvg) {
+                        %>
+                                    <a href="<%= social.link %>" target="_blank" rel="noopener" class="text-gray-400 hover:text-red-500 transition-colors" title="<%= platform %>">
+                                        <svg class="social-icon w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><%- iconSvg %></svg>
+                                    </a>
+                        <% 
+                                }
+                            });
+                        } else { %>
+                            <p class="text-gray-500 text-sm">No social links added</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: PRIVATE VIEW -->
+        <div id="private-profile" class="lg:w-2/3 space-y-8">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Profile Picture</h3>
+                <button id="editProfilePictureButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Profile Picture</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Name</h3>
+                <button id="editNameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Name</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Username</h3>
+                <button id="editUsernameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Username</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Bio</h3>
+                <button id="editBioButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Bio</button>
+            </div>
+            
+            <!---
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Manage Social Media</h3>
+                <button id="editSocialsButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Manage Social Media</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Change Password</h3>
+                <button id="changePasswordButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change Password</button>
+            </div>
+            --->
+            
+            <% if (user && ['admin', 'level1', 'level2', 'level3'].includes(user.position)) { %>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-yellow-500 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6 text-yellow-400">Admin Panel</h3>
+                    <button id="goToAdminButton" class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-semibold">Go to Admin</button>
+                </div>
+            <% } %>
+        </div>
+
+    <!-- SUCCESS POPUP -->
+    <div id="successPopup">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span id="successMessage">Successfully updated!</span>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Profile Picture Modal -->
+    <div id="profilePictureModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Profile Picture</h3></div>
+            <div class="modal-body">
+                <form id="profile-picture-form" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profilePicture" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                        <p class="error-message" id="profile-picture-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-profile-picture-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="profile-picture-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Modal -->
+    <div id="nameModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Name</h3></div>
+            <div class="modal-body">
+                <form id="name-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                        <input type="text" name="name" value="<%= user.name %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="name-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-name-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="name-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div id="usernameModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Username</h3></div>
+            <div class="modal-body">
+                <form id="username-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" name="username" value="<%= user.username %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="username-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-username-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="username-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bio Modal -->
+    <div id="bioModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Bio</h3></div>
+            <div class="modal-body">
+                <form id="bio-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Bio (max 150 characters)</label>
+                        <textarea name="bio" rows="4" maxlength="150" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white"><%= user.bio || '' %></textarea>
+                        <p class="error-message" id="bio-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-bio-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="bio-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Modal -->
+    <div id="socialMediaModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Manage Social Media</h3></div>
+            <div class="modal-body">
+                <form id="social-media-form">
+                    <div id="socialMediaSection" class="space-y-4">
+                        <div id="socialMediaContainer" class="space-y-4">
+                            <% 
+                            const socialMediaToDisplay = Array.isArray(user.socialMedia) && user.socialMedia.length > 0 ? user.socialMedia : [{ type: '', link: '' }];
+                            socialMediaToDisplay.forEach(social => { 
+                            %>
+                                <div class="flex items-center space-x-2 social-media-row">
+                                    <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                                        <option value="">Select</option>
+                                        <option value="facebook" <%= social.type === 'facebook' ? 'selected' : '' %>>Facebook</option>
+                                        <option value="instagram" <%= social.type === 'instagram' ? 'selected' : '' %>>Instagram</option>
+                                        <option value="twitter" <%= social.type === 'twitter' ? 'selected' : '' %>>Twitter</option>
+                                        <option value="linkedin" <%= social.type === 'linkedin' ? 'selected' : '' %>>LinkedIn</option>
+                                        <option value="youtube" <%= social.type === 'youtube' ? 'selected' : '' %>>YouTube</option>
+                                        <option value="website" <%= social.type === 'website' ? 'selected' : '' %>>Website</option>
+                                        <option value="other" <%= social.type === 'other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                    <input type="url" name="socialMediaLink[]" value="<%= social.link %>" placeholder="https://example.com" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+                                    <button type="button" class="remove-social-media icon-button text-white" title="Remove">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" /></svg>
+                                    </button>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <p class="error-message" id="social-media-error"></p>
+                        <button id="addSocialMediaButton" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                            Add another social media
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-socials-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="social-media-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Change Password</h3></div>
+            <div class="modal-body">
+                <form id="password-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Current Password</label>
+                        <input type="password" name="currentPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="current-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
+                        <input type="password" name="newPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="new-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="confirm-password-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-password-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="password-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+        <!-- LOGOUT BUTTON -->
+<div class="border-t border-gray-700 pt-4 mt-4 w-full">
+    <div class="flex justify-center">
+        <button id="logoutButton" class="flex items-center gap-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 hover:text-red-200 px-4 py-2 rounded-lg transition-all duration-300 border border-red-800/50 hover:border-red-700/50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Logout</span>
+        </button>
+    </div>
+    
+    <!-- Auto Logout Timer -->
+    <div class="mt-3 text-center">
+        <p class="text-xs text-gray-500">Auto logout in: <span id="logoutTimer">60:00</span> minutes</p>
+        <div class="mt-1 h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div id="logoutProgress" class="h-full bg-red-600 transition-all duration-1000" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Success Popup
+    const showSuccess = (msg = 'Successfully saved!') => {
+        const popup = document.getElementById('successPopup');
+        document.getElementById('successMessage').textContent = msg;
+        popup.classList.add('show');
+        setTimeout(() => popup.classList.remove('show'), 3500);
+    };
+
+    // View Toggle
+    document.getElementById('privateViewButton')?.addEventListener('click', () => {
+        document.getElementById('private-profile').classList.remove('hidden');
+        document.getElementById('public-profile').classList.add('hidden');
+        document.getElementById('privateViewButton').classList.add('bg-red-600');
+        document.getElementById('privateViewButton').classList.remove('bg-gray-600');
+        document.getElementById('publicViewButton').classList.add('bg-gray-600');
+        document.getElementById('publicViewButton').classList.remove('bg-red-600');
+    });
+
+    document.getElementById('publicViewButton')?.addEventListener('click', () => {
+        document.getElementById('public-profile').classList.remove('hidden');
+        document.getElementById('private-profile').classList.add('hidden');
+        document.getElementById('publicViewButton').classList.add('bg-red-600');
+        document.getElementById('publicViewButton').classList.remove('bg-gray-600');
+        document.getElementById('privateViewButton').classList.add('bg-gray-600');
+        document.getElementById('privateViewButton').classList.remove('bg-red-600');
+    });
+
+    // Create Social Media Row
+    const createSocialRow = (type = '', link = '') => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center space-x-2 social-media-row mb-4';
+        div.innerHTML = `
+            <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                <option value="">Select</option>
+                <option value="facebook" ${type === 'facebook' ? 'selected' : ''}>Facebook</option>
+                <option value="instagram" ${type === 'instagram' ? 'selected' : ''}>Instagram</option>
+                <option value="twitter" ${type === 'twitter' ? 'selected' : ''}>Twitter</option>
+                <option value="linkedin" ${type === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+                <option value="youtube" ${type === 'youtube' ? 'selected' : ''}>YouTube</option>
+                <option value="website" ${type === 'website' ? 'selected' : ''}>Website</option>
+                <option value="other" ${type === 'other' ? 'selected' : ''}>Other</option>
+            </select>
+            <input type="url" name="socialMediaLink[]" value="${link}" placeholder="https://example.com" 
+                   class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+            <button type="button" class="remove-social-media icon-button text-red-500 hover:text-red-400" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" />
+                </svg>
+            </button>
+        `;
+        div.querySelector('.remove-social-media').addEventListener('click', () => div.remove());
+        return div;
+    };
+
+    // Initialize Social Media Rows
+    const socialContainer = document.getElementById('socialMediaContainer');
+    if (socialContainer) {
+        // Remove empty rows if needed and add remove listeners
+        socialContainer.querySelectorAll('.remove-social-media').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.social-media-row').remove();
+            });
+        });
+    }
+
+    // Add Social Media Row Button
+    document.getElementById('addSocialMediaButton')?.addEventListener('click', () => {
+        const container = document.getElementById('socialMediaContainer');
+        if (container.children.length >= 6) {
+            document.getElementById('social-media-error').textContent = 'Maximum 6 social media links allowed';
+            document.getElementById('social-media-error').style.display = 'block';
+            return;
+        }
+        container.appendChild(createSocialRow());
+        document.getElementById('social-media-error').style.display = 'none';
+    });
+
+    // MAIN SUBMIT FUNCTION - COMPLETE WORKING VERSION
+    const submitForm = async (formId, type) => {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error('Form not found:', formId);
+            return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const errorEl = document.getElementById(formId.replace('-form', '-error'));
+
+        // Disable button and show loading
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.classList.add('opacity-70');
+        }
+
+        // Hide previous errors
+        if (errorEl) {
+            errorEl.style.display = 'none';
+        }
+
+        try {
+            let url, body, headers = {};
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            switch (type) {
+                case 'picture':
+                    url = '/admin/profile/update-picture';
+                    body = new FormData(form);
+                    break;
+
+                case 'name':
+                    const name = form.name.value.trim();
+                    if (!name) throw new Error('Name is required');
+                    url = '/admin/profile/update-name';
+                    body = JSON.stringify({ name });
+                    headers['Content-Type'] = 'application/json';
+                    break;
+
+                case 'username':
+                    const username = form.username.value.trim();
+                    if (!username) throw new Error('Username is required');
+                    url = '/admin/profile/update-username';
+                    body = JSON.stringify({ username });
+                    headers['Content-Type'] = 'application/json';
+                    break;
+
+                case 'bio':
+                    const bio = form.bio.value.trim();
+                    url = '/admin/profile/update-bio';
+                    body = JSON.stringify({ bio });
+                    headers['Content-Type'] = 'application/json';
+                    break;
+
+                case 'social':
+                    const typeInputs = form.querySelectorAll('[name="socialMediaType[]"]');
+                    const linkInputs = form.querySelectorAll('[name="socialMediaLink[]"]');
+                    
+                    const socialData = Array.from(typeInputs).map((typeInput, index) => ({
+                        type: typeInput.value.trim(),
+                        link: linkInputs[index].value.trim()
+                    })).filter(item => item.type && item.link);
+                    
+                    // Validate URLs
+                    socialData.forEach(item => {
+                        if (!item.link.startsWith('http://') && !item.link.startsWith('https://')) {
+                            throw new Error(`Invalid URL for ${item.type}. Must start with http:// or https://`);
+                        }
+                    });
+
+                    url = '/admin/profile/update-social-media';
+                    body = JSON.stringify({ socialMedia: socialData });
+                    headers['Content-Type'] = 'application/json';
+                    break;
+
+                case 'password':
+                    const currentPassword = form.currentPassword.value;
+                    const newPassword = form.newPassword.value;
+                    const confirmPassword = form.confirmPassword.value;
+
+                    if (!currentPassword || !newPassword || !confirmPassword) {
+                        throw new Error('All password fields are required');
+                    }
+                    if (newPassword.length < 6) {
+                        throw new Error('New password must be at least 6 characters');
+                    }
+                    if (newPassword !== confirmPassword) {
+                        throw new Error('New passwords do not match');
+                    }
+
+                    url = '/admin/profile/update-password';
+                    body = JSON.stringify({ 
+                        currentPassword, 
+                        newPassword 
+                    });
+                    headers['Content-Type'] = 'application/json';
+                    break;
+
+                default:
+                    throw new Error('Invalid form type');
+            }
+
+            // Add CSRF token if available
+            if (csrfToken) {
+                headers['X-CSRF-Token'] = csrfToken;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: body,
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || `Server responded with ${response.status}`);
+            }
+
+            // Show success message
+            showSuccess(data.message || 'Changes saved successfully!');
+
+            // Update UI dynamically
+            switch (type) {
+                case 'name':
+                    document.getElementById('profileName').textContent = form.name.value.trim();
+                    break;
+                case 'username':
+                    const newUsername = form.username.value.trim();
+                    document.getElementById('profileUsername').textContent = '@' + newUsername;
+                    document.getElementById('breadcrumbUsername').textContent = '@' + newUsername;
+                    break;
+                case 'bio':
+                    const newBio = form.bio.value.trim() || 'Your bio goes here...';
+                    document.getElementById('profileBio').textContent = newBio;
+                    break;
+                case 'picture':
+                    if (data.picture) {
+                        const img = document.getElementById('profilePicture');
+                        if (img) {
+                            img.src = data.picture + '?t=' + new Date().getTime();
+                        } else {
+                            const container = document.getElementById('profilePictureContainer');
+                            container.innerHTML = `
+                                <img id="profilePicture" src="${data.picture}" alt="Profile Picture" class="w-full h-full object-cover">
+                                ${container.innerHTML.includes('A</div>') ? '<div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold text-black">A</div>' : ''}
+                            `;
+                        }
+                    }
+                    break;
+                case 'social':
+                    // Reload after 1 second to show updated social icons
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                    break;
+                case 'password':
+                    // Clear password form
+                    form.reset();
+                    break;
+            }
+
+            // Close modal
+            const modal = form.closest('.modal-backdrop');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+
+        } catch (error) {
+            console.error('Form submission error:', error);
+            
+            // Show error message
+            if (errorEl) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            } else {
+                alert('Error: ' + error.message);
+            }
+        } finally {
+            // Re-enable button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70');
+                if (type === 'password') {
+                    submitBtn.textContent = 'Change';
+                } else {
+                    submitBtn.textContent = 'Save';
+                }
+            }
+        }
+    };
+
+    // Attach form submit handlers
+    const forms = {
+        'profile-picture-form': 'picture',
+        'name-form': 'name',
+        'username-form': 'username',
+        'bio-form': 'bio',
+        'social-media-form': 'social',
+        'password-form': 'password'
+    };
+
+    Object.entries(forms).forEach(([formId, type]) => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForm(formId, type);
+            });
+        }
+    });
+
+    // Modal open buttons
+    const modalButtons = {
+        'editProfilePictureButton': 'profilePictureModal',
+        'editNameButton': 'nameModal',
+        'editUsernameButton': 'usernameModal',
+        'editBioButton': 'bioModal',
+        'editSocialsButton': 'socialMediaModal',
+        'changePasswordButton': 'passwordModal'
+    };
+
+    Object.entries(modalButtons).forEach(([buttonId, modalId]) => {
+        const button = document.getElementById(buttonId);
+        const modal = document.getElementById(modalId);
+        
+        if (button && modal) {
+            button.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                
+                // Clear any previous errors when opening modal
+                modal.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                });
+            });
+        }
+    });
+
+    // Modal close buttons and backdrop
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+        });
+
+        // Close on X button click
+        modal.querySelectorAll('[id^="close-"]').forEach(closeBtn => {
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                modal.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                });
+            });
+        });
+    });
+
+    // Admin Panel Redirect
+    document.getElementById('goToAdminButton')?.addEventListener('click', () => {
+        const position = '<%= user.position %>'.trim();
+        const adminRoutes = {
+            'admin': '/admin/superaccount',
+            'level1': '/admin/article',
+            'level2': '/admin/category',
+            'level3': '/admin/level3am'
+        };
+        
+        const route = adminRoutes[position] || '/admin/category';
+        window.location.href = route;
+    });
+
+    // Clear file input on modal close
+    document.querySelectorAll('[type="file"]').forEach(fileInput => {
+        fileInput.addEventListener('change', function() {
+            const errorEl = this.parentElement.querySelector('.error-message');
+            if (errorEl) errorEl.style.display = 'none';
+            
+            // Validate file size
+            if (this.files[0] && this.files[0].size > 10 * 1024 * 1024) {
+                this.value = '';
+                alert('File size must be less than 10MB');
+            }
+        });
+    });
+
+    // Character counter for bio
+    const bioTextarea = document.getElementById('bio-form')?.querySelector('textarea[name="bio"]');
+    if (bioTextarea) {
+        bioTextarea.addEventListener('input', function() {
+            const charCount = this.value.length;
+            const maxLength = 150;
+            const errorEl = document.getElementById('bio-error');
+            
+            if (charCount > maxLength) {
+                this.value = this.value.substring(0, maxLength);
+                if (errorEl) {
+                    errorEl.textContent = `Maximum ${maxLength} characters allowed`;
+                    errorEl.style.display = 'block';
+                }
+            } else {
+                if (errorEl) errorEl.style.display = 'none';
+            }
+        });
+    }
+
+    <!-- profile.ejs को existing script को अन्त्यमा यो code थप्नुहोस्: -->
+
+    // Logout Functionality
+    document.getElementById('logoutButton')?.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to logout?')) {
+            try {
+                // Show loading state
+                const button = document.getElementById('logoutButton');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span class="animate-spin">⟳</span> Logging out...';
+                button.disabled = true;
+                
+                // Perform logout
+                const response = await fetch('/logout');
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.href = '/logout';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/logout';
+            }
+        }
+    });
+
+    // Auto Logout Timer
+    let logoutTime = 60 * 60; // 60 minutes in seconds
+    const timerElement = document.getElementById('logoutTimer');
+    const progressElement = document.getElementById('logoutProgress');
+    
+    function updateLogoutTimer() {
+        if (logoutTime > 0) {
+            logoutTime--;
+            const minutes = Math.floor(logoutTime / 60);
+            const seconds = logoutTime % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update progress bar
+            const progress = (logoutTime / (60 * 60)) * 100;
+            progressElement.style.width = `${progress}%`;
+            
+            // Change color when less than 5 minutes
+            if (logoutTime < 300) { // 5 minutes
+                progressElement.classList.remove('bg-red-600');
+                progressElement.classList.add('bg-red-500');
+                if (logoutTime < 60) { // 1 minute
+                    progressElement.classList.remove('bg-red-500');
+                    progressElement.classList.add('bg-red-400');
+                }
+            }
+        } else {
+            // Auto logout
+            showNotification('Session expired. Auto logging out...', 'warning');
+            setTimeout(() => {
+                window.location.href = '/logout';
+            }, 2000);
+        }
+    }
+    
+    // Start timer if elements exist
+    if (timerElement && progressElement) {
+        setInterval(updateLogoutTimer, 1000);
+    }
+
+    // Notification function for auto logout warning
+    function showNotification(message, type = 'warning') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transform transition-all duration-300 ${
+            type === 'warning' ? 'bg-yellow-900/90 border-l-4 border-yellow-500' : ''
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-white font-medium">${message}</span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+
+    // Auto logout warning at 5 minutes and 1 minute
+    setTimeout(() => {
+        showNotification('Your session will expire in 5 minutes');
+    }, (55 * 60 * 1000)); // 55 minutes
+    
+    setTimeout(() => {
+        showNotification('Your session will expire in 1 minute');
+    }, (59 * 60 * 1000)); // 59 minutes
+
+});
+</script>
+</body>
+</html>

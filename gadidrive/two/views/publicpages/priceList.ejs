@@ -1,0 +1,560 @@
+<%
+    const vName = vehicleType.vehicle_type_name || 'Vehicle';
+    const cName = country ? country.country_name : 'Nepal';
+    const bName = (pageType !== 'vehicleType' && typeof brand !== 'undefined' && brand) ? brand.brand_name : '';
+    const seoTitle = bName
+        ? `${bName} ${vName} Price in ${cName} 2026 | Full Model Wise List`
+        : `Latest ${vName} Price in ${cName} 2026 | ${vName} Brands & Price List`;
+    const seoDesc = bName
+        ? `Check updated 2026 ${bName} ${vName.toLowerCase()} official price list in ${cName}. View variant-wise starting prices for ${(typeof models !== 'undefined' && models) ? models.slice(0,3).map(m => m.model_name).join(', ') : ''} and more.`
+        : `Explore the complete ${vName.toLowerCase()} price list in ${cName} for 2026. Compare prices of all brands including ${brands ? brands.slice(0,3).map(b => b.brand_name).join(', ') : ''} in one place.`;
+%>
+<%- include('../partials/head.ejs', {
+    title: seoTitle,
+    description: seoDesc,
+    path: path,
+    image: 'https://gadidrive.com/images/mainlogo.png'
+}) %>
+
+<% 
+    const countryPrefixBreadPL = country ? '/' + country.country_name.toLowerCase() : '';
+    const vtSlugBreadPL = vehicleType.vehicle_type_name.toLowerCase();
+    
+    const breadcrumbs = [
+        { name: vName + 's', url: `${countryPrefixBreadPL}/${vtSlugBreadPL}` },
+        { name: 'Price List', url: `${countryPrefixBreadPL}/${vtSlugBreadPL}/price-list` }
+    ];
+%>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "<%= seoTitle %>",
+  "description": "<%= seoDesc %>",
+  "itemListElement": [
+    <% if (pageType === 'vehicleType') { %>
+      <% brands.slice(0, 10).forEach((brand, index) => { %>
+      {
+        "@type": "ListItem",
+        "position": <%= index + 1 %>,
+        "name": "<%= brand.brand_name %> <%= vName %> Price List",
+        "url": "https://gadidrive.com<%= country ? '/' + country.country_name.toLowerCase() : '' %>/<%= vName.toLowerCase() %>/<%= brand.brand_name.toLowerCase().replace(/ /g, '-') %>/price-list/"
+      }<%= index < Math.min(9, brands.length - 1) ? ',' : '' %>
+      <% }) %>
+    <% } %>
+  ]
+}
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; background: #000; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+main { flex: 1; padding: 15px 20px 40px; }
+.container { max-width: 1400px; margin: 0 auto; }
+
+/* Modern Vehicle Type Navbar (Matched with Brands Page) */
+.vehicle-nav-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 2rem 0 1rem 0;
+}
+
+.vehicle-nav {
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    border-radius: 60px;
+    padding: 0.4rem;
+    display: inline-flex;
+    max-width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.vehicle-nav-container {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding: 0.2rem;
+    scrollbar-width: thin;
+    scrollbar-color: #DC2626 #2a2a2a;
+    border-radius: 60px;
+}
+
+.vehicle-nav-container::-webkit-scrollbar {
+    height: 3px;
+}
+
+.vehicle-nav-container::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 10px;
+}
+
+.vehicle-nav-container::-webkit-scrollbar-thumb {
+    background: #DC2626;
+    border-radius: 10px;
+}
+
+.vehicle-nav-item {
+    flex: 0 0 auto;
+    padding: 0.7rem 2rem;
+    background: transparent;
+    border: none;
+    border-radius: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: #d1d5db;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+    position: relative;
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.vehicle-nav-item:hover {
+    color: #ffffff;
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.vehicle-nav-item.active {
+    background: #DC2626;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Page Title */
+.page-title { font-size: 2.2rem; font-weight: 700; color: white; margin: .5rem 0 2rem; text-align: left; letter-spacing: -.5px; }
+.page-title span { color: #DC2626; font-weight: 800; }
+
+/* Description */
+.description-container { cursor: pointer; border-radius: 12px; padding: 20px; background: #111; border: 1px solid #222; margin-bottom: 30px; transition: all .3s; }
+.description-container:hover { background: #1a1a1a; border-color: #DC2626; }
+.description-text { font-size: 1.05rem; line-height: 1.7; color: #9CA3AF; overflow: hidden; transition: max-height .5s; }
+.description-text.collapsed { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-height: 3.4em; }
+.description-text.expanded { max-height: 500px; }
+
+/* 2-Column Layout */
+.page-layout { display: flex; gap: 2rem; align-items: flex-start; }
+.main-content { flex: 1; min-width: 0; }
+.sidebar { 
+    width: 300px; 
+    flex-shrink: 0; 
+    position: sticky; 
+    top: 90px; 
+    max-height: calc(100vh - 110px); 
+    overflow-y: auto; 
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(220,38,38,.3) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(220,38,38,0.3); border-radius: 10px; }
+
+/* Main Content Box */
+.main-content-box { background: #111; border: 1px solid #222; border-radius: 24px; padding: 32px; margin-bottom: 32px; }
+
+/* Brand Section */
+.brand-section { margin-bottom: 3.5rem; padding-bottom: 2rem; border-bottom: 1px solid #222; scroll-margin-top: 100px; }
+.brand-section:last-child { border-bottom: none; margin-bottom: 1rem; }
+
+/* Brand Header with Logo */
+.brand-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; gap: 12px; }
+.brand-header-left { display: flex; align-items: center; gap: 16px; }
+.brand-logo-small { width: 56px; height: 56px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.brand-logo-small img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.brand-header h2 { font-size: 1.8rem; font-weight: 700; color: #fff; position: relative; padding-bottom: 10px; }
+.brand-header h2::after { content: ''; position: absolute; bottom: 0; left: 0; width: 50px; height: 3px; background: #DC2626; border-radius: 2px; }
+.model-count { color: #DC2626; font-size: .9rem; font-weight: 500; background: rgba(220,38,38,.1); padding: 4px 14px; border-radius: 50px; border: 1px solid rgba(220,38,38,.3); }
+
+/* Price List */
+.price-list { display: flex; flex-direction: column; gap: .8rem; margin-bottom: 1.2rem; }
+
+/* Price List Item with Model Image */
+.price-list-item { display: flex; align-items: center; gap: 1rem; background: #1a1a1a; border: 1px solid #222; border-radius: 16px; padding: 1rem 1.5rem; transition: all .3s; }
+.price-list-item:hover { background: #222; border-color: #DC2626; transform: translateX(6px); }
+.model-thumb { width: 80px; height: 60px; background: #111; border-radius: 10px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.model-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.model-thumb-placeholder { font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,.06); }
+.model-info { flex: 1; min-width: 0; }
+.model-info h3 { font-size: 1.2rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.price-and-action { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
+.model-price { font-size: 1.5rem; font-weight: 700; color: #DC2626; white-space: nowrap; }
+.details-btn { padding: .6rem 1.5rem; background: #DC2626; border-radius: 50px; color: white; font-weight: 600; text-decoration: none; transition: all .3s; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; }
+.details-btn:hover { background: white; color: #DC2626; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(220,38,38,.3); }
+
+/* View All */
+.view-all-container { display: flex; justify-content: flex-start; margin-top: .8rem; }
+.view-all-btn { display: inline-flex; align-items: center; gap: 8px; padding: .7rem 1.8rem; background: #1a1a1a; border: 1px solid #333; border-radius: 50px; color: white; font-weight: 500; text-decoration: none; transition: all .3s; font-size: .9rem; }
+.view-all-btn:hover { background: #DC2626; color: white; transform: translateY(-2px); border-color: #DC2626; }
+
+/* Pagination */
+.pagination-section { margin: 2.5rem 0 1rem; text-align: center; }
+.pagination-info { color: #6B7280; font-size: .9rem; margin-bottom: .8rem; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap; }
+.page-link { min-width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #9CA3AF; text-decoration: none; font-weight: 500; transition: all .3s; }
+.page-link:hover, .page-link.active { background: #DC2626; color: white; border-color: #DC2626; }
+.page-link.active { pointer-events: none; }
+.page-dots { color: #6B7280; margin: 0 4px; }
+
+/* Empty State */
+.empty-message { text-align: center; padding: 4rem 1rem; color: #6b7280; }
+.empty-message p { font-size: 1.2rem; color: #9ca3af; margin-bottom: .4rem; }
+
+/* ===== PREMIUM SIDEBAR ===== */
+.sidebar-box { background: rgba(14,14,14,.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.06); border-radius: 20px; padding: 22px; margin-bottom: 18px; position: relative; overflow: hidden; }
+.sidebar-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(220,38,38,.5), transparent); }
+
+.sidebar-title { font-size: .78rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .18em; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.sidebar-dot { width: 8px; height: 8px; background: #DC2626; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 10px rgba(220,38,38,.8); animation: sdot 2s infinite; }
+@keyframes sdot { 0%,100%{box-shadow:0 0 8px rgba(220,38,38,.7)} 50%{box-shadow:0 0 18px rgba(220,38,38,1)} }
+.sidebar-subtitle { font-size: .72rem; color: #4B5563; margin-bottom: 16px; font-style: italic; }
+
+/* Premium Sidebar Brand Card */
+.sidebar-brand-card { display: flex; align-items: center; gap: 13px; padding: 11px 13px; border-radius: 14px; text-decoration: none; color: white; transition: all .3s ease; border: 1px solid rgba(255,255,255,.04); margin-bottom: 7px; position: relative; overflow: hidden; background: rgba(255,255,255,.02); }
+.sidebar-brand-card::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #DC2626; transform: scaleY(0); transition: transform .3s; border-radius: 0 2px 2px 0; }
+.sidebar-brand-card:hover { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.06); transform: translateX(6px); box-shadow: 0 4px 20px rgba(220,38,38,.12); }
+.sidebar-brand-card:hover::after { transform: scaleY(1); }
+.sidebar-brand-logo { width: 46px; height: 46px; background: #1a1a1a; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .3s; }
+.sidebar-brand-card:hover .sidebar-brand-logo { border-color: rgba(220,38,38,.4); }
+.sidebar-brand-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.sidebar-brand-info { flex: 1; min-width: 0; }
+.sidebar-brand-name { font-size: .93rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .3s; }
+.sidebar-brand-card:hover .sidebar-brand-name { color: #DC2626; }
+.sidebar-brand-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.sidebar-brand-count { font-size: .7rem; color: #6B7280; background: rgba(255,255,255,.04); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,.06); }
+.sidebar-brand-cta { font-size: .68rem; color: #DC2626; font-weight: 700; white-space: nowrap; opacity: 0; transition: opacity .3s; letter-spacing: .03em; }
+.sidebar-brand-card:hover .sidebar-brand-cta { opacity: 1; }
+
+/* Brand Hero (brand page type) */
+.brand-hero { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding: 20px; background: #111; border: 1px solid #222; border-radius: 20px; flex-wrap: wrap; }
+.brand-hero-logo { width: 90px; height: 90px; background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.brand-hero-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.brand-hero-info h1 { font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 4px; }
+.brand-hero-info h1 span { color: #DC2626; }
+.brand-hero-info p { color: #6B7280; font-size: .9rem; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .page-layout { flex-direction: column; }
+    .sidebar { width: 100%; position: static; }
+}
+@media (max-width: 768px) {
+    .main-content-box { padding: 20px; }
+    .page-title { font-size: 1.7rem; }
+    .price-list-item { padding: .8rem 1rem; }
+    .model-thumb { width: 64px; height: 48px; }
+    .model-info h3 { font-size: 1rem; }
+    .model-price { font-size: 1.2rem; }
+    .price-and-action { gap: 1rem; }
+    .vehicle-nav-item { padding: .6rem 1.2rem; font-size: .95rem; }
+}
+@media (max-width: 480px) {
+    .main-content-box { padding: 14px; border-radius: 20px; border-color: #222; }
+    .price-list-item { flex-direction: row; align-items: center; gap: 12px; padding: 12px; background: #161616; border-radius: 16px; border: 1px solid #222; margin-bottom: 10px; }
+    .model-thumb { width: 85px; height: 65px; border-radius: 8px; flex-shrink: 0; display: flex !important; }
+    .model-thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .model-info { flex: 1; min-width: 0; }
+    .model-info h3 { font-size: 1rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .price-and-action { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; margin-top: 0; padding-top: 0; border-top: none; }
+    /* Re-organizing for better mobile flow */
+    .price-list-item { flex-wrap: wrap; }
+    .price-and-action { width: 100%; margin-top: 8px; padding-top: 10px; border-top: 1px solid #222; }
+    .model-price { font-size: 1.1rem; }
+    .details-btn { padding: 6px 14px; font-size: .8rem; }
+    .vehicle-nav-item { padding: 8px 20px; font-size: .85rem; }
+}
+</style>
+</head>
+
+<body>
+<%- include('../partials/navbar', {
+    currentPage: 'priceList',
+    country: country,
+    allVehicleTypes: (typeof vehicleTypes !== 'undefined' ? vehicleTypes : (typeof allVehicleTypes !== 'undefined' ? allVehicleTypes : []))
+}) %>
+
+<main>
+    <div class="container">
+        <%- include('../partials/breadcrumb', { breadcrumbs, countryPrefix: countryPrefixBreadPL }) %>
+        
+        <!-- Vehicle Type Nav -->
+        <div class="vehicle-nav-wrapper">
+            <div class="vehicle-nav">
+                <div class="vehicle-nav-container" id="vehicle-nav-container">
+                    <% 
+                        let navTypes = (typeof vehicleTypes !== 'undefined' ? vehicleTypes : (typeof allVehicleTypes !== 'undefined' ? allVehicleTypes : []));
+                        
+                        // Ensure current vehicleType is in the list
+                        if (typeof vehicleType !== 'undefined' && vehicleType && !navTypes.find(vt => vt.vehicle_type_id == vehicleType.vehicle_type_id)) {
+                            navTypes = [vehicleType, ...navTypes];
+                        }
+
+                        if (navTypes && navTypes.length > 0) { 
+                            navTypes.forEach((vt) => { 
+                                const isSelected = (typeof vehicleType !== 'undefined' && vehicleType && vehicleType.vehicle_type_id == vt.vehicle_type_id);
+                    %>
+                            <a href="<%= country ? '/' + country.country_name.toLowerCase() + '/' + vt.vehicle_type_name + '/price-list/' : '/' + vt.vehicle_type_name + '/price-list/' %>"
+                               class="vehicle-nav-item <%= isSelected ? 'active' : '' %>">
+                                <%= vt.vehicle_type_name %>
+                            </a>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brand Hero (brand view only) -->
+        <% if (pageType !== 'vehicleType' && typeof brand !== 'undefined' && brand) { %>
+        <div class="brand-hero">
+            <div class="brand-hero-logo">
+                <% if (brand.image_path || brand.brand_image) { %>
+                    <img src="<%= brand.image_path || brand.brand_image %>" alt="<%= brand.brand_name %> logo" onerror="this.style.display='none'">
+                <% } else { %>
+                    <span style="font-size:2rem;font-weight:900;color:rgba(255,255,255,.1);"><%= (brand.brand_name||'?').charAt(0) %></span>
+                <% } %>
+            </div>
+            <div class="brand-hero-info">
+                <h1><span><%= brand.brand_name %></span> <%= vehicleType.vehicle_type_name %> Price List<% if (country) { %> in <span><%= country.country_name %></span><% } %></h1>
+                <p><%= (typeof models !== 'undefined' && models) ? models.length : 0 %> models available</p>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Page Title (vehicleType view or fallback) -->
+        <% if (pageType === 'vehicleType' || pageType === 'all' || (typeof brands !== 'undefined' && brands && !brand)) { %>
+        <h1 class="page-title">
+            Complete <span><%= vehicleType.vehicle_type_name %></span> Price List
+            <% if (country) { %> in <span><%= country.country_name %></span><% } %>
+        </h1>
+        <% } %>
+
+        <!-- Description -->
+        <div class="description-container" onclick="toggleDescription()">
+            <div class="description-text collapsed" id="descriptionText">
+                <%= description %>
+            </div>
+        </div>
+
+        <!-- 2-Column Layout -->
+        <div class="page-layout">
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="main-content-box">
+
+                    <% if (pageType === 'vehicleType' || (typeof brands !== 'undefined' && brands)) { %>
+                        <!-- VEHICLE TYPE PRICE LIST -->
+                        <% if (brands && brands.length > 0) { %>
+                            <% brands.forEach(brand => { %>
+                                <div class="brand-section" id="<%= brand.brand_name.toLowerCase().replace(/ /g, '-') %>-prices">
+                                    <div class="brand-header">
+                                        <div class="brand-header-left">
+                                            <div class="brand-logo-small">
+                                                <% if (brand.brand_image) { %>
+                                                    <img src="<%= brand.brand_image %>" alt="<%= brand.brand_name %>" onerror="this.style.display='none'">
+                                                <% } else { %>
+                                                    <span style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,.1);"><%= brand.brand_name.charAt(0) %></span>
+                                                <% } %>
+                                            </div>
+                                            <h2><%= brand.brand_name %> <%= vehicleType.vehicle_type_name %> Prices</h2>
+                                        </div>
+                                        <span class="model-count"><%= brand.model_count %> models</span>
+                                    </div>
+
+                                    <div class="price-list">
+                                        <% if (brand.models && brand.models.length > 0) { %>
+                                            <% brand.models.slice(0, 5).forEach(model => { %>
+                                                <div class="price-list-item">
+                                                    <div class="model-thumb">
+                                                        <% if (model.model_image) { %>
+                                                            <img src="<%= model.model_image %>" alt="<%= model.model_name %>" onerror="this.parentElement.innerHTML='<span class=model-thumb-placeholder><%= model.model_name.charAt(0) %></span>'">
+                                                        <% } else { %>
+                                                            <span class="model-thumb-placeholder"><%= model.model_name.charAt(0) %></span>
+                                                        <% } %>
+                                                    </div>
+                                                    <div class="model-info">
+                                                        <h3><%= brand.brand_name %> <%= model.model_name %></h3>
+                                                    </div>
+                                                    <div class="price-and-action">
+                                                        <span class="model-price"><%= country ? country.currency_symbol : 'Rs.' %><%= (parseFloat(model.starting_price) || 0).toLocaleString() %></span>
+                                                        <a href="<%= country ? '/' + country.country_name.toLowerCase() + '/' : '/' %><%= vehicleType.vehicle_type_name %>/<%= brand.brand_name.toLowerCase().replace(/ /g, '-') %>/<%= model.model_name.toLowerCase().replace(/ /g, '-') %>/" class="details-btn">Details <i class="fas fa-arrow-right"></i></a>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <div class="price-list-item">
+                                                <div class="model-info"><h3>No models available</h3></div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="view-all-container">
+                                        <a href="<%= country ? '/' + country.country_name.toLowerCase() + '/' : '/' %><%= vehicleType.vehicle_type_name %>/<%= brand.brand_name.toLowerCase().replace(/ /g, '-') %>/price-list/" class="view-all-btn">
+                                            View All <%= brand.brand_name %> Models (<%= brand.model_count %>) <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="empty-message"><p>No brands available</p><div class="small">Check back soon</div></div>
+                        <% } %>
+
+                    <% } else if (typeof models !== 'undefined' && models) { %>
+                        <!-- BRAND PRICE LIST -->
+                        <div class="price-list">
+                            <% if (typeof models !== 'undefined' && models && models.length > 0) { %>
+                                <% models.forEach(model => { %>
+                                    <div class="price-list-item">
+                                        <div class="model-thumb">
+                                            <% if (model.model_image) { %>
+                                                <img src="<%= model.model_image %>" alt="<%= model.model_name %>" onerror="this.parentElement.innerHTML='<span class=model-thumb-placeholder><%= model.model_name.charAt(0) %></span>'">
+                                            <% } else { %>
+                                                <span class="model-thumb-placeholder"><%= model.model_name.charAt(0) %></span>
+                                            <% } %>
+                                        </div>
+                                        <div class="model-info">
+                                            <h3><%= (typeof brand !== 'undefined' ? brand.brand_name : '') %> <%= model.model_name %></h3>
+                                        </div>
+                                        <div class="price-and-action">
+                                            <span class="model-price"><%= country ? country.currency_symbol : 'Rs.' %><%= (parseFloat(model.starting_price) || 0).toLocaleString() %></span>
+                                            <a href="<%= country ? '/' + country.country_name.toLowerCase() + '/' : '/' %><%= vehicleType.vehicle_type_name %>/<%= (typeof brand !== 'undefined' ? brand.brand_name.toLowerCase().replace(/ /g, '-') : '') %>/<%= model.model_name.toLowerCase().replace(/ /g, '-') %>/" class="details-btn">Details <i class="fas fa-arrow-right"></i></a>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="empty-message"><p>No models available for <%= (typeof brand !== 'undefined' ? brand.brand_name : 'this brand') %></p></div>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                </div><!-- end main-content-box -->
+            </div><!-- end main-content -->
+
+            <!-- PREMIUM SIDEBAR -->
+            <aside class="sidebar">
+                <!-- Popular Models Section -->
+                <% if (typeof popularModels !== 'undefined' && popularModels && popularModels.length > 0) { %>
+                <div class="sidebar-box">
+                    <div class="sidebar-title"><span class="sidebar-dot"></span> Suggested Models</div>
+                    <% popularModels.forEach(m => { 
+                        const mName = m.model_name || '';
+                        const bName = m.brand_name || '';
+                        const bSlug = bName.toLowerCase().replace(/ /g, '-');
+                        const mSlug = mName.toLowerCase().replace(/ /g, '-');
+                        const countryPath = country ? `/${country.country_name.toLowerCase()}` : '';
+                        const mUrl = `${countryPath}/${vehicleType.vehicle_type_name}/${bSlug}/${mSlug}/`;
+                    %>
+                        <a href="<%= mUrl %>" class="sidebar-brand-card">
+                            <div class="sidebar-brand-logo" style="background: #111; padding: 4px; border-radius: 8px;">
+                                <% if (m.model_image) { %>
+                                    <img src="<%= m.model_image %>" alt="<%= mName %>" style="object-fit: cover; border-radius: 6px;">
+                                <% } else { %>
+                                    <i class="fas fa-car" style="color:rgba(255,255,255,.1);"></i>
+                                <% } %>
+                            </div>
+                            <div class="sidebar-brand-info">
+                                <div class="sidebar-brand-name"><%= bName %> <%= mName %></div>
+                                <div class="sidebar-brand-meta">
+                                    <span style="font-size: .75rem; color: #DC2626; font-weight: 700;">
+                                        <%= country ? country.currency_symbol : 'Rs.' %><%= (parseFloat(m.starting_price) || 0).toLocaleString() %>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+                <% } %>
+
+                <% 
+                    const recBrands = (typeof recommendedBrands !== 'undefined' && recommendedBrands && recommendedBrands.length > 0) ? recommendedBrands : [];
+                %>
+                <!-- Similar Brands Section (Hidden on Global List as per request) -->
+                <% if (typeof pageType !== 'undefined' && pageType === 'brand' && recBrands && recBrands.length > 0) { %>
+                <div class="sidebar-box">
+                    <div class="sidebar-title"><span class="sidebar-dot"></span> Similar Brands</div>
+                    <div class="sidebar-subtitle">Other popular <%= vehicleType.vehicle_type_name %> brands you may like</div>
+                    <% recBrands.forEach(b => {
+                        const bName2 = b.brand_name || b.name || '';
+                        const bImg = b.image_path || b.brand_image || '';
+                        const bSlug = bName2.toLowerCase().replace(/ /g, '-');
+                        const bCount = b.model_count || 0;
+                        const bUrl = (country ? '/' + country.country_name.toLowerCase() : '') + '/' + vehicleType.vehicle_type_name + '/' + bSlug + '/price-list/';
+                    %>
+                        <a href="<%= bUrl %>" class="sidebar-brand-card">
+                            <div class="sidebar-brand-logo">
+                                <% if (bImg) { %>
+                                    <img src="<%= bImg %>" alt="<%= bName2 %>" onerror="this.style.display='none'">
+                                <% } else { %>
+                                    <span style="font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.15);"><%= bName2.charAt(0) %></span>
+                                <% } %>
+                            </div>
+                            <div class="sidebar-brand-info">
+                                <div class="sidebar-brand-name"><%= bName2 %></div>
+                                <div class="sidebar-brand-meta">
+                                    <span class="sidebar-brand-count"><%= bCount %> models</span>
+                                    <% if (b.min_price) { %>
+                                        <span style="font-size: .7rem; color: #DC2626; font-weight: 600;">From <%= country ? country.currency_symbol : 'Rs.' %><%= (parseFloat(b.min_price) || 0).toLocaleString() %></span>
+                                    <% } %>
+                                </div>
+                                <div class="sidebar-brand-meta" style="margin-top: 2px;">
+                                    <span class="sidebar-brand-cta">View Prices →</span>
+                                </div>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+                <% } %>
+
+                <!-- Browse by Type -->
+                <div class="sidebar-box">
+                    <div class="sidebar-title"><span class="sidebar-dot"></span> Browse by Type</div>
+                    <% 
+                        const sidebarTypes = (typeof vehicleTypes !== 'undefined' ? vehicleTypes : (typeof allVehicleTypes !== 'undefined' ? allVehicleTypes : []));
+                        if (sidebarTypes && sidebarTypes.length > 0) { 
+                            sidebarTypes.forEach(vt => {
+                        const isActive = vehicleType && vehicleType.vehicle_type_id == vt.vehicle_type_id;
+                    %>
+                        <a href="<%= country ? '/' + country.country_name.toLowerCase() : '' %>/<%= vt.vehicle_type_name %>/price-list/" class="sidebar-brand-card" style="<%= isActive ? 'border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.07);' : '' %>">
+                            <div class="sidebar-brand-info">
+                                <div class="sidebar-brand-name" style="<%= isActive ? 'color:#DC2626;' : '' %>"><%= vt.vehicle_type_name %></div>
+                                <div class="sidebar-brand-meta">
+                                    <span class="sidebar-brand-count">Price List</span>
+                                    <% if (isActive) { %><span style="font-size:.68rem;color:#DC2626;font-weight:700;">Current ✓</span><% } %>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right" style="color:#DC2626;font-size:.75rem;flex-shrink:0;"></i>
+                        </a>
+                    <% }) } %>
+                </div>
+            </aside>
+
+        </div><!-- end page-layout -->
+    </div>
+</main>
+
+<%- include('../partials/footer', {
+    country: country,
+    allCountries: allCountries,
+    allVehicleTypes: (typeof vehicleTypes !== 'undefined' ? vehicleTypes : (typeof allVehicleTypes !== 'undefined' ? allVehicleTypes : []))
+}) %>
+
+<script>
+function toggleDescription() {
+    const d = document.getElementById('descriptionText');
+    d.classList.toggle('collapsed');
+    d.classList.toggle('expanded');
+}
+if (window.location.hash) {
+    setTimeout(() => {
+        const el = document.querySelector(window.location.hash);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+</script>
+</body>
+</html>

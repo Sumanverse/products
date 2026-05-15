@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /signin
+Disallow: /logout
+Disallow: /profile
+
+Sitemap: https://gadidrive.com/sitemap.xml

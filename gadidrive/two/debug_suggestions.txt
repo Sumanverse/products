@@ -1,0 +1,2 @@
+{"timestamp":"2026-05-08T06:46:03.090Z","vehicle_type_id":34,"country":5,"cats":8,"brands":8,"models":8,"category_id":52}
+{"timestamp":"2026-05-08T06:46:11.002Z","vehicle_type_id":8,"country":2,"cats":8,"brands":8,"models":8,"category_id":16}
