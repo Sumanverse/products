@@ -1,0 +1,384 @@
+<%- include('../partials/head.ejs', { 
+    title: 'GadiDrive | Global Automotive Information Hub',
+    description: 'Explore automotive information from Nepal, India, USA and more. Find car prices, bike prices, vehicle reviews and automotive news from around the world.',
+    keywords: 'GadiDrive, global automotive, car prices worldwide, bike prices, vehicle information, automotive news, nepal cars, india cars, usa cars',
+    path: '/',
+    ogImage: 'https://gadidrive.com/images/mainlogo.png',
+    country: null  // ✅ ADD THIS - Homepage has no specific country
+}) %>
+
+<!-- Schema Markup for Global Website -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "GadiDrive",
+  "url": "https://gadidrive.com/",
+  "image": "https://gadidrive.com/images/mainlogo.png",
+  "description": "Global automotive information hub - Find vehicle details, prices, and news from multiple countries",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://gadidrive.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Organization Schema for Homepage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "GadiDrive",
+  "url": "https://gadidrive.com/",
+  "logo": "https://gadidrive.com/images/mainlogo.png",
+  "description": "Global automotive information hub - Find vehicle details, prices, and news from multiple countries",
+  "sameAs": [
+    "https://www.facebook.com/share/1AL5zK3bHj/",
+    "https://www.instagram.com/gadidrivenepal",
+    "https://youtube.com/@gadidrivenepal",
+    "https://www.tiktok.com/@gadidrivenepal"
+  ]
+}
+</script>
+
+<style>
+    /* Import Poppins Font */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Pure Black Background */
+    body {
+        background-color: #000000;
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    /* Minimal Hero Section */
+    .hero-minimal {
+        background-color: #000000;
+        padding: 3rem 1rem;
+        margin: 1rem 0 2rem;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+    }
+    
+    .hero-title span {
+        color: #DC2626;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #9CA3AF;
+        margin-bottom: 2.5rem;
+        font-weight: 300;
+    }
+    
+    /* Country Selector */
+    .country-selector {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        background-color: #111111;
+        border-radius: 16px;
+        border: 1px solid #222222;
+    }
+    
+    .selector-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #DC2626;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .select-wrapper {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .select-wrapper select {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 40px;
+        color: #ffffff;
+        font-size: 1rem;
+        appearance: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .select-wrapper select:hover {
+        border-color: #DC2626;
+        background-color: #1f1f1f;
+    }
+    
+    .select-wrapper select:focus {
+        outline: none;
+        border-color: #DC2626;
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+    }
+    
+    .select-wrapper::after {
+        content: '▼';
+        position: absolute;
+        top: 50%;
+        right: 1.2rem;
+        transform: translateY(-50%);
+        color: #DC2626;
+        font-size: 0.8rem;
+        pointer-events: none;
+    }
+    
+    .select-wrapper option {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        padding: 0.5rem;
+    }
+    
+    /* Stats */
+    .stats-minimal {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        max-width: 600px;
+        margin: 2rem auto 0;
+        padding: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #DC2626;
+    }
+    
+    .stat-label {
+        color: #6B7280;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Navbar - Left Aligned with Original Style */
+    .navbar-minimal {
+        padding: 1.5rem 0;
+    }
+    
+    .navbar-minimal .logo {
+        text-align: left;
+    }
+    
+    .navbar-minimal .logo a {
+        font-size: 2rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .navbar-minimal .logo span {
+        color: #DC2626;
+    }
+    
+    /* Footer - Red with Border Radius and Content */
+    .footer-red {
+        background-color: #DC2626;
+        margin-top: 3rem;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+        padding: 2rem 0;
+    }
+    
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .footer-logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .footer-logo span {
+        color: #000000;
+    }
+    
+    .footer-text {
+        color: #ffffff;
+        font-size: 1rem;
+        text-align: center;
+        opacity: 0.9;
+    }
+    
+    .footer-copyright {
+        color: #ffffff;
+        font-size: 0.9rem;
+        opacity: 0.7;
+        margin-top: 0.5rem;
+    }
+    
+    .footer-divider {
+        width: 100px;
+        height: 2px;
+        background-color: rgba(255, 255, 255, 0.3);
+        margin: 0.5rem 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+        
+        .stats-minimal {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .navbar-minimal .logo {
+            text-align: center;
+        }
+        
+        .footer-content {
+            padding: 0 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .country-selector {
+            padding: 1.2rem;
+        }
+        
+        .select-wrapper select {
+            padding: 0.9rem 1rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col text-white font-['Poppins']" style="background-color: #000000;">
+
+    <!-- Navbar - Left Aligned with Original Style -->
+    <nav class="navbar-minimal">
+        <div class="container mx-auto px-4">
+            <div class="logo">
+                <a href="/">
+                    Gadi<span>Drive</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 max-w-screen-xl">
+
+        <!-- Hero Section -->
+        <section class="hero-minimal">
+            <h1 class="hero-title">
+                Welcome to <span>GadiDrive</span>
+            </h1>
+            <p class="hero-subtitle">
+                Your Global Gateway to Automotive Information
+            </p>
+            
+            <!-- Country Selector - Direct Navigation on Select -->
+            <div class="country-selector">
+                <div class="selector-label">EXPLORE BY COUNTRY</div>
+                <div class="select-wrapper">
+                    <select id="country-select" aria-label="Select Country" onchange="navigateToCountry(this)">
+                        <option value="" disabled selected>Choose your country</option>
+                        <% if (countries && countries.length > 0) { %>
+                            <% countries.forEach(country => { %>
+                                <option value="<%= country.country_name.toLowerCase() %>/">
+                                    <%= country.country_name %> (<%= country.currency_symbol %>)
+                                </option>
+                            <% }) %>
+                        <% } %>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-minimal">
+                <div class="stat-item">
+                    <div class="stat-number"><%= countries ? countries.length : 0 %>+</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Brands</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Updates</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer - Red with Border Radius and Content -->
+    <footer class="footer-red">
+        <div class="footer-content">
+            <div class="footer-logo">
+                Gadi<span>Drive</span>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-text">
+                Your Global Gateway to Automotive Information
+            </div>
+            <div class="footer-copyright">
+                © 2026 GadiDrive. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigate to country page when selected (with trailing slash)
+        function navigateToCountry(selectElement) {
+            const countryPath = selectElement.value;
+            if (countryPath) {
+                window.location.href = `/${countryPath}`;
+            }
+        }
+
+        // Keyboard support for select
+        document.getElementById('country-select').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value) {
+                window.location.href = `/${this.value}`;
+            }
+        });
+    </script>
+</body>
+</html>

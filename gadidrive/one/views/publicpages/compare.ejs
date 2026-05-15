@@ -1,0 +1,1729 @@
+<%- include('../partials/head', {
+    title: `Compare Vehicles Side-by-Side in ${countryDisplay || 'Nepal'} | GadiDrive`,
+    description: `Compare multiple vehicles side-by-side with detailed specifications, features, and prices in ${countryDisplay || 'Nepal'}. Compare cars, bikes, and scooters to find the best one.`,
+    keywords: `vehicle comparison ${(countryDisplay || 'Nepal').toLowerCase()}, car compare, bike compare, price comparison ${(countryDisplay || 'Nepal').toLowerCase()}, GadiDrive comparison`,
+    canonical: path || '/compare',
+    path: path || '/compare',
+    country: country
+}) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://gadidrive.com<%= country ? '/' + country.country_name.toLowerCase() : '' %>"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Compare Vehicles",
+    "item": "https://gadidrive.com<%= path %>"
+  }]
+}
+</script>
+
+<style>
+    :root {
+        --primary-red: #dc2626;
+        --dark-red: #b91c1c;
+        --primary-blue: #3b82f6;
+        --dark-blue: #1d4ed8;
+        --dark-bg: #000000;
+        --card-bg: #111111;
+        --text-light: #ffffff;
+        --text-muted: #9ca3af;
+        --border-color: #374151;
+    }
+    
+    * {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+        background: var(--dark-bg);
+        color: var(--text-light);
+    }
+
+    /* Main Container */
+    .compare-container {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #374151;
+    }
+
+    /* Selection Section */
+    .selection-section {
+        background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .selection-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #ffffff, #e5e5e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .vehicle-count-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .count-label {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .count-select {
+        background: #000000;
+        border: 2px solid white;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .count-select option {
+        background: #000000;
+        color: white;
+        padding: 10px;
+    }
+
+    .count-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+    }
+
+    /* Vehicle Selection Boxes */
+    .vehicle-selection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .vehicle-selector-box {
+        background: var(--card-bg);
+        border: 2px solid #374151;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .vehicle-selector-box:hover {
+        border-color: var(--primary-red);
+    }
+
+    .vehicle-number {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        background: var(--primary-red);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .selection-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .selection-group {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .selection-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    .selection-dropdown {
+        width: 100%;
+        background: #000000;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        padding: 0.75rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .selection-dropdown option {
+        background: #000000;
+        color: white;
+        padding: 10px;
+    }
+
+    .selection-dropdown:focus {
+        outline: none;
+        border-color: var(--primary-red);
+    }
+
+    .selection-dropdown:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Selected Model Display */
+    .selected-model-display {
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border: 1px solid #374151;
+        display: none;
+    }
+
+    .selected-model-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .selected-model-image {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #374151;
+    }
+
+    .model-info-compact {
+        flex: 1;
+    }
+
+    .model-name-compact {
+        font-weight: 700;
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    .model-price-compact {
+        color: var(--primary-red);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .remove-model-btn {
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .remove-model-btn:hover {
+        background: var(--dark-red);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .compare-btn {
+        padding: 1rem 2.5rem;
+        background: transparent;
+        border: 2px solid #10b981;
+        border-radius: 40px;
+        color: #10b981;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .compare-btn:hover {
+        background: #10b981;
+        border-color: #10b981;
+        color: black;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .compare-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        border-color: #9ca3af;
+        color: #9ca3af;
+    }
+
+    .compare-btn:disabled:hover {
+        background: transparent;
+        color: #9ca3af;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .share-btn {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: 2px solid var(--primary-blue);
+        border-radius: 40px;
+        color: var(--primary-blue);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .share-btn:hover {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .share-btn svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .share-btn:hover svg {
+        transform: rotate(10deg);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid var(--primary-red);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 2rem auto;
+        display: none;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Comparison Results */
+    .comparison-section {
+        display: none;
+        margin-top: 3rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: var(--primary-red);
+    }
+
+    /* Comparison Table */
+    .comparison-table-container {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid #374151;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+    .table-header {
+        background: rgba(55, 65, 81, 0.5);
+    }
+
+    .spec-header {
+        background: var(--card-bg);
+        font-weight: 700;
+        padding: 1.5rem;
+        text-align: left;
+        border-right: 1px solid #374151;
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+
+    .vehicle-header {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        text-align: center;
+        border-right: 1px solid #374151;
+        min-width: 200px;
+    }
+
+    .vehicle-header.winner {
+        background: rgba(34, 197, 94, 0.1);
+        border: 2px solid #22c55e;
+        position: relative;
+    }
+
+    .winner-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #22c55e;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    /* CLICKABLE VEHICLE NAME STYLES - NO UNDERLINE */
+    .vehicle-name {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: white;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        text-decoration: none !important;
+    }
+
+    .vehicle-name:hover {
+        color: #dc2626;
+        text-decoration: none !important;
+    }
+
+    .vehicle-brand {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+    }
+
+    .vehicle-price {
+        color: var(--primary-red);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* VIEW DETAILS BUTTON - WHITE BG WITH BLACK TEXT */
+    .view-details-btn {
+        display: inline-block;
+        background: white;
+        color: black;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        text-align: center;
+        border: 1px solid #374151;
+    }
+
+    .view-details-btn:hover {
+        background: black;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        border-color: white;
+    }
+
+    .spec-row {
+        border-bottom: 1px solid #374151;
+    }
+
+    .spec-name {
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+        color: var(--text-light);
+        border-right: 1px solid #374151;
+        background: var(--card-bg);
+    }
+
+    .spec-value {
+        padding: 1.25rem;
+        text-align: center;
+        color: var(--text-light);
+        border-right: 1px solid #374151;
+    }
+
+    .spec-value:last-child {
+        border-right: none;
+    }
+
+    .tick {
+        color: #22c55e;
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    .cross {
+        color: #ef4444;
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    /* Score Section */
+    .score-row {
+        background: rgba(55, 65, 81, 0.5);
+        font-weight: 700;
+    }
+
+    .score-cell {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--text-light);
+        text-align: center;
+    }
+
+    .score-cell.winner {
+        color: #22c55e;
+    }
+
+    /* Conclusion Box */
+    .conclusion-box {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin: 2rem 0;
+        border: 1px solid #374151;
+        position: relative;
+    }
+
+    .conclusion-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .winner-section {
+        background: rgba(34, 197, 94, 0.1);
+        border: 2px solid #22c55e;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .winner-title {
+        color: #22c55e;
+        font-weight: 800;
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* RANKING LIST LINKS - NO UNDERLINE */
+    .ranking-list a {
+        text-decoration: none !important;
+        color: white;
+        transition: color 0.3s ease;
+    }
+
+    .ranking-list a:hover {
+        color: #dc2626;
+        text-decoration: none !important;
+    }
+
+    .ranking-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+    }
+
+    .ranking-item {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        background: rgba(55, 65, 81, 0.3);
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-red);
+    }
+
+    .ranking-item.winner {
+        border-left-color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    .ranking-position {
+        font-weight: 700;
+        color: var(--primary-red);
+    }
+
+    .ranking-item.winner .ranking-position {
+        color: #22c55e;
+    }
+
+    /* Recommendations Section */
+    .recommendations-section {
+        margin-top: 3rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #374151;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Share Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: #1f2937;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        border: 1px solid #374151;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #374151;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+        background: #374151;
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .share-icons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .share-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background: #374151;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .share-icon::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .share-icon:hover {
+        background: #4b5563;
+        transform: translateY(-3px);
+    }
+
+    .share-icon:hover::before {
+        opacity: 1;
+    }
+
+    .share-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .copy-link {
+        width: 100%;
+        padding: 1rem;
+        background: #374151;
+        border: 1px solid #4b5563;
+        border-radius: 8px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .copy-link:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .compare-container {
+            padding: 1rem;
+        }
+        
+        .selection-section {
+            padding: 1.5rem;
+        }
+        
+        .selection-title {
+            font-size: 2rem;
+        }
+        
+        .vehicle-selection-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .selection-row {
+            flex-direction: column;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .compare-btn, .share-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .comparison-table {
+            min-width: 600px;
+        }
+
+        .vehicle-header {
+            min-width: 180px;
+        }
+
+        .view-details-btn {
+            padding: 0.5rem 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .share-icons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .selection-title {
+            font-size: 1.5rem;
+        }
+        
+        .vehicle-count-selector {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .comparison-table {
+            min-width: 400px;
+        }
+        
+        .vehicle-header {
+            min-width: 150px;
+            padding: 1rem;
+        }
+
+        .vehicle-name {
+            font-size: 1.1rem;
+        }
+
+        .view-details-btn {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .share-icons {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-black text-white">
+
+<%- include('../partials/navbar', { 
+    currentPage: 'compare',
+    country: country,
+    allVehicleTypes: []
+}) %>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Compare Section -->
+    <section class="compare-container">
+        <!-- Selection Section -->
+        <div class="selection-section">
+            <h1 class="selection-title">Compare Vehicles in <%= countryDisplay || 'Nepal' %></h1>
+            
+            <div class="vehicle-count-selector">
+                <span class="count-label">Compare</span>
+                <select id="vehicle-count" class="count-select">
+                    <option value="2">2 Vehicles</option>
+                    <option value="3">3 Vehicles</option>
+                    <option value="4">4 Vehicles</option>
+                </select>
+                <span class="count-label">at once</span>
+            </div>
+
+            <!-- Vehicle Selection Grid -->
+            <div id="vehicle-selection" class="vehicle-selection-grid">
+                <!-- Vehicle selection boxes will be dynamically generated here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="compare-button" class="compare-btn" disabled>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span id="compare-button-text">Select at least 2 Vehicles</span>
+                </button>
+
+                <button id="share-button" class="share-btn" style="display: none;" onclick="openShareModal()">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Share Comparison
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner"></div>
+
+        <!-- Comparison Results -->
+        <section id="comparison-results" class="comparison-section">
+            <h2 class="section-title" id="comparison-title">Comparison Results</h2>
+            
+            <!-- Comparison Table -->
+            <div class="comparison-table-container">
+                <div class="overflow-x-auto">
+                    <table class="comparison-table">
+                        <thead class="table-header">
+                            <tr id="comparison-header">
+                                <th class="spec-header">Specifications</th>
+                                <!-- Vehicle headers will be dynamically added here -->
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-body">
+                            <!-- Comparison rows will be dynamically added here -->
+                        </tbody>
+                        <tfoot class="table-header">
+                            <tr class="score-row">
+                                <td class="spec-name">Total Score</td>
+                                <!-- Score cells will be dynamically added here -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div class="conclusion-box fade-in">
+                <h3 class="conclusion-title">Comparison Conclusion</h3>
+                <div id="conclusion-content">
+                    <!-- Conclusion content will be dynamically added here -->
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <!-- Recommended Vehicles -->
+    <section class="recommendations-section">
+        <h2 class="section-title">Recommended Vehicles in <%= countryDisplay || 'Nepal' %></h2>
+        <div id="recommended-vehicles" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% if (popularModels && popularModels.length > 0) { %>
+                <% popularModels.forEach(model => { %>
+                    <%- include('../partials/modelbox', { model, country: country }) %>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state col-span-full">
+                    <div class="empty-state-icon">🚗</div>
+                    <p>Select vehicles to compare to see recommendations</p>
+                </div>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<!-- Share Modal -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Share This Comparison</h3>
+            <button class="close-btn" onclick="closeShareModal()" aria-label="Close share modal">&times;</button>
+        </div>
+        
+        <div class="share-icons">
+            <button class="share-icon" onclick="shareOnTwitter()" aria-label="Share on Twitter">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                </svg>
+            </button>
+            
+            <button class="share-icon" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </button>
+            
+            <button class="share-icon" onclick="shareOnLinkedIn()" aria-label="Share on LinkedIn">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+            </button>
+            
+            <button class="share-icon" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893 0-3.176-1.24-6.165-3.495-8.411z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <button class="copy-link" onclick="copyToClipboard()" aria-label="Copy comparison link to clipboard">
+            <span>Copy Comparison Link</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<%- include('../partials/footer', { 
+    country: country,
+    allCountries: allCountries,
+    allVehicleTypes: []
+}) %>
+
+<script>
+    // Global variables
+    let selectedModels = [];
+    let vehicleTypes = <%- JSON.stringify(vehicleTypes || []) %>;
+    let currentComparisonData = null;
+    let currentCountry = '<%= country ? country.country_name.toLowerCase() : "" %>';
+    let currencySymbol = '<%= currencySymbol || "रू" %>';
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeVehicleSelection();
+        setupEventListeners();
+        updateCompareButton();
+    });
+
+    // Initialize vehicle selection boxes
+    function initializeVehicleSelection() {
+        const vehicleCount = document.getElementById('vehicle-count');
+        const vehicleSelection = document.getElementById('vehicle-selection');
+        
+        vehicleCount.addEventListener('change', updateVehicleSelection);
+        updateVehicleSelection();
+    }
+
+    // Update vehicle selection boxes based on count
+    function updateVehicleSelection() {
+        const count = parseInt(document.getElementById('vehicle-count').value);
+        const vehicleSelection = document.getElementById('vehicle-selection');
+        
+        vehicleSelection.innerHTML = '';
+        selectedModels = Array(count).fill(null);
+        
+        for (let i = 0; i < count; i++) {
+            const selectionBox = document.createElement('div');
+            selectionBox.className = 'vehicle-selector-box fade-in';
+            selectionBox.innerHTML = `
+                <div class="vehicle-number">${i + 1}</div>
+                <div class="selection-group">
+                    <label class="selection-label">Vehicle Type</label>
+                    <select class="selection-dropdown vehicle-type-select" data-index="${i}" onchange="onVehicleTypeChange(${i})">
+                        <option value="">Select Type</option>
+                        ${vehicleTypes.map(type => 
+                            `<option value="${type.vehicle_type_id}">${type.vehicle_type_name}</option>`
+                        ).join('')}
+                </select>
+                </div>
+                
+                <div class="selection-group">
+                    <label class="selection-label">Brand</label>
+                    <select class="selection-dropdown brand-select" data-index="${i}" onchange="onBrandChange(${i})" disabled>
+                        <option value="">Select Brand</option>
+                    </select>
+                </div>
+                
+                <div class="selection-group">
+                    <label class="selection-label">Model</label>
+                    <select class="selection-dropdown model-select" data-index="${i}" onchange="onModelChange(${i})" disabled>
+                        <option value="">Select Model</option>
+                    </select>
+                </div>
+                
+                <div id="selected-model-${i}" class="selected-model-display">
+                    <!-- Selected model will be shown here -->
+                </div>
+            `;
+            vehicleSelection.appendChild(selectionBox);
+        }
+        
+        updateCompareButton();
+    }
+
+    // Handle vehicle type change
+    async function onVehicleTypeChange(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const vehicleTypeId = vehicleTypeSelect.value;
+        
+        // Reset downstream selections
+        brandSelect.innerHTML = '<option value="">Select Brand</option>';
+        brandSelect.disabled = true;
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.style.display = 'none';
+        selectedModels[index] = null;
+        
+        if (!vehicleTypeId) {
+            updateCompareButton();
+            return;
+        }
+        
+        try {
+            // Show loading state
+            brandSelect.innerHTML = '<option value="">Loading brands...</option>';
+            
+            // Fetch brands for selected vehicle type with country filter
+            const response = await fetch(`/compare/brands/${vehicleTypeId}?countryname=${currentCountry}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                brandSelect.innerHTML = '<option value="">Select Brand</option>' + 
+                    data.brands.map(brand => 
+                        `<option value="${brand.brand_id}">${brand.name}</option>`
+                    ).join('');
+                brandSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error fetching brands:', error);
+            brandSelect.innerHTML = '<option value="">Error loading brands</option>';
+        }
+        
+        updateCompareButton();
+    }
+
+    // Handle brand change
+    async function onBrandChange(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const vehicleTypeId = vehicleTypeSelect.value;
+        const brandId = brandSelect.value;
+        
+        // Reset downstream selections
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.style.display = 'none';
+        selectedModels[index] = null;
+        
+        if (!vehicleTypeId || !brandId) {
+            updateCompareButton();
+            return;
+        }
+        
+        try {
+            // Show loading state
+            modelSelect.innerHTML = '<option value="">Loading models...</option>';
+            
+            // Fetch models for selected brand and vehicle type with country filter
+            const response = await fetch(`/compare/models/${vehicleTypeId}/${brandId}?countryname=${currentCountry}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                modelSelect.innerHTML = '<option value="">Select Model</option>' + 
+                    data.models.map(model => 
+                        `<option value="${model.id}">${model.model_name}</option>`
+                    ).join('');
+                modelSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error fetching models:', error);
+            modelSelect.innerHTML = '<option value="">Error loading models</option>';
+        }
+        
+        updateCompareButton();
+    }
+
+    // Handle model change
+    async function onModelChange(index) {
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const modelId = modelSelect.value;
+        
+        if (!modelId) {
+            selectedDisplay.style.display = 'none';
+            selectedModels[index] = null;
+            updateCompareButton();
+            return;
+        }
+        
+        try {
+            // Show loading state
+            selectedDisplay.innerHTML = '<div class="text-center py-2">Loading model details...</div>';
+            selectedDisplay.style.display = 'block';
+            
+            // Fetch model details with country filter
+            const response = await fetch(`/compare/model/${modelId}?countryname=${currentCountry}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const model = data.model;
+                selectedModels[index] = model;
+                
+                selectedDisplay.innerHTML = `
+                    <div class="selected-model-content">
+                        <img src="${model.model_image || '/images/placeholder.jpg'}" 
+                             alt="${model.model_name}" 
+                             class="selected-model-image"
+                             onerror="this.src='/images/placeholder.jpg'">
+                        <div class="model-info-compact">
+                            <div class="model-name-compact">${model.brand_name} ${model.model_name}</div>
+                            <div class="model-price-compact">
+                                ${model.formatted_price || currencySymbol + ' ' + (model.starting_price ? new Intl.NumberFormat('en-IN').format(model.starting_price) : 'Price not available')}
+                            </div>
+                        </div>
+                        <button class="remove-model-btn" onclick="removeModel(${index})" aria-label="Remove model">
+                            Remove
+                        </button>
+                    </div>
+                `;
+                selectedDisplay.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error fetching model details:', error);
+            selectedDisplay.innerHTML = '<div class="text-center py-2 text-red-400">Error loading model</div>';
+        }
+        
+        updateCompareButton();
+    }
+
+    // Remove selected model
+    function removeModel(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        // Reset all selections for this box
+        vehicleTypeSelect.value = '';
+        brandSelect.innerHTML = '<option value="">Select Brand</option>';
+        brandSelect.disabled = true;
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.style.display = 'none';
+        selectedModels[index] = null;
+        
+        updateCompareButton();
+    }
+
+    // Update compare button state
+    function updateCompareButton() {
+        const selectedCount = selectedModels.filter(model => model !== null).length;
+        const compareButton = document.getElementById('compare-button');
+        const compareButtonText = document.getElementById('compare-button-text');
+        const shareButton = document.getElementById('share-button');
+        
+        if (selectedCount >= 2) {
+            compareButton.disabled = false;
+            compareButtonText.textContent = `Compare ${selectedCount} Vehicles`;
+        } else {
+            compareButton.disabled = true;
+            compareButtonText.textContent = 'Select at least 2 Vehicles';
+        }
+        
+        // Hide share button when no comparison is shown
+        shareButton.style.display = 'none';
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        document.getElementById('compare-button').addEventListener('click', performComparison);
+    }
+
+    // Perform comparison
+    async function performComparison() {
+        const selectedCount = selectedModels.filter(model => model !== null).length;
+        
+        if (selectedCount < 2) {
+            alert('Please select at least 2 vehicles to compare');
+            return;
+        }
+
+        // Show loading spinner
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('comparison-results').style.display = 'none';
+        document.getElementById('share-button').style.display = 'none';
+
+        try {
+            const modelIds = selectedModels.filter(model => model !== null).map(model => model.id);
+            
+            const response = await fetch(`/compare?countryname=${currentCountry}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ modelIds: modelIds })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                currentComparisonData = data.comparisonData;
+                displayComparisonResults(data.comparisonData);
+                document.getElementById('share-button').style.display = 'flex';
+            } else {
+                alert(data.message || 'Error performing comparison');
+            }
+        } catch (error) {
+            console.error('Comparison error:', error);
+            alert('Error performing comparison');
+        } finally {
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+    }
+
+    // Display comparison results
+    function displayComparisonResults(comparisonData) {
+        const resultsSection = document.getElementById('comparison-results');
+        const comparisonHeader = document.getElementById('comparison-header');
+        const comparisonBody = document.getElementById('comparison-body');
+        const conclusionContent = document.getElementById('conclusion-content');
+        const comparisonTitle = document.getElementById('comparison-title');
+        
+        // Update title with compared vehicles
+        const titleModels = comparisonData.models.map(model => `${model.brand} ${model.name}`).join(' vs ');
+        comparisonTitle.textContent = `Comparing ${titleModels}`;
+
+        // Clear previous results
+        comparisonHeader.innerHTML = '<th class="spec-header">Specifications</th>';
+        comparisonBody.innerHTML = '';
+        
+        // Find winner (highest score)
+        const winnerIndex = comparisonData.models.reduce((maxIndex, model, index, array) => 
+            model.score > array[maxIndex].score ? index : maxIndex, 0
+        );
+        
+        // Define which specs should show data vs ticks
+        const specsWithData = new Set([
+            'Engine Type', 'Power', 'Torque', 'Ground Clearance', 'Dimensions',
+            'Drive Type', 'Seating Capacity', 'Total Airbags', 'Boot Space',
+            'Mileage', 'Range', 'Battery Capacity', 'Cylinders', 'Fuel Tank Capacity',
+            'Price', 'Safety Rating', 'Launch Year', 'Engine'
+        ]);
+        
+        // Create table headers with prices and CLICKABLE NAMES (NO UNDERLINE)
+        comparisonData.models.forEach((model, index) => {
+            const headerCell = document.createElement('th');
+            headerCell.className = `vehicle-header ${index === winnerIndex ? 'winner' : ''}`;
+            
+            const price = model.basicInfo.starting_price || 'Price not available';
+            const modelName = model.name || '';
+            const brandName = model.brand || '';
+            
+            // Create URL-friendly slugs
+            const modelSlug = modelName.toLowerCase()
+                .replace(/ /g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-');
+                
+            const brandSlug = brandName.toLowerCase()
+                .replace(/ /g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-');
+            
+            // Create the model details URL with brand prefix
+            const modelDetailsUrl = currentCountry ? 
+                `/${currentCountry}/${model.vehicle_type_name || 'car'}/brand/${brandSlug}/${modelSlug}/` : 
+                `/${model.vehicle_type_name || 'car'}/brand/${brandSlug}/${modelSlug}/`;
+            
+            if (index === winnerIndex) {
+                headerCell.innerHTML = `
+                    <div class="winner-badge">Winner</div>
+                    <a href="${modelDetailsUrl}" 
+                       class="vehicle-name" 
+                       style="text-decoration: none !important;" 
+                       onmouseover="this.style.color='#dc2626'; this.style.textDecoration='none';" 
+                       onmouseout="this.style.color='white'; this.style.textDecoration='none';"
+                       title="View ${brandName} ${modelName} details">
+                        ${modelName}
+                    </a>
+                    <div class="vehicle-brand">${brandName}</div>
+                    <div class="vehicle-price">
+                        ${price}
+                    </div>
+                    <a href="${modelDetailsUrl}" class="view-details-btn" title="View full details of ${brandName} ${modelName}">
+                        <i class="fas fa-external-link-alt mr-2"></i>View Details
+                    </a>
+                `;
+            } else {
+                headerCell.innerHTML = `
+                    <a href="${modelDetailsUrl}" 
+                       class="vehicle-name" 
+                       style="text-decoration: none !important;" 
+                       onmouseover="this.style.color='#dc2626'; this.style.textDecoration='none';" 
+                       onmouseout="this.style.color='white'; this.style.textDecoration='none';"
+                       title="View ${brandName} ${modelName} details">
+                        ${modelName}
+                    </a>
+                    <div class="vehicle-brand">${brandName}</div>
+                    <div class="vehicle-price">
+                        ${price}
+                    </div>
+                    <a href="${modelDetailsUrl}" class="view-details-btn" title="View full details of ${brandName} ${modelName}">
+                        <i class="fas fa-external-link-alt mr-2"></i>View Details
+                    </a>
+                `;
+            }
+            
+            comparisonHeader.appendChild(headerCell);
+        });
+
+        // Create specification rows
+        comparisonData.specifications.forEach(spec => {
+            const row = document.createElement('tr');
+            row.className = 'spec-row';
+            
+            const specNameCell = document.createElement('td');
+            specNameCell.className = 'spec-name';
+            specNameCell.textContent = spec;
+            row.appendChild(specNameCell);
+            
+            comparisonData.models.forEach(model => {
+                const specValueCell = document.createElement('td');
+                specValueCell.className = 'spec-value';
+                
+                if (model.specs[spec]) {
+                    if (specsWithData.has(spec)) {
+                        // Show actual data for specs
+                        let value = '';
+                        
+                        // Get value from specValues object
+                        if (model.specValues && model.specValues[spec]) {
+                            value = model.specValues[spec];
+                        } else {
+                            // Try to get from basicInfo
+                            const basicInfoKey = spec.toLowerCase().replace(/ /g, '_');
+                            value = model.basicInfo[basicInfoKey] || '';
+                        }
+                        specValueCell.textContent = value || '';
+                    } else {
+                        // Show tick for specifications list
+                        specValueCell.innerHTML = '<span class="tick">✓</span>';
+                    }
+                } else {
+                    // Show cross for both data specs and specifications list
+                    specValueCell.innerHTML = '<span class="cross">✗</span>';
+                }
+                
+                row.appendChild(specValueCell);
+            });
+            
+            comparisonBody.appendChild(row);
+        });
+
+        // Add score row to footer
+        const scoreRow = document.querySelector('.score-row');
+        scoreRow.innerHTML = '<td class="spec-name">Total Score</td>';
+        
+        comparisonData.models.forEach((model, index) => {
+            const scoreCell = document.createElement('td');
+            scoreCell.className = `score-cell ${index === winnerIndex ? 'winner' : ''}`;
+            
+            const actualScore = Math.min(model.score, comparisonData.totalSpecifications);
+            scoreCell.textContent = `${actualScore}/${comparisonData.totalSpecifications}`;
+            scoreRow.appendChild(scoreCell);
+        });
+
+        // Generate conclusion
+        generateConclusion(comparisonData, conclusionContent);
+        
+        // Show results section
+        resultsSection.style.display = 'block';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Generate conclusion
+    function generateConclusion(comparisonData, container) {
+        // Sort models by score in descending order
+        const sortedModels = [...comparisonData.models].sort((a, b) => b.score - a.score);
+        const winner = sortedModels[0];
+        
+        const winnerScore = Math.min(winner.score, comparisonData.totalSpecifications);
+        const winnerPercentage = Math.round((winnerScore / comparisonData.totalSpecifications) * 100);
+        
+        // Create URL-friendly slugs for winner
+        const winnerModelSlug = winner.name.toLowerCase()
+            .replace(/ /g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-');
+        const winnerBrandSlug = winner.brand.toLowerCase()
+            .replace(/ /g, '-')
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-');
+        const winnerDetailsUrl = currentCountry ? 
+            `/${currentCountry}/${winner.vehicle_type_name || 'car'}/brand/${winnerBrandSlug}/${winnerModelSlug}/` : 
+            `/${winner.vehicle_type_name || 'car'}/brand/${winnerBrandSlug}/${winnerModelSlug}/`;
+        
+        let conclusionHTML = `
+            <div class="winner-section">
+                <div class="winner-title">
+                    🏆 <a href="${winnerDetailsUrl}" 
+                       style="text-decoration: none !important; color: #22c55e;" 
+                       onmouseover="this.style.textDecoration='none'; this.style.color='#16a34a';" 
+                       onmouseout="this.style.textDecoration='none'; this.style.color='#22c55e';"
+                       title="View ${winner.brand} ${winner.name} details">
+                        ${winner.brand} ${winner.name}
+                    </a> - Winner
+                </div>
+                <p class="text-white">
+                    Leads with <strong>${winnerPercentage}%</strong> of specifications met, scoring <strong>${winnerScore}</strong> out of <strong>${comparisonData.totalSpecifications}</strong> total specifications.
+                    <br>
+                    <a href="${winnerDetailsUrl}" class="view-details-btn inline-block mt-3" title="View full details of ${winner.brand} ${winner.name}">
+                        <i class="fas fa-external-link-alt mr-2"></i>View Winner Details
+                    </a>
+                </p>
+            </div>
+        `;
+
+        if (sortedModels.length > 1) {
+            conclusionHTML += `
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-white mb-3">Ranking Summary</h4>
+                    <ul class="ranking-list">`;
+            
+            sortedModels.forEach((model, index) => {
+                const position = index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : '4th';
+                const modelScore = Math.min(model.score, comparisonData.totalSpecifications);
+                const modelPercentage = Math.round((modelScore / comparisonData.totalSpecifications) * 100);
+                const isWinner = index === 0;
+                
+                // Create URL for each model
+                const modelSlug = model.name.toLowerCase()
+                    .replace(/ /g, '-')
+                    .replace(/[^a-z0-9-]/g, '')
+                    .replace(/-+/g, '-');
+                const brandSlug = model.brand.toLowerCase()
+                    .replace(/ /g, '-')
+                    .replace(/[^a-z0-9-]/g, '')
+                    .replace(/-+/g, '-');
+                const modelDetailsUrl = currentCountry ? 
+                    `/${currentCountry}/${model.vehicle_type_name || 'car'}/brand/${brandSlug}/${modelSlug}/` : 
+                    `/${model.vehicle_type_name || 'car'}/brand/${brandSlug}/${modelSlug}/`;
+                
+                conclusionHTML += `
+                    <li class="ranking-item ${isWinner ? 'winner' : ''}">
+                        <span class="ranking-position">${position} Place:</span> 
+                        <a href="${modelDetailsUrl}" 
+                           style="text-decoration: none !important; color: white;" 
+                           onmouseover="this.style.textDecoration='none'; this.style.color='#dc2626';" 
+                           onmouseout="this.style.textDecoration='none'; this.style.color='white';"
+                           title="View ${model.brand} ${model.name} details">
+                            ${model.brand} ${model.name}
+                        </a>
+                        <strong>(${modelPercentage}% - ${modelScore}/${comparisonData.totalSpecifications})</strong>
+                        ${isWinner ? ' - 🏆 WINNER' : ''}
+                    </li>`;
+            });
+            
+            conclusionHTML += `</ul></div>`;
+        }
+
+        // Missing specifications for winner
+        const missingSpecs = comparisonData.specifications.filter(spec => !winner.specs[spec]);
+        if (missingSpecs.length > 0) {
+            conclusionHTML += `
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-white mb-2">Considerations for ${winner.brand} ${winner.name}</h4>
+                    <p class="text-white mb-3">The winner is missing these specifications you might want to consider:</p>
+                    <div class="text-sm text-white bg-gray-800 rounded-lg p-4 border border-gray-600">
+                        ${missingSpecs.slice(0, 6).join(', ')}${missingSpecs.length > 6 ? ` and ${missingSpecs.length - 6} more...` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Final recommendation
+        conclusionHTML += `
+            <div class="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-600">
+                <h4 class="text-lg font-semibold text-white mb-2">💡 Final Recommendation</h4>
+                <p class="text-white">
+                    Based on your comparison, the <strong class="text-green-400">${winner.brand} ${winner.name}</strong> offers the best overall specifications. 
+                    ${missingSpecs.length > 0 ? 
+                        'Consider if the missing features are important for your specific needs before making a final decision.' : 
+                        'It provides comprehensive features across all categories and is our top recommendation.'
+                    }
+                </p>
+                <div class="mt-4">
+                    <a href="${winnerDetailsUrl}" class="view-details-btn" title="View full details of ${winner.brand} ${winner.name}">
+                        <i class="fas fa-info-circle mr-2"></i>View Complete Details of ${winner.brand} ${winner.name}
+                    </a>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = conclusionHTML;
+    }
+
+    // Share Modal Functions
+    function openShareModal() {
+        if (!currentComparisonData) {
+            alert('Please perform a comparison first');
+            return;
+        }
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    // Social Share Functions
+    function shareOnTwitter() {
+        if (!currentComparisonData) return;
+        
+        const modelNames = currentComparisonData.models.map(model => `${model.brand} ${model.name}`).join(' vs ');
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent(`Check out this vehicle comparison: ${modelNames} on GadiDrive`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnFacebook() {
+        if (!currentComparisonData) return;
+        
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnLinkedIn() {
+        if (!currentComparisonData) return;
+        
+        const modelNames = currentComparisonData.models.map(model => `${model.brand} ${model.name}`).join(' vs ');
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(`Vehicle Comparison: ${modelNames}`);
+        const summary = encodeURIComponent(`Compare vehicles side-by-side with detailed specifications on GadiDrive`);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnWhatsApp() {
+        if (!currentComparisonData) return;
+        
+        const modelNames = currentComparisonData.models.map(model => `${model.brand} ${model.name}`).join(' vs ');
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent(`Check out this vehicle comparison: ${modelNames}\n${url}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+        closeShareModal();
+    }
+
+    function copyToClipboard() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = event.currentTarget;
+            const span = btn.querySelector('span');
+            const originalText = span.textContent;
+            span.textContent = 'Copied!';
+            
+            setTimeout(() => {
+                span.textContent = originalText;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            const btn = event.currentTarget;
+            const span = btn.querySelector('span');
+            const originalText = span.textContent;
+            span.textContent = 'Copied!';
+            
+            setTimeout(() => {
+                span.textContent = originalText;
+            }, 2000);
+        });
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const shareModal = document.getElementById('shareModal');
+        if (event.target === shareModal) {
+            closeShareModal();
+        }
+    }
+
+    // Keyboard support for modal
+    document.addEventListener('keydown', function(e) {
+        const shareModal = document.getElementById('shareModal');
+        if (shareModal && shareModal.style.display === 'flex') {
+            if (e.key === 'Escape') {
+                closeShareModal();
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<%- include('../partials/head', { 
+    title: 'Ads Manager',
+    description: 'GadiDrive Ads Management - Manage advertisements and promotional content',
+    keywords: 'ads manager, advertisements, promotions, ad management',
+    path: '/admin/level3am',
+    country: null
+}) %>
+
+        body {
+            background-color: #000000;
+        }
+        .border-bottom-left-to-right {
+            position: relative;
+            border-radius: 0.75rem;
+        }
+        .border-bottom-left-to-right:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #DC2626;
+            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        }
+        @keyframes borderLeftToRight {
+            to {
+                width: 100%;
+            }
+        }
+        .icon-button {
+            transition: transform 0.2s;
+        }
+        .icon-button:hover {
+            transform: scale(1.1);
+        }
+        #mobile-menu-overlay {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            width: 16rem;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: auto;
+            will-change: transform, opacity;
+        }
+        .mobile-menu-open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        #mobile-menu-backdrop.active {
+            display: block;
+        }
+        .table-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table-container th {
+            background-color: #1F2937;
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 2px solid #4B5563;
+        }
+        .table-container td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #4B5563;
+        }
+        .table-container tr:hover {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins']">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Main Section -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white mb-6">Ads Management Dashboard</h2>
+            <!-- Active Ads Table -->
+            <div class="table-container bg-gray-800 rounded-lg shadow-lg p-6 border-bottom-left-to-right">
+                <h3 class="text-2xl font-semibold text-white mb-4">Active Ads</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Serial No.</th>
+                            <th>Series Name</th>
+                            <th>Ad Ratio</th>
+                            <th>Ad Content</th>
+                            <th>Time Remaining</th>
+                            <th>Action</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adsTableBody">
+                        <tr>
+                            <td>1</td>
+                            <td>Ad Series 1</td>
+                            <td>16:9</td>
+                            <td><video width="200" controls><source src="https://via.placeholder.com/200x100.mp4" type="video/mp4">No Ads</video></td>
+                            <td id="timer1">01:00:00</td>
+                            <td><button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" disabled>Upload Ad</button></td>
+                            <td><button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="deleteAd(this)">Delete Ad</button></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Ad Series 2</td>
+                            <td>4:3</td>
+                            <td>No Ads</td>
+                            <td>No Ads</td>
+                            <td><button id="uploadAdButton2" class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="showUploadForm(2)">Upload Ad</button></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Create Ad Series Button -->
+            <div class="flex justify-start mt-6">
+                <button id="createAdSeriesButton" class="bg-red-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition">Create Ad Series</button>
+            </div>
+        </section>
+
+        <!-- Create Ad Series Modal -->
+        <div id="createAdSeriesModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Create New Ad Series</h3>
+                <form id="createAdSeriesFormData" class="space-y-6">
+                    <div>
+                        <label for="seriesName" class="block text-sm font-medium text-gray-300 mb-1">Series Name</label>
+                        <input type="text" id="seriesName" name="seriesName" placeholder="Enter Series Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label for="adRatio" class="block text-sm font-medium text-gray-300 mb-1">Ad Ratio</label>
+                        <input type="text" id="adRatio" name="adRatio" placeholder="e.g., 16:9" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-create-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create Series</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Upload Ad Modal -->
+        <div id="uploadAdModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Upload the Ad</h3>
+                <form id="uploadAdFormData" class="space-y-6">
+                    <div>
+                        <label for="adFile" class="block text-sm font-medium text-gray-300 mb-1">Upload Ad (Video, GIF, or Photo)</label>
+                        <input type="file" id="adFile" accept="video/*,image/*,image/gif" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                    </div>
+                    <div>
+                        <label for="redirectLink" class="block text-sm font-medium text-gray-300 mb-1">Redirect Link</label>
+                        <input type="url" id="redirectLink" name="redirectLink" placeholder="Enter redirect URL" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Set Time (HH:MM:SS)</label>
+                        <div class="flex space-x-2">
+                            <input type="number" name="hours" placeholder="HH" min="0" max="730" class="w-1/3 px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <input type="number" name="minutes" placeholder="MM" min="0" max="59" class="w-1/3 px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <input type="number" name="seconds" placeholder="SS" min="0" max="59" class="w-1/3 px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                        </div>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-upload-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload Ad</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded');
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+            if (!mobileMenuButton || !mobileMenuOverlay || !mobileMenuBackdrop || !closeMobileMenuButton) {
+                console.error('Mobile menu elements missing:', {
+                    mobileMenuButton: !!mobileMenuButton,
+                    mobileMenuOverlay: !!mobileMenuOverlay,
+                    mobileMenuBackdrop: !!mobileMenuBackdrop,
+                    closeMobileMenuButton: !!closeMobileMenuButton
+                });
+                return;
+            }
+
+            const toggleMenu = () => {
+                console.log('Toggling menu');
+                mobileMenuOverlay.classList.toggle('mobile-menu-open');
+                mobileMenuBackdrop.classList.toggle('active');
+            };
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Hamburger menu clicked');
+                toggleMenu();
+            }, { passive: false });
+
+            mobileMenuButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Hamburger menu touched');
+                toggleMenu();
+            }, { passive: false });
+
+            closeMobileMenuButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close menu clicked');
+                mobileMenuOverlay.classList.remove('mobile-menu-open');
+                mobileMenuBackdrop.classList.remove('active');
+            }, { passive: false });
+
+            mobileMenuBackdrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Backdrop clicked, closing menu');
+                mobileMenuOverlay.classList.remove('mobile-menu-open');
+                mobileMenuBackdrop.classList.remove('active');
+            }, { passive: false });
+
+            mobileMenuOverlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('Clicked inside menu, preventing close');
+            }, { passive: false });
+
+            // Search Functionality
+            document.getElementById('search-button').addEventListener('click', () => {
+                const query = document.getElementById('search-input').value;
+                console.log('Search button clicked, query:', query);
+                if (query) {
+                    alert('Search for: ' + query);
+                } else {
+                    alert('Please enter a search query.');
+                }
+            });
+
+            // Highlight Active Nav Link
+            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+            const currentPath = window.location.pathname;
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-red-600', 'text-white');
+                    link.classList.remove('hover:bg-red-600');
+                }
+            });
+
+            // Timer Countdown
+            const timers = {
+                timer1: 3600 // 1 hour in seconds
+            };
+            function updateTimers() {
+                Object.entries(timers).forEach(([id, time]) => {
+                    if (time > 0) {
+                        const hours = Math.floor(time / 3600);
+                        const minutes = Math.floor((time % 3600) / 60);
+                        const seconds = time % 60;
+                        const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        document.getElementById(id).textContent = display;
+                        timers[id]--;
+                    } else {
+                        document.getElementById(id).textContent = 'No Ads';
+                        const row = document.getElementById(id).parentElement;
+                        row.cells[5].innerHTML = `<button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="showUploadForm(${row.rowIndex})">Upload Ad</button>`;
+                        row.cells[6].innerHTML = '';
+                        delete timers[id];
+                    }
+                });
+                if (Object.keys(timers).length) setTimeout(updateTimers, 1000);
+            }
+            updateTimers();
+
+            // Create Ad Series Modal
+            const createAdSeriesButton = document.getElementById('createAdSeriesButton');
+            const createAdSeriesModal = document.getElementById('createAdSeriesModal');
+            const createAdSeriesFormData = document.getElementById('createAdSeriesFormData');
+            const closeCreateModal = document.getElementById('close-create-modal');
+
+            createAdSeriesButton.addEventListener('click', () => {
+                console.log('Create ad series button clicked');
+                createAdSeriesModal.classList.remove('hidden');
+            });
+
+            closeCreateModal.addEventListener('click', () => {
+                console.log('Close create modal clicked');
+                createAdSeriesModal.classList.add('hidden');
+            });
+
+            createAdSeriesFormData.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Create ad series form submitted');
+                const formData = new FormData(createAdSeriesFormData);
+                const seriesName = formData.get('seriesName');
+                const adRatio = formData.get('adRatio');
+                if (seriesName && adRatio) {
+                    const tableBody = document.getElementById('adsTableBody');
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${tableBody.rows.length + 1}</td>
+                        <td>${seriesName}</td>
+                        <td>${adRatio}</td>
+                        <td>No Ads</td>
+                        <td>No Ads</td>
+                        <td><button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="showUploadForm(${tableBody.rows.length + 1})">Upload Ad</button></td>
+                        <td></td>
+                    `;
+                    tableBody.appendChild(newRow);
+                    createAdSeriesModal.classList.add('hidden');
+                }
+            });
+
+            // Upload Ad Modal
+            window.showUploadForm = (rowIndex) => {
+                const uploadAdModal = document.getElementById('uploadAdModal');
+                uploadAdModal.dataset.row = rowIndex;
+                uploadAdModal.classList.remove('hidden');
+            };
+
+            window.hideUploadForm = () => {
+                const uploadAdModal = document.getElementById('uploadAdModal');
+                uploadAdModal.classList.add('hidden');
+            };
+
+            const uploadAdFormData = document.getElementById('uploadAdFormData');
+            const closeUploadModal = document.getElementById('close-upload-modal');
+
+            uploadAdFormData.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Upload ad form submitted');
+                const formData = new FormData(uploadAdFormData);
+                const rowIndex = uploadAdModal.dataset.row;
+                const row = document.querySelector(`#adsTableBody tr:nth-child(${rowIndex})`);
+                row.cells[3].innerHTML = '<video width="200" controls><source src="https://via.placeholder.com/200x100.mp4" type="video/mp4">No Ads</video>';
+                const hours = parseInt(formData.get('hours')) || 0;
+                const minutes = parseInt(formData.get('minutes')) || 0;
+                const seconds = parseInt(formData.get('seconds')) || 0;
+                const timerValue = (hours * 3600) + (minutes * 60) + seconds;
+                if (timerValue > 0 && timerValue <= 2628000) { // Max 730 hours
+                    row.cells[4].id = `timer${rowIndex}`;
+                    row.cells[4].textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    timers[`timer${rowIndex}`] = timerValue;
+                    row.cells[5].innerHTML = '<button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" disabled>Upload Ad</button>';
+                    row.cells[6].innerHTML = `<button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="deleteAd(this)">Delete Ad</button>`;
+                    hideUploadForm();
+                    updateTimers();
+                }
+            });
+
+            closeUploadModal.addEventListener('click', () => {
+                console.log('Close upload modal clicked');
+                hideUploadForm();
+            });
+
+            // Delete Ad
+            window.deleteAd = (button) => {
+                console.log('Delete ad clicked');
+                const row = button.parentElement.parentElement;
+                row.cells[3].textContent = 'No Ads';
+                row.cells[4].textContent = 'No Ads';
+                row.cells[5].innerHTML = `<button class="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" onclick="showUploadForm(${row.rowIndex})">Upload Ad</button>`;
+                row.cells[6].innerHTML = '';
+            };
+        });
+    </script>
+</body>
+</html>

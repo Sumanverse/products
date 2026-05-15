@@ -1,0 +1,177 @@
+<footer class="bg-red-600 w-full mt-20 rounded-tl-[30px] rounded-tr-[30px]">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Top Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 text-center md:text-left">
+            <!-- Logo & Tagline -->
+            <div class="flex flex-col items-center md:items-start">
+                <div class="text-4xl font-extrabold text-white mb-3" aria-hidden="true">
+                    Gadi<span class="text-black">Drive</span>
+                </div>
+                <p class="text-white text-sm max-w-xs">
+                    Hub for Automotive information in <%= typeof country !=='undefined' && country ?
+                        country.country_name : 'Nepal' %> — Built for Vehicle enthusiasts
+                </p>
+                <div class="flex space-x-4 mt-6">
+                    <!-- Facebook -->
+                    <a href="https://www.facebook.com/share/1AL5zK3bHj/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+                        class="w-10 h-10 bg-black/20 hover:bg-black text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/gadidrivenepal?igsh=bHc3MjZoZXlkajFt" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+                        class="w-10 h-10 bg-black/20 hover:bg-black text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                    </a>
+
+                    <!-- YouTube -->
+                    <a href="https://youtube.com/@gadidrivenepal?si=0y11NMWIZBOZayPG" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+                        class="w-10 h-10 bg-black/20 hover:bg-black text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                        </svg>
+                    </a>
+
+                    <!-- TikTok -->
+                    <a href="https://www.tiktok.com/@gadidrivenepal?_r=1&_t=ZS-926kgCR1Fg5" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
+                        class="w-10 h-10 bg-black/20 hover:bg-black text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.33 6.33 0 0 0-1-.05A6.34 6.34 0 0 0 5 20.1a6.34 6.34 0 0 0 11.58-3.35v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.76-.16z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links (Price List Added) -->
+            <div class="flex flex-col items-center md:items-start">
+                <div class="text-xl font-bold text-white mb-6" role="heading" aria-level="2">Quick Links</div>
+                <div class="space-y-3">
+                    <% 
+                        const footerVehicleTypes = (typeof allVehicleTypes !== 'undefined') ? allVehicleTypes : []; 
+                        const footerDefaultType = (footerVehicleTypes.length > 0) ? footerVehicleTypes[0].vehicle_type_name : 'car';
+                        const footerCountryPrefix = (typeof country !== 'undefined' && country) ? '/' + country.country_name.toLowerCase() : '';
+                    %>
+                        <a href="<%= footerCountryPrefix || '/' %>"
+                            class="block text-white hover:text-black font-medium transition">Home</a>
+                        <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/brands"
+                            class="block text-white hover:text-black font-medium transition">Brands</a>
+                        <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/category"
+                            class="block text-white hover:text-black font-medium transition">Categories</a>
+
+                        <!-- NEW: Price List Link -->
+                        <a href="<%= footerCountryPrefix %>/<%= footerDefaultType %>/price-list/"
+                            class="block text-white hover:text-black font-medium transition">Price List</a>
+
+                        <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/compare' : '/compare' %>"
+                            class="block text-white hover:text-black font-medium transition">Compare</a>
+                        <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/news' : '/news' %>"
+                            class="block text-white hover:text-black font-medium transition">News</a>
+                        <a href="<%= footerCountryPrefix ? footerCountryPrefix + '/emicalculator' : '/emicalculator' %>"
+                            class="block text-white hover:text-black font-medium transition">EMI Calculator</a>
+                </div>
+            </div>
+
+            <!-- Legal -->
+            <div class="flex flex-col items-center md:items-start">
+                <div class="text-xl font-bold text-white mb-6" role="heading" aria-level="2">Company</div>
+                <div class="space-y-3">
+                    <a href="/about" class="block text-white hover:text-black font-medium transition">About
+                        GadiDrive</a>
+                    <a href="/about#contact" class="block text-white hover:text-black font-medium transition">Contact
+                        Us</a>
+                    <a href="/about#contact" class="block text-white hover:text-black font-medium transition">Privacy
+                        Policy</a>
+                    <a href="/about#privacy" class="block text-white hover:text-black font-medium transition">Terms
+                        of Service</a>
+                    <a href="/about#vision"
+                        class="block text-white hover:text-black font-medium transition">Services</a>
+                    <a href="/about#terms"
+                        class="block text-white hover:text-black font-medium transition">Signin</a>
+                </div>
+            </div>
+
+            <!-- Country Selector - Premium Style (Redirects to Country Home) -->
+            <div class="flex flex-col items-center md:items-start">
+                <div class="text-xl font-bold text-white mb-6" role="heading" aria-level="2">Switch Country</div>
+                <div class="w-full max-w-xs">
+                    <% if (typeof allCountries !=='undefined' && allCountries.length> 0) { %>
+                        <div class="relative group">
+                            <label for="footer-country-selector" class="sr-only">Select Country</label>
+                            <select id="footer-country-selector"
+                                class="w-full bg-black/40 text-white border-2 border-white/30 rounded-full px-5 py-3.5 appearance-none cursor-pointer focus:outline-none focus:border-white focus:bg-black/50 transition-all duration-300 text-base font-medium shadow-lg hover:shadow-xl hover:border-white/50">
+                                <option value="" disabled selected class="bg-gray-900 text-white">🌍 Select Country
+                                </option>
+                                <% allCountries.forEach(c=> { %>
+                                    <option value="<%= c.country_name.toLowerCase() %>"
+                                        data-currency="<%= c.currency_symbol %>"
+                                        class="bg-gray-900 text-white hover:bg-red-600" <%=typeof country !=='undefined'
+                                        && country && country.country_name===c.country_name ? 'selected' : '' %>>
+                                        <%= c.country_name %> (<%= c.currency_symbol %>)
+                                    </option>
+                                    <% }); %>
+                            </select>
+                            <div
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-white group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-white text-xs mt-3 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Current: <span class="font-semibold">
+                                <%= typeof country !=='undefined' && country ? country.country_name + ' (' +
+                                    country.currency_symbol + ')' : 'Global' %>
+                            </span>
+                        </p>
+                        <% } else { %>
+                            <p class="text-white/70 text-sm bg-black/30 rounded-full px-5 py-3 text-center">No countries
+                                available</p>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Type Links - REMOVED (bike Brands, bike Categories, etc.) -->
+        <!-- This entire section has been removed as requested -->
+
+        <!-- Bottom Copyright -->
+        <div class="mt-12 pt-8 border-t border-white/30 text-center">
+            <p class="text-white text-sm font-medium">
+                © <%= new Date().getFullYear() %> <span class="font-bold text-black">GadiDrive</span>. All rights
+                    reserved.
+                    <br class="sm:hidden">
+                    <span class="text-white">Made with <span class="text-black">❤</span> for automotive lovers in <%=
+                            typeof country !=='undefined' && country ? country.country_name : 'Nepal' %></span>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const countrySelector = document.getElementById('footer-country-selector');
+
+        if (countrySelector) {
+            countrySelector.addEventListener('change', function () {
+                const selectedCountry = this.value;
+                if (selectedCountry) {
+                    // Always redirect to country home page with trailing slash
+                    window.location.href = '/' + selectedCountry + '/';
+                }
+            });
+        }
+    });
+</script>

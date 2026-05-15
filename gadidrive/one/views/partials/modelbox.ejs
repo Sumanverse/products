@@ -1,0 +1,121 @@
+<% 
+    const isAdminMode = (typeof isAdmin !== 'undefined' && isAdmin);
+    const vehicleTypeName = model.vehicle_type_name || 'car';
+    const brandSlug = model.brand_name ? model.brand_name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') : '';
+    const modelSlug = model.model_name ? model.model_name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') : '';
+    const countryPrefix = (typeof country !== 'undefined' && country) ? '/' + country.country_name.toLowerCase() : '';
+    const detailUrl = countryPrefix ? `${countryPrefix}/${vehicleTypeName}/${brandSlug}/${modelSlug}/` : `/${vehicleTypeName}/${brandSlug}/${modelSlug}/`;
+    const currencySymbol = (typeof country !== 'undefined' && country && country.currency_symbol) ? country.currency_symbol : (model.currency_symbol || 'Rs.');
+%>
+
+    <div class="relative group h-full min-w-0" itemscope itemtype="https://schema.org/Product">
+        <% if (!isAdminMode) { %>
+            <a href="<%= detailUrl %>" class="absolute inset-0 z-10"></a>
+        <% } %>
+
+        <div class="model-card 
+        relative bg-[#0d0d0d] border border-white/10 rounded-2xl overflow-hidden 
+        transition-all duration-500 ease-out
+        <%= !isAdminMode ? 'hover:border-red-600/50 hover:shadow-[0_20px_50px_-15px_rgba(220,38,38,0.3)]' : 'border-white/10' %>
+        h-full flex flex-col min-w-0">
+
+            <div
+                class="relative w-full h-24 xs:h-28 sm:h-44 md:h-56 flex items-center justify-center bg-gradient-to-b from-white/[0.03] to-transparent p-2 sm:p-4 md:p-6 text-center">
+                <% if (model.model_image && model.model_image !== '/images/placeholder.png') { %>
+                    <img src="<%= model.model_image %>?v=contain" alt="<%= model.brand_name %> <%= model.model_name %>"
+                        itemprop="image" loading="lazy" class="absolute inset-0 w-full h-full object-contain transition-all duration-700 ease-in-out p-2 sm:p-4 md:p-6 
+                           <%= !isAdminMode ? 'group-hover:scale-110 group-hover:-rotate-2' : '' %>">
+                    <% } else { %>
+                        <div class="w-full h-full flex flex-col items-center justify-center">
+                            <span class="text-4xl md:text-6xl font-black text-white/5 select-none">
+                                <%= model.model_name.charAt(0) %>
+                            </span>
+                            <p class="text-xs text-gray-600 mt-2">No Image Found</p>
+                        </div>
+                        <% } %>
+
+                            <div
+                                class="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-red-600/10 to-transparent opacity-0 <%= !isAdminMode ? 'group-hover:opacity-100' : '' %> transition-opacity duration-500">
+                            </div>
+            </div>
+
+            <div class="px-2 pb-2 md:px-3 md:pb-3 mt-auto">
+                <div
+                    class="bg-[#151515] border border-white/5 rounded-xl p-2.5 md:p-3.5 flex items-center justify-between transition-all duration-300 <%= !isAdminMode ? 'group-hover:bg-[#1a0505] group-hover:border-red-600/30' : '' %>">
+
+                    <div class="flex flex-col gap-0.5 md:gap-1 overflow-hidden">
+                        <span
+                            class="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-wider leading-none transition-colors <%= !isAdminMode ? 'group-hover:text-red-400/60' : '' %>">
+                            <%= model.brand_name %>
+                        </span>
+
+                        <h3 class="text-sm md:text-lg font-black text-white tracking-tight leading-tight transition-colors truncate"
+                            itemprop="name">
+                            <span class="<%= !isAdminMode ? 'group-hover:text-red-500' : '' %> transition-colors duration-300">
+                                <%= model.model_name %>
+                            </span>
+                        </h3>
+
+                        <div class="mt-0.5" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <meta itemprop="priceCurrency"
+                                content="<%= typeof country !== 'undefined' && country && country.currency_code ? country.currency_code : 'NPR' %>">
+                            <% if (model.starting_price) { %>
+                                <span
+                                    class="text-[12px] md:text-[15px] font-black text-red-600 <%= !isAdminMode ? 'group-hover:text-white' : '' %> transition-colors duration-300">
+                                    <%= currencySymbol %> <span itemprop="price" content="<%= model.starting_price %>">
+                                            <%= new Intl.NumberFormat('en-IN').format(model.starting_price) %>
+                                        </span>
+                                </span>
+                                <% } else { %>
+                                    <span
+                                        class="text-[10px] md:text-[11px] font-bold text-gray-600 transition-colors">Coming
+                                        Soon</span>
+                                    <% } %>
+                        </div>
+                    </div>
+
+                    <% if (!isAdminMode) { %>
+                    <div
+                        class="bg-white/5 px-2 py-2 md:px-3 md:py-2 rounded-lg border border-white/5 transition-all duration-300 group-hover:bg-red-600 group-hover:border-red-600 group-hover:shadow-[0_0_15px_rgba(220,38,38,0.4)] flex-shrink-0 ml-2">
+                        <span
+                            class="text-[9px] md:text-[10px] font-black text-white flex items-center gap-1 md:gap-1.5">
+                            <span class="hidden xs:block">VIEW</span>
+                            <svg class="w-2.5 h-2.5 md:w-3.5 md:h-3.5 transition-transform group-hover:translate-x-0.5"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </div>
+                    <% } %>
+
+                </div>
+
+                <% if (isAdminMode) { %>
+                    <div class="mt-3">
+                        <a href="/admin/model/<%= model.id %>/studio"
+                           class="w-full bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-2 rounded-xl border border-emerald-600/30 transition-all duration-300 text-xs font-bold mb-2 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            CREATE SOCIAL POST
+                        </a>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="/admin/model/<%= model.id %>" class="flex-1 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-2 rounded-xl border border-blue-600/30 transition-all duration-300 text-xs font-bold text-center">
+                            EDIT
+                        </a>
+                        <form action="/admin/model/delete/<%= model.id %>" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to delete this model? This action cannot be undone.');">
+                            <button type="submit" class="w-full bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-2 rounded-xl border border-red-600/30 transition-all duration-300 text-xs font-bold">
+                                DELETE
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+
+            <% if (!isAdminMode) { %>
+            <div
+                class="absolute bottom-0 left-0 h-[2px] md:h-[3px] w-0 bg-red-600 transition-all duration-700 group-hover:w-full">
+            </div>
+            <% } %>
+        </div>
+    </div>

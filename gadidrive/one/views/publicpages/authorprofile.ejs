@@ -1,0 +1,513 @@
+<%- include('../partials/head', { 
+    title: author.name + ' - GadiDrive Author',
+    description: author.bio || 'Check out articles by ' + author.name + ' on GadiDrive',
+    url: currentUrl,
+    image: author.profilePicture,
+    path: path,
+    country: null
+}) %>
+
+<style>
+    body {
+        background-color: #000000;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Reusing exact same hover border animation from news.ejs */
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+        transition: border-radius 0.3s ease;
+    }
+    .border-bottom-left-to-right:hover {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+
+    /* ENHANCED AUTHOR HEADER - COMPACT & PREMIUM DESIGN */
+    .author-header {
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+        padding: 2.5rem 0;
+        position: relative;
+        overflow: hidden;
+        margin: 1.5rem auto;
+        width: 95%;
+        max-width: 1200px;
+        border-radius: 20px;
+        border: 1px solid #374151;
+        box-shadow: 0 15px 40px rgba(220, 38, 38, 0.12);
+    }
+
+    .author-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(220, 38, 38, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.04) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* Compact Avatar Design */
+    .author-avatar-container {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .author-avatar {
+        width: 140px;
+        height: 140px;
+        border: 3px solid #374151;
+        box-shadow: 
+            0 0 0 3px #dc2626,
+            0 12px 25px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(220, 38, 38, 0.25);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 2;
+    }
+
+    .author-avatar:hover {
+        transform: scale(1.05);
+        border-color: #dc2626;
+        box-shadow: 
+            0 0 0 4px #dc2626,
+            0 18px 35px rgba(0, 0, 0, 0.5),
+            0 0 50px rgba(220, 38, 38, 0.35);
+    }
+
+    /* Compact Author Info */
+    .author-info {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+    }
+
+    .author-name {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ffffff 0%, #e5e5e5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.25rem;
+        line-height: 1.1;
+    }
+
+    .author-username {
+        font-size: 1.3rem;
+        color: #dc2626;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: inline-block;
+        padding: 0.3rem 1.2rem;
+        background: rgba(220, 38, 38, 0.1);
+        border-radius: 20px;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    /* Compact Bio */
+    .author-bio {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #d1d5db;
+        margin-bottom: 1.5rem;
+        max-width: 600px;
+    }
+
+    /* Compact Social Icons */
+    .social-links {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .social-link {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        background: rgba(55, 65, 81, 0.4);
+        border: 1.5px solid #374151;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        overflow: hidden;
+    }
+
+    .social-link:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .social-icon {
+        width: 20px;
+        height: 20px;
+        transition: all 0.2s ease;
+        filter: brightness(0.9);
+    }
+
+    .social-link:hover .social-icon {
+        filter: brightness(1);
+        transform: scale(1.1);
+    }
+
+    /* Compact Stats Section */
+    .author-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 0.8rem 1.2rem;
+        background: rgba(55, 65, 81, 0.25);
+        border-radius: 12px;
+        border: 1px solid #374151;
+        transition: all 0.2s ease;
+        min-width: 100px;
+    }
+
+    .stat-item:hover {
+        border-color: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #dc2626;
+        display: block;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-top: 0.4rem;
+        font-weight: 500;
+    }
+
+    /* News Grid */
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 3rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .pagination-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        font-weight: bold;
+        font-size: 1rem;
+        border-radius: 0.375rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        background-color: #111111;
+        color: #DC2626;
+        border: 1px solid #374151;
+    }
+
+    .pagination-button.active {
+        background-color: #DC2626 !important;
+        color: #FFFFFF !important;
+        border-color: #DC2626 !important;
+    }
+
+    .pagination-button:hover:not(.active) {
+        border-color: #DC2626;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .author-header {
+            padding: 2rem 1rem;
+            margin: 1rem;
+            border-radius: 16px;
+            width: calc(100% - 2rem);
+        }
+
+        .author-avatar {
+            width: 100px;
+            height: 100px;
+        }
+
+        .author-name {
+            font-size: 2rem;
+        }
+
+        .author-username {
+            font-size: 1rem;
+            padding: 0.25rem 1rem;
+        }
+
+        .author-bio {
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .author-stats {
+            gap: 1rem;
+        }
+
+        .stat-item {
+            padding: 0.6rem 1rem;
+            min-width: 80px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+
+        .social-link {
+            width: 38px;
+            height: 38px;
+        }
+
+        .social-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .news-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .pagination-button {
+            width: 2.2rem;
+            height: 2.2rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .author-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .author-avatar {
+            width: 80px;
+            height: 80px;
+        }
+
+        .author-name {
+            font-size: 1.6rem;
+        }
+
+        .author-username {
+            font-size: 0.9rem;
+        }
+
+        .author-bio {
+            font-size: 0.9rem;
+        }
+
+        .author-stats {
+            gap: 0.8rem;
+        }
+
+        .stat-item {
+            padding: 0.5rem 0.8rem;
+            min-width: 70px;
+        }
+
+        .stat-number {
+            font-size: 1.3rem;
+        }
+
+        .pagination-container {
+            gap: 0.3rem;
+        }
+
+        .pagination-button {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar', { 
+    currentPage: 'author',
+    country: null,
+    allVehicleTypes: []
+}) %>
+
+<!-- COMPACT Author Header - Premium Design -->
+<section class="author-header">
+    <div class="container mx-auto px-6">
+        <div class="flex flex-col lg:flex-row items-center gap-10 max-w-6xl mx-auto">
+            <!-- Compact Author Avatar -->
+            <div class="author-avatar-container">
+                <div class="author-avatar rounded-full bg-gray-800 overflow-hidden">
+                    <% if (author.profilePicture && author.profilePicture !== '/images/default-avatar.png') { %>
+                        <img src="<%= author.profilePicture %>" alt="<%= author.name %>" class="w-full h-full object-cover">
+                    <% } else { %>
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-600 to-black">
+                            <span class="text-5xl font-bold text-white"><%= author.name.charAt(0).toUpperCase() %></span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Compact Author Info -->
+            <div class="author-info text-center lg:text-left">
+                <h1 class="author-name"><%= author.name %></h1>
+                <div class="author-username">@<%= author.username %></div>
+                
+                <% if (author.bio) { %>
+                    <div class="author-bio"><%= author.bio %></div>
+                <% } %>
+
+                <!-- Author Stats - Only Articles -->
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"><%= articles ? articles.length : 0 %></span>
+                        <span class="stat-label">Articles</span>
+                    </div>
+                </div>
+
+                <!-- Compact Social Media -->
+                <% if (author.socialMedia && author.socialMedia.length > 0) { %>
+                    <div class="social-links lg:justify-start">
+                        <% author.socialMedia.forEach(social => { 
+                            let iconPath = '';
+                            let platform = '';
+                            switch(social.type) {
+                                case 'facebook': iconPath = '<path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>'; platform = 'Facebook'; break;
+                                case 'instagram': iconPath = '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849c0 3.205-.011 3.584-.069 4.849-.148 3.225-1.664 4.771-4.919 4.919-.266.058-.646.069-4.849.069-3.205 0-3.584-.011-4.849-.069-3.225-.148-4.771-1.664-4.919-4.919-.058-.265-.069-.645-.069-4.849 0-3.204.011-3.584.069-4.849.148-3.225 1.664-4.771 4.919-4.919.265-.058.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.059 1.689.073 4.948.073 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>'; platform = 'Instagram'; break;
+                                case 'twitter': iconPath = '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231L18.244 2.25zM17.046 19.5h1.858L7.054 4.5H5.079L17.046 19.5z"/>'; platform = 'Twitter'; break;
+                                case 'linkedin': iconPath = '<path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>'; platform = 'LinkedIn'; break;
+                                case 'youtube': iconPath = '<path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 4-8 4z"/>'; platform = 'YouTube'; break;
+                                case 'website':
+                                case 'other':
+                                default: iconPath = '<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>'; platform = 'Website'; break;
+                            }
+                            if (iconPath && social.link) { %>
+                                <a href="<%= social.link %>" target="_blank" rel="noopener noreferrer" class="social-link" title="<%= platform %>">
+                                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <%- iconPath %>
+                                    </svg>
+                                </a>
+                            <% } %>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+    <h2 class="text-3xl font-bold text-center mb-8">Published Articles</h2>
+
+    <!-- Article Grid -->
+    <section class="news-grid">
+        <% if (articles && articles.length > 0) { %>
+            <% articles.forEach(article => { %>
+                <%- include('../partials/articlebox', { article: article, country: null }) %>
+            <% }) %>
+        <% } else { %>
+            <div class="col-span-full text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-xl text-gray-400">No articles published yet.</p>
+            </div>
+        <% } %>
+    </section>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+        <div class="pagination-container">
+            <!-- Previous Button -->
+            <% if (currentPage > 1) { %>
+                <a href="/@<%= author.username %>-<%= authorid %>?page=<%= currentPage - 1 %>" 
+                   class="pagination-button">
+                    &laquo;
+                </a>
+            <% } %>
+            
+            <!-- Page Numbers -->
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/@<%= author.username %>-<%= authorid %>?page=<%= i %>" 
+                   class="pagination-button <%= i === currentPage ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+            
+            <!-- Next Button -->
+            <% if (currentPage < totalPages) { %>
+                <a href="/@<%= author.username %>-<%= authorid %>?page=<%= currentPage + 1 %>" 
+                   class="pagination-button">
+                    &raquo;
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+</main>
+
+<%- include('../partials/footer', { 
+    country: null,
+    allCountries: allCountries,
+    allVehicleTypes: []
+}) %>
+
+<script>
+    // Same broken image handler as news.ejs
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('.article-image');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                const fallback = this.nextElementSibling;
+                if (fallback) fallback.style.display = 'block';
+            });
+        });
+    });
+</script>
+</body>
+</html>

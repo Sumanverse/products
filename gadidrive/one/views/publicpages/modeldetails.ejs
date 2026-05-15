@@ -1,0 +1,3095 @@
+<% 
+// Server-side date calculation
+const now = new Date();
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const currentYear = now.getFullYear();
+const updatedDate = months[now.getMonth()] + " " + currentYear;
+// Safety check for variables
+const displayCountry = country ? country.country_name : 'Nepal';
+const modelTitle = model ? (model.brand_name + " " + (model.model_name || "")) : 'Vehicle';
+const currency = (country && country.currency_symbol) ? country.currency_symbol : 'Rs.';
+// Formatting price for SEO (if available)
+const startingPrice = (model && model.starting_price) ? (currency + " " + new Intl.NumberFormat('en-IN').format(model.starting_price)) : '';
+    // Color options logic
+    let hasExteriorColors = typeof modelDetails !== 'undefined' && modelDetails.exteriorColors && modelDetails.exteriorColors.length > 0;
+    let hasInteriorColors = typeof modelDetails !== 'undefined' && modelDetails.interiorColors && modelDetails.interiorColors.length > 0;
+    let showColorsSection = hasExteriorColors || hasInteriorColors;
+
+    const countryPrefix = country ? '/' + country.country_name.toLowerCase() : '';
+    const vType = (model && model.vehicle_type_name ? model.vehicle_type_name.toLowerCase() : 'car');
+
+    // --- HYBRID SEO LOGIC ---
+    const catchyTitle = modelTitle + " Price in " + displayCountry + " " + currentYear + " | Specs & Variants";
+
+    // Description: Keyword-rich & Persuasive (approx 155 chars)
+    const categoryName = (model && model.category_name) || 'vehicles';
+    const catchyDescription = "Check " + modelTitle + " " + vType + " price in " + displayCountry + " for " + currentYear + ". Explore mileage, specs, and variants. Find the best " + categoryName + " deals on GadiDrive.";
+
+    // Keywords: Dynamic & Category-based
+    var kArray = [
+    modelTitle,
+    modelTitle + " " + displayCountry,
+    modelTitle + " price",
+    modelTitle + " price in " + displayCountry,
+    (model && model.brand_name ? model.brand_name : '') + " price in " + displayCountry,
+    (model && model.brand_name ? model.brand_name : '') + " " + vType + " price in " + displayCountry,
+    modelTitle + " on road price",
+    "Buying guide for " + modelTitle,
+    modelTitle + " " + currentYear + " specifications"
+    ];
+    if (model && model.category_name) {
+    kArray.push(model.category_name + " price in " + displayCountry);
+    kArray.push(model.brand_name + " " + model.category_name + " " + vType + " price in " + displayCountry);
+    }
+    const catchyKeywords = kArray.join(', ');
+
+    // Detailed Description Logic
+    let detailDescription = (model && model.descriptions) || '';
+    if (!detailDescription || detailDescription.trim() === '') {
+        detailDescription = "Here you will find and get information such as " + (model ? (model.brand_name + " " + model.model_name) : "") + " price in " + displayCountry + ", specifications, features, variants, colors, safety rating, and review. Find all details about " + (model ? (model.brand_name + " " + model.model_name) : "") + " including engine type, seating capacity, and launch year.";
+    }
+    const maxFirstLineLength = 100;
+    let shortPart = detailDescription;
+    let fullPart = '';
+    if (detailDescription.length > maxFirstLineLength) {
+    let breakPoint = detailDescription.lastIndexOf(' ', maxFirstLineLength);
+    if (breakPoint === -1) breakPoint = maxFirstLineLength;
+    shortPart = detailDescription.substring(0, breakPoint).trim();
+    fullPart = detailDescription.substring(breakPoint).trim();
+    }
+    // Pre-generate FAQ JSON-LD (safe - no EJS inside script tags)
+    var faqJsonLd = '';
+    if (typeof modelDetails !== 'undefined' && modelDetails && modelDetails.faqs && modelDetails.faqs.length > 0) {
+    var faqEntities = modelDetails.faqs.map(function(faq) {
+    return { "@type": "Question", "name": faq.question, "acceptedAnswer": { "@type": "Answer", "text": faq.answer } };
+    });
+    faqJsonLd = JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faqEntities });
+    }
+    %>
+
+    <%- include('../partials/head', { title: catchyTitle, description: catchyDescription, keywords: catchyKeywords,
+        path: (typeof path !=='undefined' ? path : '/' ), country: country }) %>
+
+        <% if (faqJsonLd) { %>
+            <script type="application/ld+json">
+                <%- faqJsonLd %>
+            </script>
+            <% } %>
+
+                <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "<%= modelTitle %>",
+      "image": "<%= model && model.model_image ? model.model_image : '' %>",
+      "description": "<%= catchyDescription %>",
+      "brand": {
+        "@type": "Brand",
+        "name": "<%= model && model.brand_name ? model.brand_name : '' %>"
+      },
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "<%= typeof country !== 'undefined' && country && country.currency_code ? country.currency_code : 'NPR' %>",
+        "lowPrice": "<%= model && model.starting_price ? model.starting_price : 0 %>",
+        "highPrice": "<%= model && (model.max_price || model.starting_price) ? (model.max_price || model.starting_price) : 0 %>",
+        "offerCount": "<%= model && model.variant_count ? model.variant_count : 1 %>",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
+
+                <script type="application/ld+json">
+    {
+     "@context": "https://schema.org",
+     "@type": "BreadcrumbList",
+     "itemListElement": [
+       {
+         "@type": "ListItem",
+         "position": 1,
+         "name": "Home",
+         "item": "https://gadidrive.com"
+       },
+       {
+         "@type": "ListItem",
+         "position": 2,
+         "name": "<%= displayCountry %>",
+         "item": "https://gadidrive.com/<%= displayCountry.toLowerCase() %>"
+       },
+       {
+         "@type": "ListItem",
+         "position": 3,
+         "name": "<%= model && model.brand_name ? model.brand_name : '' %>",
+         "item": "https://gadidrive.com/<%= displayCountry.toLowerCase() %>/<%= model && model.vehicle_type_name ? model.vehicle_type_name.toLowerCase() : '' %>/<%= model && model.brand_name ? model.brand_name.toLowerCase().replace(/ /g, '-') : '' %>"
+       },
+       {
+         "@type": "ListItem",
+         "position": 4,
+         "name": "<%= model && model.model_name ? model.model_name : '' %>",
+         "item": "https://gadidrive.com<%= typeof path !== 'undefined' ? path : '' %>"
+       }
+     ]
+    }
+    </script>
+
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+                    rel="stylesheet">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <style>
+                    :root {
+                        --primary-red: #dc2626;
+                        --dark-red: #991b1b;
+                        --card-bg: #1f2937;
+                        --text-muted: #9ca3af;
+                        --primary-blue: #3b82f6;
+                        --dark-blue: #1d4ed8;
+                        --dark-bg: #000000;
+                        --text-light: #ffffff;
+                        --border-color: #374151;
+                        --hover-bg: rgba(220, 38, 38, 0.1);
+                    }
+
+                    /* FAQ Section Styles */
+                    .faq-section {
+                        margin-top: 3rem;
+                        background: var(--card-bg);
+                        border-radius: 16px;
+                        padding: 2rem;
+                        border: 1px solid #374151;
+                    }
+
+                    .faq-title {
+                        font-size: 2rem;
+                        font-weight: 800;
+                        color: white;
+                        margin-bottom: 2rem;
+                        text-align: center;
+                    }
+
+                    .faq-accordion {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+
+                    .faq-item {
+                        border: 1px solid #374151;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        background: rgba(0, 0, 0, 0.2);
+                    }
+
+                    .faq-accordion-btn {
+                        width: 100%;
+                        padding: 1.25rem 1.5rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background: none;
+                        border: none;
+                        color: white;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        text-align: left;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+
+                    .faq-accordion-btn:hover {
+                        background: rgba(220, 38, 38, 0.1);
+                    }
+
+                    .faq-accordion-btn.active {
+                        background: rgba(220, 38, 38, 0.15);
+                        color: var(--primary-red);
+                    }
+
+                    .faq-icon {
+                        transition: transform 0.3s ease;
+                        color: var(--primary-red);
+                    }
+
+                    .faq-accordion-btn.active .faq-icon {
+                        transform: rotate(180deg);
+                    }
+
+                    .faq-answer {
+                        max-height: 0;
+                        overflow: hidden;
+                        transition: max-height 0.3s ease-out;
+                        background: rgba(0, 0, 0, 0.3);
+                    }
+
+                    .faq-answer-content {
+                        padding: 1.5rem;
+                        color: #d1d5db;
+                        line-height: 1.7;
+                        border-top: 1px solid #374151;
+                    }
+
+                    * {
+                        font-family: 'Poppins', sans-serif;
+                    }
+
+                    body {
+                        background: var(--dark-bg);
+                        color: white;
+                    }
+
+                    /* Brand Link */
+                    .brand-link {
+                        color: var(--text-muted);
+                        text-decoration: none;
+                        transition: color 0.3s ease;
+                        position: relative;
+                        display: inline-block;
+                    }
+
+                    .brand-link:hover {
+                        color: var(--primary-red);
+                    }
+
+                    .brand-link::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -2px;
+                        left: 0;
+                        width: 0;
+                        height: 2px;
+                        background: var(--primary-red);
+                        transition: width 0.3s ease;
+                    }
+
+                    .brand-link:hover::after {
+                        width: 100%;
+                    }
+
+                    /* --- PREMIUM LUXURY HEADERS --- */
+                    .rec-section-header {
+                        position: relative;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+                        margin: 4rem 0 2.5rem 0;
+                        padding-left: 1.5rem;
+                        border-left: 4px solid #DC2626;
+                        font-family: 'Poppins', sans-serif;
+                    }
+
+                    /* The glowing bar effect */
+                    .rec-section-header::before {
+                        content: '';
+                        position: absolute;
+                        left: -4px;
+                        top: 0;
+                        height: 100%;
+                        width: 4px;
+                        background: #DC2626;
+                        box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+                        border-radius: 2px;
+                    }
+
+                    .rec-section-header .accent-text {
+                        font-size: 0.85rem;
+                        font-weight: 700;
+                        color: #DC2626;
+                        text-transform: uppercase;
+                        letter-spacing: 0.2em;
+                        opacity: 0.9;
+                    }
+
+                    .rec-section-header .main-text {
+                        font-size: 2.5rem;
+                        font-weight: 800;
+                        line-height: 1.1;
+                        letter-spacing: -0.02em;
+                        background: linear-gradient(135deg, #FFFFFF 0%, #A1A1A1 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        text-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+                    }
+
+                    @media (max-width: 768px) {
+                        .rec-section-header .main-text {
+                            font-size: 1.75rem;
+                        }
+                    }
+
+                    /* नयाँ CSS for SEO header - पेजको बायाँपट्टि */
+                    .seo-header-left {
+                        margin-bottom: 2rem;
+                        padding: 0;
+                    }
+
+                    .seo-h1-title {
+                        font-size: 2.75rem;
+                        font-weight: 800;
+                        color: white;
+                        line-height: 1.2;
+                        margin-bottom: 1rem;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        font-family: 'Poppins', sans-serif;
+                    }
+
+                    .h1-brand-link {
+                        color: white;
+                        text-decoration: none;
+                        transition: color 0.3s ease;
+                    }
+
+                    .h1-brand-link:hover {
+                        color: #dc2626;
+                    }
+
+                    .h1-model-name {
+                        color: #dc2626;
+                        margin-left: 0.5rem;
+                    }
+
+                    .seo-description-container {
+                        text-align: left;
+                        position: relative;
+                        margin-top: 0.5rem;
+                        text-align: justify;
+                    }
+
+                    .description-text {
+                        font-size: 1.1rem;
+                        line-height: 1.7;
+                        color: white;
+                        margin-bottom: 0;
+                        text-align: justify;
+                        text-justify: inter-word;
+                        cursor: pointer;
+                        display: inline;
+                    }
+
+                    .ellipsis-dots {
+                        color: white;
+                        cursor: pointer;
+                        font-weight: 700;
+                        user-select: none;
+                        display: inline;
+                        margin-left: 4px;
+                        transition: color 0.3s ease;
+                    }
+
+                    .ellipsis-dots:hover {
+                        color: var(--primary-red);
+                    }
+
+                    .hide-description {
+                        color: var(--primary-red);
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.9rem;
+                        margin-top: 1rem;
+                        display: inline-block;
+                        transition: all 0.3s ease;
+                        padding: 0.25rem 0.5rem;
+                        border-radius: 4px;
+                    }
+
+                    .hide-description:hover {
+                        background: rgba(220, 38, 38, 0.1);
+                        transform: translateY(-1px);
+                    }
+
+                    /* Top Hero Section */
+                    .top-hero-section {
+                        display: flex;
+                        flex-direction: column;
+                        /* Mobile: stacked, Image Top, Price Bottom */
+                        gap: 0rem;
+                        /* Handled tightly for mobile */
+                        margin-bottom: 2rem;
+                    }
+
+                    @media (min-width: 769px) {
+                        .top-hero-section {
+                            flex-direction: row-reverse;
+                            /* Desktop: Price Left, Image Right */
+                            align-items: center;
+                            justify-content: center;
+                            gap: 2rem;
+                            /* Restore gap for desktop */
+                        }
+
+                        .top-hero-section .price-box {
+                            flex: 0.8;
+                            margin: 0;
+                            /* Remove top margin so it aligns nicely */
+                        }
+
+                        .top-hero-section .model-presentation {
+                            flex: 1.2;
+                        }
+                    }
+
+                    /* Combined Model Header and Specs Box */
+                    .model-main-box {
+                        background: var(--card-bg);
+                        border-radius: 16px;
+                        padding: 2rem;
+                        margin-bottom: 1.5rem;
+                        border: 1px solid #374151;
+                    }
+
+                    /* UPDATED: Model Header Styles from one.ejs */
+                    .model-header-content {
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 2rem;
+                        margin-bottom: 2rem;
+                    }
+
+                    .model-image-full {
+                        width: 100%;
+                        max-width: 500px;
+                        height: auto;
+                        max-height: 380px;
+                        object-fit: contain;
+                        margin: 0 auto 2rem auto;
+                        display: block;
+                        transition: transform 0.3s ease;
+                    }
+
+                    .model-image-full:hover {
+                        transform: scale(1.02);
+                    }
+
+                    .read-more-btn {
+                        color: #dc2626;
+                        font-weight: bold;
+                        margin-left: 5px;
+                        text-decoration: underline;
+                    }
+
+                    .model-image {
+                        width: 300px;
+                        height: 200px;
+                        border-radius: 12px;
+                        object-fit: cover;
+                        border: 2px solid #374151;
+                        flex-shrink: 0;
+                    }
+
+                    .model-info {
+                        flex: 1;
+                    }
+
+                    .model-brand {
+                        font-size: 1.1rem;
+                        color: var(--text-muted);
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .model-brand a {
+                        color: var(--text-muted);
+                        text-decoration: none;
+                        transition: color 0.3s ease;
+                    }
+
+                    .model-brand a:hover {
+                        color: var(--primary-red);
+                    }
+
+                    .model-name {
+                        font-size: 2.5rem;
+                        font-weight: 800;
+                        color: white;
+                        margin-bottom: 1rem;
+                        background: linear-gradient(to right, #ffffff, #e5e5e5);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                    }
+
+                    .model-meta {
+                        display: flex;
+                        align-items: center;
+                        gap: 2rem;
+                        flex-wrap: wrap;
+                    }
+
+                    .safety-rating {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        padding: 0.5rem 1rem;
+                        background: var(--primary-red);
+                        color: white;
+                        border-radius: 25px;
+                        font-weight: 600;
+                        text-decoration: none;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        border: 2px solid var(--primary-red);
+                    }
+
+                    .safety-rating:hover {
+                        background: #dc2626;
+                        color: var(--primary-red);
+                        border-color: #dc2626;
+                    }
+
+                    .release-date {
+                        color: var(--text-muted);
+                        font-weight: 500;
+                    }
+
+                    /* Specifications Grid */
+                    .specs-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                        gap: 1rem;
+                        padding-top: 2rem;
+                        border-top: 1px solid #374151;
+                    }
+
+                    .spec-item {
+                        text-align: center;
+                        padding: 1.5rem 1rem;
+                        background: rgba(55, 65, 81, 0.3);
+                        border-radius: 12px;
+                        border: 1px solid #374151;
+                    }
+
+                    .spec-icon {
+                        width: 32px;
+                        height: 32px;
+                        margin: 0 auto 0.75rem;
+                        color: var(--primary-red);
+                        font-size: 1.75rem;
+                    }
+
+                    .spec-value {
+                        font-size: 1.2rem;
+                        font-weight: 700;
+                        color: white;
+                        margin-bottom: 0.25rem;
+                    }
+
+                    .spec-label {
+                        font-size: 0.8rem;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        font-weight: normal;
+                    }
+
+
+
+                    .color-name-display {
+                        text-align: center;
+                        margin-top: 0.5rem;
+                        font-weight: 600;
+                        color: white;
+                    }
+
+                    .color-gallery-container {
+                        background: rgba(30, 30, 30, 0.4);
+                        border-radius: 20px;
+                        padding: 2rem;
+                        margin-top: 2rem;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                    }
+
+                    .color-gallery-title {
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        color: var(--primary-red);
+                        text-align: center;
+                        margin-bottom: 2rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    }
+
+                    .color-main-image-display {
+                        width: 100%;
+                        max-width: 1000px;
+                        margin: 2rem auto;
+                        aspect-ratio: 16/9;
+                        position: relative;
+                        border-radius: 24px;
+                        overflow: hidden;
+                        background: radial-gradient(circle at center, #2c2c2c 0%, #000000 100%);
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(220, 38, 38, 0.05);
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .color-main-image-display img {
+                        width: 90%;
+                        height: 90%;
+                        object-fit: contain;
+                        filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8));
+                        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                        transform: scale(1);
+                    }
+
+                    .color-main-image-display:hover img {
+                        transform: scale(1.05);
+                    }
+
+                    /* Price Box with EMI */
+                    .price-box {
+                        background: linear-gradient(135deg, #111111, #000000);
+                        border-radius: 12px;
+                        padding: 2rem;
+                        margin-top: 3rem;
+                        margin-bottom: 2rem;
+                        text-align: center;
+                        position: relative;
+                        border: 1px solid #374151;
+                    }
+
+                    .price-title {
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        color: white;
+                        margin-bottom: 1rem;
+                    }
+
+                    .price-amount {
+                        font-size: 3rem;
+                        font-weight: 800;
+                        color: white;
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .emi-info {
+                        font-size: 1rem;
+                        color: #10b981;
+                        font-weight: 500;
+                        margin-bottom: 0;
+                        display: inline-block;
+                        padding: 0.5rem 1.5rem;
+                        border-radius: 25px;
+                        background: rgba(255, 255, 255, 0.1);
+                        text-decoration: none;
+                        transition: all 0.3s ease;
+                    }
+
+                    .emi-info:hover {
+                        background: rgba(255, 255, 255, 0.2);
+                        transform: translateY(-2px);
+                        color: white;
+                    }
+
+                    /* Centered Options Buttons */
+                    .options-buttons {
+                        display: flex;
+                        gap: 1rem;
+                        margin-bottom: 1.5rem;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    }
+
+                    .option-btn {
+                        padding: 1rem 2rem;
+                        background: var(--card-bg);
+                        border: 2px solid white;
+                        border-radius: 10px;
+                        color: white;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 1rem;
+                    }
+
+                    .option-btn.active {
+                        background: var(--primary-red);
+                        border-color: var(--primary-red);
+                        color: white;
+                    }
+
+                    .option-btn:hover {
+                        background: #dc2626;
+                        border-color: #dc2626;
+                        color: black;
+                    }
+
+                    /* Modal Styles */
+                    .modal-overlay {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.95);
+                        z-index: 9999;
+                        justify-content: center;
+                        align-items: center;
+                        padding: 20px;
+                    }
+
+                    .modal-overlay.active {
+                        display: flex !important;
+                    }
+
+                    .modal-content-wide {
+                        background: #111111;
+                        border-radius: 20px;
+                        width: 90%;
+                        max-width: 1100px;
+                        max-height: 90vh;
+                        overflow-y: auto;
+                        border: 1px solid #374151;
+                        position: relative;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+                    }
+
+                    .external-close {
+                        position: absolute;
+                        top: -50px;
+                        right: 0;
+                        background: var(--primary-red);
+                        border: none;
+                        color: white;
+                        font-size: 1.8rem;
+                        cursor: pointer;
+                        padding: 0.5rem;
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                        z-index: 1001;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+                    }
+
+                    .external-close:hover {
+                        background: #dc2626;
+                        transform: scale(1.1);
+                    }
+
+                    .modal-header {
+                        position: sticky;
+                        top: 0;
+                        background: rgba(17, 17, 17, 0.98);
+                        padding: 1.5rem 2rem;
+                        border-bottom: 2px solid #dc2626;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        z-index: 10;
+                        backdrop-filter: blur(12px);
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+                    }
+
+                    .modal-title {
+                        font-size: 2rem;
+                        font-weight: 800;
+                        color: white;
+                        margin: 0;
+                        flex: 1;
+                        text-align: center;
+                    }
+
+                    .modal-close {
+                        background: var(--primary-red);
+                        border: none;
+                        color: white;
+                        font-size: 1.5rem;
+                        cursor: pointer;
+                        padding: 0.5rem;
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                    }
+
+                    .modal-close:hover {
+                        background: var(--dark-red);
+                        transform: scale(1.1);
+                    }
+
+                    .modal-body {
+                        padding: 3rem 4rem;
+                        background: var(--card-bg);
+                    }
+
+                    /* Variants Table */
+                    .variant-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        background: rgba(55, 65, 81, 0.3);
+                        border-radius: 12px;
+                        overflow: hidden;
+                        border: 1px solid #374151;
+                    }
+
+                    .variant-row {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        padding: 1.5rem 2rem;
+                        border-bottom: 1px solid #374151;
+                        align-items: center;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+
+                    .variant-row:hover {
+                        background: rgba(220, 38, 38, 0.15);
+                        transform: translateY(-2px);
+                    }
+
+                    .variant-row:last-child {
+                        border-bottom: none;
+                    }
+
+                    .variant-row:nth-child(even) {
+                        background: rgba(55, 65, 81, 0.5);
+                    }
+
+                    .variant-name {
+                        font-weight: 700;
+                        font-size: 1.3rem;
+                    }
+
+                    .variant-price {
+                        font-weight: 700;
+                        color: var(--primary-red);
+                        font-size: 1.3rem;
+                        text-align: right;
+                    }
+
+                    /* About Content */
+                    .about-content {
+                        line-height: 1.9;
+                        font-size: 1.15rem;
+                    }
+
+                    .about-content p {
+                        margin-bottom: 1.5rem;
+                        text-align: justify;
+                    }
+
+                    .article-section {
+                        margin-bottom: 3rem;
+                        padding: 2rem;
+                        border-radius: 12px;
+                        background: rgba(55, 65, 81, 0.5);
+                        border-left: 6px solid var(--primary-red);
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+
+                    .article-image {
+                        width: 100%;
+                        max-width: 100%;
+                        border-radius: 12px;
+                        margin: 1.5rem 0;
+                        border: 3px solid #374151;
+                        cursor: pointer;
+                    }
+
+                    .content-photo {
+                        position: relative;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        margin: 1.5rem 0;
+                        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .image-source-badge {
+                        position: absolute;
+                        bottom: 10px;
+                        right: 10px;
+                        background: rgba(0, 0, 0, 0.8);
+                        color: white;
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 0.75rem;
+                        cursor: pointer;
+                        text-decoration: none;
+                        transition: all 0.3s ease;
+                        backdrop-filter: blur(5px);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        font-weight: 500;
+                    }
+
+                    .image-source-badge:hover {
+                        background: rgba(220, 38, 38, 0.9);
+                        transform: translateY(-2px);
+                    }
+
+                    /* Available Sites */
+                    .sites-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 2rem;
+                    }
+
+                    .site-card {
+                        background: rgba(55, 65, 81, 0.5);
+                        padding: 2rem;
+                        border-radius: 12px;
+                        text-align: center;
+                        border: 2px solid #374151;
+                        transition: all 0.3s;
+                        text-decoration: none;
+                        color: white;
+                        display: block;
+                    }
+
+                    .site-card:hover {
+                        border-color: var(--primary-red);
+                        transform: translateY(-5px);
+                    }
+
+                    .site-card .font-semibold {
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .site-card .text-sm {
+                        font-size: 1rem;
+                        color: var(--text-muted);
+                    }
+
+                    /* Colors Section */
+                    /* Colors Section Refinement */
+                    .colors-section {
+                        margin-bottom: 3rem;
+                        background: linear-gradient(180deg, rgba(31, 41, 55, 0.5) 0%, rgba(17, 24, 39, 0.8) 100%);
+                        border-radius: 24px;
+                        padding: 3rem;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        backdrop-filter: blur(10px);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .colors-section::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 1px;
+                        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.5), transparent);
+                    }
+
+                    /* Definitive Poppins Colors Section */
+                    .colors-section {
+                        font-family: 'Poppins', sans-serif !important;
+                        background: transparent !important;
+                        border: none !important;
+                        padding: 1rem 0;
+                        margin: 1.5rem 0;
+                    }
+
+                    .color-header {
+                        text-align: center;
+                        margin-bottom: 1.5rem;
+                    }
+
+                    .color-header h2 {
+                        display: block;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        color: white;
+                        margin: 0;
+                        letter-spacing: -0.01em;
+                    }
+
+                    .color-buttons-wrapper {
+                        display: flex;
+                        justify-content: center;
+                        margin-bottom: 1rem;
+                    }
+
+                    /* Override: keep buttons horizontal always */
+                    .colors-section .color-buttons {
+                        display: inline-flex !important;
+                        flex-direction: row !important;
+                        background: rgba(255, 255, 255, 0.06);
+                        padding: 0.3rem;
+                        border-radius: 50px;
+                        border: 1px solid rgba(255, 255, 255, 0.12);
+                        gap: 0.25rem;
+                    }
+
+                    /* Force white active buttons with absolute specificity */
+                    .colors-section .color-buttons .color-btn {
+                        padding: 0.5rem 1.8rem !important;
+                        border: none !important;
+                        background: transparent !important;
+                        color: rgba(255, 255, 255, 0.55) !important;
+                        font-weight: 600 !important;
+                        font-family: 'Poppins', sans-serif !important;
+                        border-radius: 50px !important;
+                        cursor: pointer;
+                        transition: all 0.25s ease !important;
+                        font-size: 0.85rem !important;
+                        box-shadow: none !important;
+                        outline: none !important;
+                        width: auto !important;
+                        max-width: none !important;
+                        text-align: center !important;
+                    }
+
+                    .colors-section .color-buttons .color-btn:hover {
+                        background: rgba(255, 255, 255, 0.12) !important;
+                        color: #ffffff !important;
+                    }
+
+                    .colors-section .color-buttons .color-btn.active {
+                        background: #ffffff !important;
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                        opacity: 1 !important;
+                        box-shadow: none !important;
+                    }
+
+                    .color-content {
+                        display: none;
+                    }
+
+                    .color-content.active {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
+                    .color-palette {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 1.25rem;
+                        justify-content: center;
+                        margin-bottom: 1.25rem;
+                        padding: 0.5rem 0;
+                    }
+
+                    .color-item {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        position: relative;
+                        width: 75px;
+                    }
+
+                    .color-swatch {
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 16px;
+                        padding: 3px;
+                        background: rgba(255, 255, 255, 0.06);
+                        border: 2px solid rgba(255, 255, 255, 0.08);
+                        cursor: pointer;
+                        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                        backdrop-filter: blur(8px);
+                        -webkit-backdrop-filter: blur(8px);
+                    }
+
+                    .color-swatch:hover {
+                        transform: translateY(-4px) scale(1.06);
+                        border-color: rgba(255, 255, 255, 0.35);
+                        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                    }
+
+                    .color-swatch.active {
+                        border-color: rgba(255, 255, 255, 0.7);
+                        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+                        transform: scale(1.06);
+                    }
+
+                    .color-swatch img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 12px;
+                    }
+
+                    .color-name-display {
+                        font-size: 0.68rem;
+                        color: rgba(255, 255, 255, 0.95);
+                        text-transform: lowercase;
+                        display: inline-block;
+                        letter-spacing: 0.4px;
+                        text-align: center;
+                        font-weight: 500;
+                        opacity: 0;
+                        transform: translateY(6px);
+                        transition: opacity 0.3s ease, transform 0.3s ease;
+                        pointer-events: none;
+                        position: absolute;
+                        top: calc(100% + 6px);
+                        left: 50%;
+                        transform: translateX(-50%) translateY(6px);
+                        background: rgba(15, 15, 15, 0.92);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                        padding: 5px 12px;
+                        border-radius: 8px;
+                        white-space: nowrap;
+                        z-index: 20;
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                    }
+
+                    .color-name-display::first-letter {
+                        text-transform: uppercase;
+                    }
+
+                    .color-item:hover .color-name-display {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+
+                    .color-gallery-container {
+                        width: 100%;
+                        background: transparent !important;
+                        border: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        box-shadow: none !important;
+                    }
+
+                    .color-main-image-display {
+                        width: 100%;
+                        max-width: 580px;
+                        margin: 0 auto;
+                        aspect-ratio: 16/9;
+                        background: transparent !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        overflow: hidden;
+                    }
+
+                    .color-main-image-display img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                        transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+                        filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+                    }
+
+                    .color-main-image-display:hover img {
+                        transform: scale(1.08);
+                    }
+
+                    .color-gallery-title {
+                        display: none !important;
+                    }
+
+                    .color-swatch:hover:not(.active) {
+                        border-color: rgba(255, 255, 255, 0.4);
+                        transform: translateY(-3px);
+                    }
+
+                    .color-swatch img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        opacity: 0.9;
+                        transition: opacity 0.3s ease;
+                    }
+
+                    .color-swatch.active img {
+                        opacity: 1;
+                    }
+
+                    .color-name-display {
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                        color: #9ca3af;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        transition: all 0.3s ease;
+                    }
+
+                    .color-swatch.active + .color-name-display {
+                        color: white;
+                        font-weight: 700;
+                    }
+
+                    .color-gallery-container {
+                        background: rgba(0, 0, 0, 0.2);
+                        border-radius: 20px;
+                        padding: 2rem;
+                        border: 1px solid rgba(255, 255, 255, 0.05);
+                        position: relative;
+                    }
+
+                    .color-gallery-title {
+                        font-size: 1.5rem;
+                        font-weight: 800;
+                        color: white;
+                        text-align: center;
+                        margin-bottom: 1.5rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    }
+
+                    /* Specifications Section */
+                    .specs-section {
+                        background: var(--dark-bg);
+                        border-radius: 12px;
+                        padding: 2rem;
+                        margin-bottom: 1.5rem;
+                        border: 2px solid rgba(55, 65, 81, 0.7);
+                    }
+
+                    .specs-section-title {
+                        font-size: 2rem;
+                        font-weight: 800;
+                        color: white;
+                        margin-bottom: 2rem;
+                        text-align: center;
+                        position: relative;
+                        padding-bottom: 1rem;
+                    }
+
+                    .specs-section-title::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 100px;
+                        height: 3px;
+                        background: #dc2626;
+                    }
+
+                    .specs-grid-container {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 1.5rem;
+                        margin-top: 2rem;
+                    }
+
+                    .spec-category-box {
+                        background: #111111;
+                        border-radius: 12px;
+                        padding: 0;
+                        border: 2px solid #374151;
+                        cursor: pointer;
+                        text-decoration: none;
+                        color: white;
+                        display: block;
+                        overflow: hidden;
+                        position: relative;
+                        transition: all 0.3s ease;
+                    }
+
+                    .spec-category-box:hover {
+                        border-color: #dc2626;
+                        background: #111111;
+                    }
+
+                    .spec-category-box:hover .spec-category-title {
+                        background: #dc2626;
+                        color: white;
+                    }
+
+                    .spec-category-title {
+                        font-size: 1.25rem;
+                        font-weight: 700;
+                        color: white;
+                        margin: 0;
+                        padding: 1rem 1.5rem;
+                        text-align: center;
+                        background: #000000;
+                        border-bottom: 2px solid #dc2626;
+                        transition: all 0.3s ease;
+                    }
+
+                    .spec-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0;
+                        padding: 1.5rem;
+                        background: #111111;
+                        transition: all 0.3s ease;
+                        counter-reset: list-item;
+                    }
+
+                    .spec-list-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 0.75rem 0;
+                        border-bottom: 1px solid #374151;
+                    }
+
+                    .spec-list-item:last-child {
+                        border-bottom: none;
+                    }
+
+                    .spec-list-item:hover {
+                        background: transparent;
+                    }
+
+                    .spec-list-title {
+                        font-weight: 500;
+                        color: #ffffff;
+                        text-align: left;
+                        position: relative;
+                        padding-left: 1.5rem;
+                    }
+
+                    .spec-list-title::before {
+                        content: counter(list-item) ".";
+                        counter-increment: list-item;
+                        position: absolute;
+                        left: 0;
+                        color: #dc2626;
+                        font-weight: bold;
+                    }
+
+                    .spec-list-content {
+                        font-weight: 500;
+                        color: #9ca3af;
+                        text-align: right;
+                    }
+
+                    /* Action Buttons - IMPROVED DESIGN */
+                    .action-buttons {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 2rem;
+                        margin: 3rem auto 2rem auto;
+                        padding: 1.5rem;
+                        max-width: 500px;
+                        background: var(--card-bg);
+                        border-radius: 60px;
+                        border: 1px solid var(--border-color);
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                    }
+
+                    .sources-btn,
+                    .share-btn {
+                        padding: 1rem 2.5rem;
+                        border-radius: 40px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        border: none;
+                        font-size: 1.1rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        background: transparent;
+                        color: white;
+                        position: relative;
+                        overflow: hidden;
+                        font-family: 'Poppins', sans-serif;
+                        min-width: 160px;
+                        justify-content: center;
+                        border: 2px solid transparent;
+                    }
+
+                    .sources-btn {
+                        border-color: var(--primary-red);
+                        color: var(--primary-red);
+                    }
+
+                    .sources-btn:hover {
+                        background: var(--primary-red);
+                        color: white;
+                        transform: translateY(-3px);
+                        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+                    }
+
+                    .share-btn {
+                        border-color: var(--primary-blue);
+                        color: var(--primary-blue);
+                    }
+
+                    .share-btn:hover {
+                        background: var(--primary-blue);
+                        color: white;
+                        transform: translateY(-3px);
+                        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+                    }
+
+                    .sources-btn svg,
+                    .share-btn svg {
+                        width: 20px;
+                        height: 20px;
+                        transition: transform 0.3s ease;
+                    }
+
+                    .sources-btn:hover svg,
+                    .share-btn:hover svg {
+                        transform: rotate(10deg);
+                    }
+
+                    /* Image Modal */
+                    .image-modal {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.98);
+                        z-index: 1001;
+                        justify-content: center;
+                        align-items: center;
+                        flex-direction: column;
+                    }
+
+                    .image-modal.active {
+                        display: flex;
+                    }
+
+                    .modal-top-bar {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        padding: 1rem 2rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background: rgba(0, 0, 0, 0.8);
+                        z-index: 1003;
+                    }
+
+                    .modal-title-bar {
+                        font-size: 1.2rem;
+                        font-weight: 600;
+                        color: white;
+                    }
+
+                    .modal-close-btn {
+                        background: none;
+                        border: none;
+                        color: white;
+                        font-size: 2rem;
+                        cursor: pointer;
+                        padding: 0.5rem;
+                        border-radius: 50%;
+                        transition: all 0.3s ease;
+                        width: 50px;
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .modal-close-btn:hover {
+                        background: var(--primary-red);
+                    }
+
+                    .modal-container {
+                        position: relative;
+                        max-width: 95%;
+                        max-height: 85vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-top: 80px;
+                    }
+
+                    .modal-image {
+                        max-width: 100%;
+                        max-height: 75vh;
+                        object-fit: contain;
+                        border-radius: 8px;
+                    }
+
+                    .modal-nav {
+                        position: fixed;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        background: var(--primary-red);
+                        border: none;
+                        color: white;
+                        font-size: 2rem;
+                        width: 70px;
+                        height: 70px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                        z-index: 1002;
+                    }
+
+                    .modal-nav:hover {
+                        background: #dc2626;
+                        transform: translateY(-50%) scale(1.1);
+                    }
+
+                    .modal-prev {
+                        left: 30px;
+                    }
+
+                    .modal-next {
+                        right: 30px;
+                    }
+
+                    .modal-counter-top {
+                        position: absolute;
+                        top: -60px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        color: white;
+                        font-size: 1.1rem;
+                        background: rgba(0, 0, 0, 0.7);
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 25px;
+                        font-weight: 600;
+                        z-index: 1004;
+                    }
+
+                    /* Share Modal - IMPROVED DESIGN */
+                    .modal {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.9);
+                        z-index: 1000;
+                        justify-content: center;
+                        align-items: center;
+                        backdrop-filter: blur(8px);
+                    }
+
+                    .modal .modal-content {
+                        background: #111111;
+                        border-radius: 24px;
+                        width: 90%;
+                        max-width: 500px;
+                        border: 1px solid #333;
+                        overflow: hidden;
+                        animation: modalFadeIn 0.3s ease;
+                    }
+
+                    @keyframes modalFadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                        }
+
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+
+                    .modal .modal-header {
+                        background: #1a1a1a;
+                        padding: 1.5rem 2rem;
+                        border-bottom: 2px solid var(--primary-red);
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        position: sticky;
+                        top: 0;
+                        z-index: 10;
+                    }
+
+                    .modal .modal-title {
+                        font-size: 1.8rem;
+                        font-weight: 700;
+                        color: white;
+                        margin: 0;
+                    }
+
+                    .modal .close-btn {
+                        background: var(--primary-red);
+                        border: none;
+                        color: white;
+                        font-size: 1.5rem;
+                        cursor: pointer;
+                        padding: 0.5rem;
+                        border-radius: 50%;
+                        width: 40px;
+                        height: 40px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                    }
+
+                    .modal .close-btn:hover {
+                        background: var(--dark-red);
+                        transform: scale(1.1);
+                    }
+
+                    .modal .modal-body {
+                        padding: 2rem;
+                        background: #111111;
+                    }
+
+                    .share-icons {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 1rem;
+                        margin-bottom: 2rem;
+                    }
+
+                    .share-icon {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 1.5rem 1rem;
+                        background: #1a1a1a;
+                        border-radius: 16px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        border: 2px solid #333;
+                        color: white;
+                        gap: 0.75rem;
+                    }
+
+                    .share-icon:hover {
+                        background: var(--primary-red);
+                        border-color: var(--primary-red);
+                        transform: translateY(-5px);
+                        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+                    }
+
+                    .share-icon svg {
+                        width: 32px;
+                        height: 32px;
+                    }
+
+                    .share-icon span {
+                        font-size: 1rem;
+                        font-weight: 600;
+                    }
+
+                    .copy-link {
+                        background: #1a1a1a;
+                        border: 2px solid #333;
+                        border-radius: 50px;
+                        padding: 1rem 1.5rem;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        color: white;
+                    }
+
+                    .copy-link:hover {
+                        background: var(--primary-red);
+                        border-color: var(--primary-red);
+                    }
+
+                    .copy-link span {
+                        font-size: 1rem;
+                        font-weight: 500;
+                    }
+
+                    .copy-link svg {
+                        width: 20px;
+                        height: 20px;
+                    }
+
+                    /* Sources Modal - IMPROVED DESIGN */
+                    .sources-content {
+                        padding: 2rem;
+                        color: white;
+                        line-height: 1.8;
+                        font-size: 1.1rem;
+                    }
+
+                    .sources-content p {
+                        margin: 0;
+                        text-align: justify;
+                    }
+
+                    .loading {
+                        opacity: 0.7;
+                        animation: pulse 2s infinite;
+                    }
+
+                    @keyframes pulse {
+                        0% {
+                            opacity: 0.7;
+                        }
+
+                        50% {
+                            opacity: 0.4;
+                        }
+
+                        100% {
+                            opacity: 0.7;
+                        }
+                    }
+
+                    /* Responsive */
+                    @media (max-width: 768px) {
+                        .seo-h1-title {
+                            font-size: 1.8rem;
+                            text-align: left;
+                        }
+
+                        .model-header-content {
+                            flex-direction: column;
+                            text-align: center;
+                        }
+
+                        .model-image {
+                            width: 250px;
+                            height: 180px;
+                            margin: 0 auto;
+                        }
+
+                        .model-name {
+                            font-size: 2rem;
+                        }
+
+                        .specs-grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+
+                        .options-buttons {
+                            flex-direction: column;
+                            align-items: center;
+                        }
+
+                        .option-btn {
+                            width: 100%;
+                            max-width: 300px;
+                            text-align: center;
+                        }
+
+                        /* Keep color buttons horizontal on mobile */
+                        .colors-section .color-buttons {
+                            flex-direction: row !important;
+                        }
+
+                        .colors-section .color-buttons .color-btn {
+                            width: auto !important;
+                            max-width: none !important;
+                        }
+
+                        .price-amount {
+                            font-size: 2rem;
+                        }
+
+                        .color-palette {
+                            justify-content: center;
+                            padding-bottom: 1rem;
+                        }
+
+                        .color-gallery {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+
+                        .modal-nav {
+                            width: 50px;
+                            height: 50px;
+                            font-size: 1.5rem;
+                        }
+
+                        .modal-prev {
+                            left: 10px;
+                        }
+
+                        .modal-next {
+                            right: 10px;
+                        }
+
+                        .specs-grid-container {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .action-buttons {
+                            flex-direction: column;
+                            gap: 1rem;
+                            padding: 1.5rem;
+                            border-radius: 30px;
+                        }
+
+                        .sources-btn,
+                        .share-btn {
+                            width: 100%;
+                            justify-content: center;
+                            padding: 0.8rem 1.5rem;
+                        }
+
+                        .modal-content {
+                            max-width: 95%;
+                            width: 95%;
+                        }
+
+                        .modal-header {
+                            padding: 1.5rem;
+                        }
+
+                        .modal-title {
+                            font-size: 1.5rem;
+                        }
+
+                        .modal-body {
+                            padding: 1.5rem;
+                        }
+
+                        .variant-row {
+                            padding: 1rem;
+                            grid-template-columns: 2fr 1fr;
+                        }
+
+                        .variant-name {
+                            font-size: 1.1rem;
+                        }
+
+                        .variant-price {
+                            font-size: 1.2rem;
+                        }
+
+                        .sites-grid {
+                            grid-template-columns: 1fr;
+                            gap: 1rem;
+                        }
+
+                        .share-icons {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+
+                        .share-icon {
+                            padding: 1rem;
+                        }
+
+                        .share-icon svg {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                </style>
+                </head>
+
+                <body class="min-h-screen flex flex-col bg-black text-white">
+
+                    <%- include('../partials/navbar', { currentPage: 'modeldetails' , country: country, allVehicleTypes:
+                        [vehicleType] }) %>
+
+                        <!-- Main Content -->
+                        <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+
+                            <!-- Country badge हटाइयो -->
+
+                            <% if (error) { %>
+                                <div class="bg-red-900 border border-red-700 text-white px-4 py-3 rounded-lg mb-6">
+                                    <p>
+                                        <%= error %>
+                                    </p>
+                                </div>
+                                <% } %>
+
+                                    <% if (model) { %>
+                                        <!-- ========== SEO HEADER SECTION ========== -->
+                                        <div class="seo-header-left">
+                                            <!-- H1 Tag for SEO -->
+                                            <h1 class="seo-h1-title">
+                                                <% if (model) { %>
+                                                    <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/"
+                                                        class="h1-brand-link">
+                                                        <%= model.brand_name %>
+                                                    </a>
+                                                    <span class="h1-model-name">
+                                                        <%= model.model_name %>
+                                                    </span>
+                                                    <% } else { %>
+                                                        Vehicle
+                                                        <% } %>
+                                                            <%= " Price in " + displayCountry + " " + currentYear %>
+                                            </h1>
+
+                                            <div class="seo-description-container">
+                                                <p class="description-text" id="descriptionText"
+                                                    onclick="toggleDescription()">
+                                                    <span id="shortPart">
+                                                        <%= shortPart %>
+                                                    </span>
+                                                    <% if (fullPart) { %>
+                                                        <span class="ellipsis-dots" id="ellipsisDots">...</span>
+                                                        <span id="continuedPart" style="display:none;">
+                                                            <%= fullPart %>
+                                                        </span>
+                                                        <% } %>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hidden Titles for SEO (Moved to Popular Searches Section Below) -->
+
+                                        <!-- Image and Price Top Hero Section -->
+                                        <div class="top-hero-section">
+                                            <div class="model-presentation">
+                                                <% if (model.model_image) { %>
+                                                    <img src="<%= model.model_image %>"
+                                                        alt="<%= model.model_name %> main image"
+                                                        class="model-image-full"
+                                                        onload="this.classList.remove('loading')"
+                                                        onerror="this.style.display='none';">
+                                                    <% } else { %>
+                                                        <div
+                                                            class="model-image-full bg-gray-700 flex items-center justify-center">
+                                                            <svg class="w-16 h-16 text-gray-500" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="1"
+                                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </div>
+                                                        <% } %>
+                                            </div>
+
+                                            <!-- 2. Price Box with EMI -->
+                                            <div class="price-box">
+                                                <h2 class="price-title">
+                                                    Price
+                                                </h2>
+                                                <% if (model.starting_price) { %>
+                                                    <div class="price-amount">
+                                                        <%= currency %>
+                                                            <%= new Intl.NumberFormat('en-IN').format(model.starting_price) %>
+                                                    </div>
+                                                    <a href="<%= countryPrefix %>/emicalculator?price=<%= model.starting_price %>"
+                                                        class="emi-info"><b>Calculate EMI monthly/yearly</b></a>
+                                                    <% } else { %>
+                                                        <div class="price-amount">Price Coming Soon</div>
+                                                        <% } %>
+                                            </div>
+                                        </div>
+
+                                        <!-- 1. Combined Model Header and Specifications Box -->
+                                        <div class="model-main-box">
+
+                                            <!-- Hidden Titles Display - Visible on page -->
+                                            <% if (hiddenTitles && hiddenTitles.length> 0) { %>
+                                                <div style="margin-bottom: 1rem; text-align: center;">
+                                                    <% hiddenTitles.forEach(function(title) { %>
+                                                        <p
+                                                            style="color: #9ca3af; font-size: 1rem; font-weight: 500; margin: 0.25rem 0; text-align: center;">
+                                                            <%= title %>
+                                                        </p>
+                                                        <% }); %>
+                                                </div>
+                                                <% } %>
+
+                                                    <%# Moved safety rating and launch year into the specs-grid below %>
+
+                                                        <!-- Key Specifications Grid -->
+                                                        <div class="specs-grid">
+                                                            <% if (model.safety_rating) { %>
+                                                                <div class="spec-item">
+                                                                    <div class="spec-value">
+                                                                        <% if (model.safety_link) { %>
+                                                                            <a href="<%= model.safety_link.startsWith('http') ? model.safety_link : 'https://' + model.safety_link %>"
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                style="color: inherit; text-decoration: none;">
+                                                                                <i class="fas fa-star"
+                                                                                    style="color: #dc2626;"></i>
+                                                                                <%= model.safety_rating %>
+                                                                            </a>
+                                                                            <% } else { %>
+                                                                                <i class="fas fa-star"
+                                                                                    style="color: #dc2626;"></i>
+                                                                                <%= model.safety_rating %>
+                                                                                    <% } %>
+                                                                    </div>
+                                                                    <div class="spec-label">Safety Rating</div>
+                                                                </div>
+                                                                <% } %>
+
+                                                                    <% if (model.release_year) { %>
+                                                                        <div class="spec-item">
+                                                                            <div class="spec-value">
+                                                                                <%= model.release_year %>
+                                                                            </div>
+                                                                            <div class="spec-label">Launch Year</div>
+                                                                        </div>
+                                                                        <% } %>
+                                                                            <% if (model.engine_type) { %>
+                                                                                <div class="spec-item">
+                                                                                    <div class="spec-value">
+                                                                                        <%= model.engine_type %>
+                                                                                    </div>
+                                                                                    <div class="spec-label">Engine Type
+                                                                                    </div>
+                                                                                </div>
+                                                                                <% } %>
+
+                                                                                    <% if (model.seater) { %>
+                                                                                        <div class="spec-item">
+                                                                                            <div class="spec-value">
+                                                                                                <%= model.seater %><span
+                                                                                                        class="spec-unit">Seater</span>
+                                                                                            </div>
+                                                                                            <div class="spec-label">
+                                                                                                Seating Capacity
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <% } %>
+
+                                                                                            <!-- Dynamic Key Specifications -->
+                                                                                            <% if (modelDetails &&
+                                                                                                modelDetails.keyspecs &&
+                                                                                                modelDetails.keyspecs.length>
+                                                                                                0) { %>
+                                                                                                <%
+                                                                                                    modelDetails.keyspecs.forEach(function(keyspec) { %>
+                                                                                                    <div
+                                                                                                        class="spec-item">
+                                                                                                        <div
+                                                                                                            class="spec-value">
+                                                                                                            <%= keyspec.key_spec_data
+                                                                                                                %>
+                                                                                                        </div>
+                                                                                                        <div
+                                                                                                            class="spec-label">
+                                                                                                            <%= keyspec.key_spec
+                                                                                                                %>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <% }); %>
+                                                                                                        <% } else { %>
+                                                                                                            <div
+                                                                                                                class="col-span-full text-center py-4 text-gray-400">
+                                                                                                                No key
+                                                                                                                specifications
+                                                                                                                available
+                                                                                                            </div>
+                                                                                                            <% } %>
+                                                        </div> <!-- End specs-grid -->
+                                        </div> <!-- End model-main-box -->
+
+                                        <!-- 3. Centered Options Buttons -->
+                                        <div class="options-buttons">
+                                            <button class="option-btn" data-option="variants">Variants</button>
+                                            <button class="option-btn" data-option="about">About <%= model.model_name %></button>
+                                            <button class="option-btn" data-option="available">Available On</button>
+                                        </div>
+
+                                        <!-- 4. Color Options Section -->
+                                        <% if (showColorsSection) { %>
+                                            <div class="colors-section">
+                                                <div class="color-header">
+                                                    <h2>Colors of <%= model.brand_name %> <%= model.model_name %> in <%= displayCountry %></h2>
+                                                </div>
+
+                                                <!-- Single set of buttons OUTSIDE content panels -->
+                                                <% if (hasExteriorColors && hasInteriorColors) { %>
+                                                    <div class="color-buttons-wrapper">
+                                                        <div class="color-buttons">
+                                                            <span class="color-btn active" data-color-type="exterior">Exterior</span>
+                                                            <span class="color-btn" data-color-type="interior">Interior</span>
+                                                        </div>
+                                                    </div>
+                                                <% } %>
+
+                                                <div class="color-content-container">
+                                                    <!-- Exterior Colors Content -->
+                                                    <% if (hasExteriorColors) { %>
+                                                        <div class="color-content active" id="exterior-content">
+                                                            <div class="color-palette">
+                                                                <% modelDetails.exteriorColors.forEach(function(color, index) { %>
+                                                                    <div class="color-item">
+                                                                        <div class="color-swatch <%= index === 0 ? 'active' : '' %>" 
+                                                                             data-color-id="<%= color.id %>" data-color-type="exterior" 
+                                                                             data-color-name="<%= color.color_name %>" 
+                                                                             data-image-path="<%= color.color_image %>">
+                                                                            <img src="<%= color.color_image %>" alt="<%= color.color_name %>" 
+                                                                                 onerror="this.src='/img/placeholder-car.png'">
+                                                                        </div>
+                                                                        <div class="color-name-display"><%= color.color_name %></div>
+                                                                    </div>
+                                                                <% }); %>
+                                                            </div>
+
+                                                            <div class="color-gallery-container">
+                                                                <div class="color-main-image-display">
+                                                                    <img src="<%= modelDetails.exteriorColors[0].color_image %>" 
+                                                                         alt="Exterior car color" id="exterior-color-main-img" 
+                                                                         onerror="this.src='/img/placeholder-car.png'">
+                                                                </div>
+                                                                <div class="color-gallery-title" id="exterior-gallery-title">
+                                                                    <%= modelDetails.exteriorColors[0].color_name %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <% } %>
+
+                                                    <!-- Interior Colors Content -->
+                                                    <% if (hasInteriorColors) { %>
+                                                        <div class="color-content <%= !hasExteriorColors ? 'active' : '' %>" id="interior-content">
+                                                            <div class="color-palette">
+                                                                <% modelDetails.interiorColors.forEach(function(color, index) { %>
+                                                                    <div class="color-item">
+                                                                        <div class="color-swatch <%= index === 0 ? 'active' : '' %>" 
+                                                                             data-color-id="<%= color.id %>" data-color-type="interior" 
+                                                                             data-color-name="<%= color.color_name %>" 
+                                                                             data-image-path="<%= color.color_image %>">
+                                                                            <img src="<%= color.color_image %>" alt="<%= color.color_name %>" 
+                                                                                 onerror="this.src='/img/placeholder-interior.png'">
+                                                                        </div>
+                                                                        <div class="color-name-display"><%= color.color_name %></div>
+                                                                    </div>
+                                                                <% }); %>
+                                                            </div>
+
+                                                            <div class="color-gallery-container">
+                                                                <div class="color-main-image-display">
+                                                                    <img src="<%= modelDetails.interiorColors[0].color_image %>" 
+                                                                         alt="Interior car color" id="interior-color-main-img" 
+                                                                         onerror="this.src='/img/placeholder-interior.png'">
+                                                                </div>
+                                                                <div class="color-gallery-title" id="interior-gallery-title">
+                                                                    <%= modelDetails.interiorColors[0].color_name %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        <% } %>
+
+                                        <!-- 5. Redesigned Specifications Section -->
+                                                <div class="specs-section">
+                                                    <h2 class="specs-section-title">
+                                                        Specifications and Features
+                                                    </h2>
+
+                                                    <% if (modelDetails && modelDetails.specifications &&
+                                                        modelDetails.specifications.length> 0) { %>
+                                                        <div class="specs-grid-container">
+                                                            <% modelDetails.specifications.forEach(function(spec) { %>
+                                                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/specs/<%= spec.title.toLowerCase().replace(/\s+/g, '-') %>/"
+                                                                    class="spec-category-box">
+                                                                    <h3 class="spec-category-title">
+                                                                        <%= spec.title %>
+                                                                    </h3>
+                                                                    <div class="spec-list">
+                                                                        <% const
+                                                                            specLists=modelDetails.specificationLists.filter(function(list) { return list.specification_id === spec.id; });
+                                                                            if (specLists && specLists.length > 0) {
+                                                                            let itemCounter = 1; %>
+                                                                            <% specLists.forEach(function(list) { %>
+                                                                                <div class="spec-list-item">
+                                                                                    <span class="spec-list-title"
+                                                                                        style="padding-left: 1.5rem;">
+                                                                                        <span
+                                                                                            style="position: absolute; left: 0; color: #dc2626; font-weight: bold;">
+                                                                                            <%= itemCounter %>.
+                                                                                        </span>
+                                                                                        <%= list.title %>
+                                                                                    </span>
+                                                                                    <span class="spec-list-content">
+                                                                                        <%= list.content %>
+                                                                                    </span>
+                                                                                </div>
+                                                                                <% itemCounter++; }); } %>
+                                                                    </div>
+                                                                </a>
+                                                                <% }); %>
+                                                        </div>
+                                                        <% } else { %>
+                                                            <p class="text-gray-400 text-center py-8">No
+                                                                detailed
+                                                                specifications available.</p>
+                                                            <% } %>
+                                                </div>
+
+                                                <% } %>
+
+                                                    <!-- FAQ Section -->
+                                                    <% if (typeof modelDetails !=='undefined' && modelDetails &&
+                                                        modelDetails.faqs && modelDetails.faqs.length> 0) { %>
+                                                        <section class="faq-section">
+                                                            <h2 class="faq-title">Frequently Asked Questions</h2>
+                                                            <div class="faq-accordion">
+                                                                <% modelDetails.faqs.forEach(function(faq, index) { %>
+                                                                    <div class="faq-item">
+                                                                        <button class="faq-accordion-btn">
+                                                                            <span>
+                                                                                <%= faq.question %>
+                                                                            </span>
+                                                                            <svg class="faq-icon w-6 h-6" fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M19 9l-7 7-7-7" />
+                                                                            </svg>
+                                                                        </button>
+                                                                        <div class="faq-answer">
+                                                                            <div class="faq-answer-content">
+                                                                                <%= faq.answer %>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% }); %>
+                                                            </div>
+                                                        </section>
+                                                        <% } %>
+
+                                                            <!-- Share and Sources Buttons -->
+                                                            <div class="action-buttons">
+                                                                <button class="sources-btn" onclick="openSourcesModal()"
+                                                                    aria-label="View model sources">
+                                                                    <svg width="20" height="20" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        stroke-width="2">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                    </svg>
+                                                                    Sources
+                                                                </button>
+
+                                                                <button class="share-btn" onclick="openShareModal()"
+                                                                    aria-label="Share this model">
+                                                                    <svg width="20" height="20" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        stroke-width="2">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                                                    </svg>
+                                                                    Share
+                                                                </button>
+                                                            </div>
+
+
+                                                            <!-- About Modal -->
+                                                            <div class="modal-overlay" id="about-modal">
+                                                                <div class="modal-content-wide">
+                                                                    <button class="external-close"
+                                                                        onclick="closeModal('about-modal')">&times;</button>
+                                                                    <div class="modal-header">
+                                                                        <h2 class="modal-title">About <%= modelTitle %>
+                                                                                in <%= displayCountry %>
+                                                                        </h2>
+                                                                        <button class="modal-close"
+                                                                            onclick="closeModal('about-modal')">&times;</button>
+                                                                    </div>
+                                                                    <div class="modal-body about-content">
+                                                                        <div
+                                                                            style="color: #ffffff; line-height: 1.7; width: 100%;">
+                                                                            <% let hasVisibleContent=false; let
+                                                                                sortedAboutContents=[]; if (modelDetails
+                                                                                && modelDetails.aboutContents) {
+                                                                                sortedAboutContents=modelDetails.aboutContents.slice().sort(function(a, b) { return a.content_order - b.content_order; });
+                                                                                } %>
+                                                                                <% if (sortedAboutContents &&
+                                                                                    sortedAboutContents.length> 0) { %>
+                                                                                    <section class="news-content mb-8"
+                                                                                        itemprop="articleBody"
+                                                                                        style="width: 100%;">
+                                                                                        <% sortedAboutContents.forEach(function(content, index) { 
+                                                                                             if ((content.type
+                                                                                            === 'article' ||
+                                                                                            content.type === 'text') &&
+                                                                                            content.value &&
+                                                                                            content.value.trim() !== '')
+                                                                                            { hasVisibleContent = true;
+                                                                                            %>
+                                                                                            <div class="content-block"
+                                                                                                style="padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                                                                                                <p class="justified-text"
+                                                                                                    style="color: #ffffff; font-size: 1.1rem; margin: 0.5rem 0; width: 100%;">
+                                                                                                    <%= content.value %>
+                                                                                                </p>
+                                                                                            </div>
+                                                                                            <% } else if
+                                                                                                (content.type==='photo'
+                                                                                                && content.image_path) {
+                                                                                                hasVisibleContent=true;
+                                                                                                %>
+                                                                                                <div class="content-block"
+                                                                                                    style="padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                                                                                                    <div class="content-photo"
+                                                                                                        style="position: relative; width: 100%;">
+                                                                                                        <img src="<%= content.image_path %>"
+                                                                                                            alt="About <%= model.model_name %>"
+                                                                                                            class="w-full h-auto rounded-lg"
+                                                                                                            loading="lazy"
+                                                                                                            style="border: 2px solid #374151; margin: 0.5rem 0; max-width: 100%; width: 100%;">
+                                                                                                        <% if (content.source) { %>
+                                                                                                            <a href="<%= content.source.includes('http') ? content.source : 'https://' + content.source %>"
+                                                                                                                target="_blank"
+                                                                                                                rel="noopener noreferrer"
+                                                                                                                class="image-source-badge"
+                                                                                                                style="position: absolute; bottom: 10px; right: 10px; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 500;">Source</a>
+                                                                                                            <% } %>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <% } else if
+                                                                                                    (content.type==='link'
+                                                                                                    && content.value) {
+                                                                                                    hasVisibleContent=true;
+                                                                                                    %>
+                                                                                                    <div
+                                                                                                        class="content-block">
+                                                                                                        <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>"
+                                                                                                            target="_blank"
+                                                                                                            rel="noopener noreferrer"
+                                                                                                            class="content-link"
+                                                                                                            style="color: #60a5fa; text-decoration: none; font-weight: 500; margin: 0.5rem 0; display: inline-block;">
+                                                                                                            <%= content.value
+                                                                                                                %>
+                                                                                                        </a>
+                                                                                                    </div>
+                                                                                                    <% } }); %>
+                                                                                                        <% if
+                                                                                                            (!hasVisibleContent)
+                                                                                                            { %>
+                                                                                                            <p class="text-gray-400 text-center py-8 no-content-message"
+                                                                                                                style="color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                                                                                                                No about
+                                                                                                                content
+                                                                                                                available
+                                                                                                                for this
+                                                                                                                model.
+                                                                                                            </p>
+                                                                                                            <% } %>
+                                                                                    </section>
+                                                                                    <% } else { %>
+                                                                                        <p class="text-gray-400 text-center py-8 no-content-message"
+                                                                                            style="color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                                                                                            No about content
+                                                                                            available for
+                                                                                            this model.
+                                                                                        </p>
+                                                                                        <% } %>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Variants Modal -->
+                                                            <div class="modal-overlay" id="variants-modal">
+                                                                <div class="modal-content-wide">
+                                                                    <button class="external-close"
+                                                                        onclick="closeModal('variants-modal')">&times;</button>
+                                                                    <div class="modal-header">
+                                                                        <h2 class="modal-title">All Variants of <%=
+                                                                                modelTitle %>
+                                                                        </h2>
+                                                                        <button class="modal-close"
+                                                                            onclick="closeModal('variants-modal')">&times;</button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <table class="variant-table">
+                                                                            <% if (modelDetails && modelDetails.variants
+                                                                                && modelDetails.variants.length> 0) {
+                                                                                modelDetails.variants.forEach(function(variant) { %>
+                                                                                <tr class="variant-row"
+                                                                                    onclick="openVariantDetails('<%= variant.name %>')">
+                                                                                    <td class="variant-name">
+                                                                                        <%= variant.name %>
+                                                                                    </td>
+                                                                                    <td class="variant-price">
+                                                                                        <%= currency %>
+                                                                                            <%= new
+                                                                                                Intl.NumberFormat('en-IN').format(variant.price)
+                                                                                                %>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <% }) } else { %>
+                                                                                    <tr>
+                                                                                        <td colspan="2"
+                                                                                            class="text-center py-8 text-gray-400">
+                                                                                            No variants
+                                                                                            available</td>
+                                                                                    </tr>
+                                                                                    <% } %>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Available Modal -->
+                                                            <div class="modal-overlay" id="available-modal">
+                                                                <div class="modal-content-wide">
+                                                                    <button class="external-close"
+                                                                        onclick="closeModal('available-modal')">&times;</button>
+                                                                    <div class="modal-header">
+                                                                        <h2 class="modal-title">Where to Buy <%=
+                                                                                modelTitle %> in <%= displayCountry %>
+                                                                        </h2>
+                                                                        <button class="modal-close"
+                                                                            onclick="closeModal('available-modal')">&times;</button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="sites-grid">
+                                                                            <% if (modelDetails &&
+                                                                                modelDetails.availableSites &&
+                                                                                modelDetails.availableSites.length> 0) {
+                                                                                modelDetails.availableSites.forEach(function(site) { %>
+                                                                                <a href="<%= site.link_phone.startsWith('http') ? site.link_phone : 'https://' + site.link_phone %>"
+                                                                                    target="_blank" class="site-card">
+                                                                                    <div class="font-semibold text-lg">
+                                                                                        <%= site.name %>
+                                                                                    </div>
+                                                                                    <div class="text-sm text-gray-300">
+                                                                                        Visit
+                                                                                        Site →</div>
+                                                                                </a>
+                                                                                <% }) } else { %>
+                                                                                    <p
+                                                                                        class="text-gray-400 text-center col-span-full py-8">
+                                                                                        No showroom
+                                                                                        information
+                                                                                        available.
+                                                                                    </p>
+                                                                                    <% } %>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Image Modal -->
+                                                            <div id="imageModal" class="image-modal">
+                                                                <div class="modal-top-bar">
+                                                                    <div class="modal-title-bar" id="imageModalTitle">
+                                                                        Image
+                                                                        Viewer</div>
+                                                                    <button class="modal-close-btn"
+                                                                        onclick="closeImageModal()">&times;</button>
+                                                                </div>
+                                                                <div class="modal-container">
+                                                                    <button class="modal-nav modal-prev"
+                                                                        onclick="changeSlide(-1)">❮</button>
+                                                                    <img id="modalImage" class="modal-image" src=""
+                                                                        alt="">
+                                                                    <button class="modal-nav modal-next"
+                                                                        onclick="changeSlide(1)">❯</button>
+                                                                    <div class="modal-counter-top" id="modalCounterTop">
+                                                                        1 /
+                                                                        1</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Review Video Section -->
+                                                            <% if (reviewVideo) { %>
+                                                                <div class="specs-section" style="margin-top: 2rem;">
+                                                                    <h2 class="specs-section-title"
+                                                                        style="margin-bottom: 1rem;">
+                                                                        <%= model.brand_name %>
+                                                                            <%= model.model_name %> Review Video
+                                                                    </h2>
+
+                                                                    <div
+                                                                        style="text-align: center; padding: 2rem; background: rgba(55, 65, 81, 0.3); border-radius: 12px;">
+                                                                        <a href="<%= reviewVideo %>" target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                                                                            <svg width="20" height="20" fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24" stroke-width="2">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                            </svg>
+                                                                            Watch Review Video
+                                                                        </a>
+
+                                                                        <p
+                                                                            style="margin-top: 1rem; color: #9ca3af; font-size: 0.9rem;">
+                                                                            Watch the full review and detailed analysis
+                                                                            of <%= modelTitle %>.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <% } %>
+
+                                                                    <!-- Popular Searches / SEO Tags Component -->
+                                                                    <% if (hiddenTitles && hiddenTitles.length> 0) { %>
+                                                                        <div class="popular-searches-section"
+                                                                            style="margin-top: 3rem; background: rgba(55, 65, 81, 0.2); padding: 2rem; border-radius: 12px; border: 1px solid #374151;">
+                                                                            <h3
+                                                                                class="text-xl font-bold text-white mb-4">
+                                                                                Popular Searches</h3>
+                                                                            <div
+                                                                                style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                                                                                <% hiddenTitles.forEach(function(title) { %>
+                                                                                    <h2 style="font-size: 0.9rem; margin: 0; padding: 0.5rem 1rem; background: rgba(0, 0, 0, 0.5); color: #d1d5db; border-radius: 9999px; border: 1px solid #4b5563; font-weight: normal; transition: all 0.3s ease;"
+                                                                                        class="hover:bg-red-900 hover:text-white cursor-default">
+                                                                                        <%= title.trim() %>
+                                                                                    </h2>
+                                                                                    <% }); %>
+                                                                            </div>
+                                                                        </div>
+                                                                        <% } %>
+
+                                                                            <div
+                                                                                class="recommendations-container mt-16 space-y-16">
+
+                                                                                <!-- 1. More From Brand (Prioritized) -->
+                                                                                <% if (typeof brandModels !=='undefined'
+                                                                                    && brandModels &&
+                                                                                    brandModels.length> 0) { %>
+                                                                                    <section
+                                                                                        class="suggestions-section">
+                                                                                        <div class="max-w-7xl mx-auto">
+                                                                                            <h2
+                                                                                                class="rec-section-header">
+                                                                                                <span
+                                                                                                    class="accent-text">More
+                                                                                                    from</span>
+                                                                                                <span class="main-text">
+                                                                                                    <%= model.brand_name
+                                                                                                        %>
+                                                                                                </span>
+                                                                                            </h2>
+                                                                                            <div
+                                                                                                class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                                                                                <% brandModels.forEach(function(m) { %>
+                                                                                                    <%- include('../partials/modelbox',
+                                                                                                        { model: m,
+                                                                                                        country: country
+                                                                                                        }) %>
+                                                                                                        <% }) %>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </section>
+                                                                                    <% } %>
+
+                                                                                        <!-- 2. Similar Models (Competitors) -->
+                                                                                        <% if (typeof similarModels
+                                                                                            !=='undefined' &&
+                                                                                            similarModels &&
+                                                                                            similarModels.length> 0) {
+                                                                                            %>
+                                                                                            <section
+                                                                                                class="suggestions-section">
+                                                                                                <div
+                                                                                                    class="max-w-7xl mx-auto">
+                                                                                                    <h2
+                                                                                                        class="rec-section-header">
+                                                                                                        <span
+                                                                                                            class="accent-text">Similar</span>
+                                                                                                        <span
+                                                                                                            class="main-text">Models</span>
+                                                                                                    </h2>
+                                                                                                    <div
+                                                                                                        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                                                                                        <% similarModels.forEach(function(m) { %>
+                                                                                                            <%- include('../partials/modelbox',
+                                                                                                                { model:
+                                                                                                                m,
+                                                                                                                country:
+                                                                                                                country
+                                                                                                                }) %>
+                                                                                                                <% }) %>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </section>
+                                                                                            <% } %>
+
+                                                                                                <!-- 3. Popular Brands (4 units per row) -->
+                                                                                                <% if (typeof
+                                                                                                    relatedBrands
+                                                                                                    !=='undefined' &&
+                                                                                                    relatedBrands &&
+                                                                                                    relatedBrands.length>
+                                                                                                    0) { %>
+                                                                                                    <section
+                                                                                                        class="suggestions-section pb-12">
+                                                                                                        <div
+                                                                                                            class="max-w-7xl mx-auto">
+                                                                                                            <h2
+                                                                                                                class="rec-section-header">
+                                                                                                                <span
+                                                                                                                    class="accent-text">Popular</span>
+                                                                                                                <span
+                                                                                                                    class="main-text">Brands</span>
+                                                                                                            </h2>
+                                                                                                            <div
+                                                                                                                class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                                                                                              <% relatedBrands.slice(0, 8).forEach(function(brandItem) { 
+                                                                                                                    const brandName = brandItem.name || brandItem.brand_name || '';
+                                                                                                                    const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+                                                                                                                    const countryPath = (typeof country !== 'undefined' && country) ? `/${country.country_name.toLowerCase()}` : '';
+                                                                                                                    const bLink = `${countryPath}/${vehicletypename}/${brandSlug}/`;
+                                                                                                                    %>
+                                                                                                                    <%- include('../partials/categoryandbrandsbox',
+                                                                                                                        {
+                                                                                                                        item:
+                                                                                                                        brandItem,
+                                                                                                                        link:
+                                                                                                                        bLink,
+                                                                                                                        type: 'brand'
+                                                                                                                        ,
+                                                                                                                        country:
+                                                                                                                        country,
+                                                                                                                        vehicletypename:
+                                                                                                                        vehicletypename
+                                                                                                                        })
+                                                                                                                        %>
+                                                                                                                        <% })
+                                                                                                                            %>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </section>
+                                                                                                    <% } %>
+                                                                            </div>
+
+                                                                            <!-- Sources Modal - IMPROVED DESIGN -->
+                                                                            <div id="sourcesModal" class="modal">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <h3 class="modal-title">
+                                                                                            Sources</h3>
+                                                                                        <button class="close-btn"
+                                                                                            onclick="closeSourcesModal()"
+                                                                                            aria-label="Close sources modal">&times;</button>
+                                                                                    </div>
+                                                                                    <div class="sources-content">
+                                                                                        <% if (model && model.sources) {
+                                                                                            %>
+                                                                                            <p class="justified-text">
+                                                                                                <%= model.sources %>
+                                                                                            </p>
+                                                                                            <% } else { %>
+                                                                                                <p
+                                                                                                    class="justified-text">
+                                                                                                    No sources
+                                                                                                    available for
+                                                                                                    this model.</p>
+                                                                                                <% } %>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <!-- Share Modal - IMPROVED DESIGN -->
+                                                                            <div id="shareModal" class="modal">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <h3 class="modal-title">
+                                                                                            Share this Model
+                                                                                        </h3>
+                                                                                        <button class="close-btn"
+                                                                                            onclick="closeShareModal()">&times;</button>
+                                                                                    </div>
+                                                                                    <div class="modal-body">
+                                                                                        <div class="share-icons">
+                                                                                            <button class="share-icon"
+                                                                                                onclick="shareOnTwitter()">
+                                                                                                <svg fill="currentColor"
+                                                                                                    viewBox="0 0 24 24">
+                                                                                                    <path
+                                                                                                        d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                                                                                                </svg>
+                                                                                                <span>Twitter</span>
+                                                                                            </button>
+                                                                                            <button class="share-icon"
+                                                                                                onclick="shareOnFacebook()">
+                                                                                                <svg fill="currentColor"
+                                                                                                    viewBox="0 0 24 24">
+                                                                                                    <path
+                                                                                                        d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+                                                                                                </svg>
+                                                                                                <span>Facebook</span>
+                                                                                            </button>
+                                                                                            <button class="share-icon"
+                                                                                                onclick="shareOnLinkedIn()">
+                                                                                                <svg fill="currentColor"
+                                                                                                    viewBox="0 0 24 24">
+                                                                                                    <path
+                                                                                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                                                                                </svg>
+                                                                                                <span>LinkedIn</span>
+                                                                                            </button>
+                                                                                            <button class="share-icon"
+                                                                                                onclick="shareOnWhatsApp()">
+                                                                                                <svg fill="currentColor"
+                                                                                                    viewBox="0 0 24 24">
+                                                                                                    <path
+                                                                                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.473-.149-.673.149-.2.298-.767.967-.94 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.298-.018-.459.13-.607.134-.133.298-.347.447-.521.149-.174.199-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.673-1.62-.922-2.219-.242-.58-.487-.5-.673-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.298-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                                                                                                </svg>
+                                                                                                <span>WhatsApp</span>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                        <div class="copy-link"
+                                                                                            onclick="copyToClipboard(event)">
+                                                                                            <span>Copy Link</span>
+                                                                                            <svg width="20" height="20"
+                                                                                                fill="none"
+                                                                                                stroke="currentColor"
+                                                                                                viewBox="0 0 24 24">
+                                                                                                <path
+                                                                                                    stroke-linecap="round"
+                                                                                                    stroke-linejoin="round"
+                                                                                                    stroke-width="2"
+                                                                                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                                            </svg>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+
+
+                        </main>
+
+                        <%- include('../partials/footer', { country: country, allCountries: allCountries, allVehicleTypes: [vehicleType] }) %>
+
+                            <script>
+                                // Make modelDetails available globally for JavaScript
+                                const modelDetails = <%- JSON.stringify(modelDetails || {}) %>;
+
+                                // Color options logic variables
+                                const hasExteriorColors = <%= typeof hasExteriorColors !== 'undefined' ? hasExteriorColors : 'false' %>;
+                                const hasInteriorColors = <%= typeof hasInteriorColors !== 'undefined' ? hasInteriorColors : 'false' %>;
+                                const showColorsSection = <%= typeof showColorsSection !== 'undefined' ? showColorsSection : 'false' %>;
+
+                                // Global variables for slideshow
+                                let currentSlideIndex = 0;
+                                let currentSlides = [];
+
+                                // Description Toggle Function
+                                function toggleDescription() {
+                                    const shortPart = document.getElementById('shortPart');
+                                    const continuedPart = document.getElementById('continuedPart');
+                                    const ellipsisDots = document.getElementById('ellipsisDots');
+
+                                    if (!continuedPart) return;
+
+                                    const isExpanded = continuedPart.style.display !== 'none';
+
+                                    if (isExpanded) {
+                                        continuedPart.style.display = 'none';
+                                        if (ellipsisDots) ellipsisDots.style.display = 'inline';
+                                    } else {
+                                        continuedPart.style.display = 'inline';
+                                        if (ellipsisDots) ellipsisDots.style.display = 'none';
+                                    }
+                                }
+
+                                // Initialize on page load
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    // Simplified Color Selection Logic
+                                    document.querySelectorAll('.color-swatch').forEach(swatch => {
+                                        swatch.addEventListener('click', function () {
+                                            const colorId = this.getAttribute('data-color-id');
+                                            const type = this.getAttribute('data-color-type');
+                                            const colorName = this.getAttribute('data-color-name');
+                                            const imagePath = this.getAttribute('data-image-path');
+
+                                            // Update active state for swatches
+                                            document.querySelectorAll(`.color-swatch[data-color-type="${type}"]`).forEach(c => c.classList.remove('active'));
+                                            this.classList.add('active');
+
+                                            // Update main display
+                                            const mainImg = document.getElementById(`${type}-color-main-img`);
+                                            const title = document.getElementById(`${type}-gallery-title`);
+
+                                            if (mainImg && imagePath) {
+                                                mainImg.style.opacity = '0';
+                                                setTimeout(() => {
+                                                    mainImg.src = imagePath;
+                                                    mainImg.style.opacity = '1';
+                                                }, 200);
+                                            }
+
+                                            if (title) {
+                                                title.textContent = name;
+                                            }
+                                        });
+                                    });
+
+                                    // FAQ Accordion Logic
+                                    document.querySelectorAll('.faq-accordion-btn').forEach(button => {
+                                        button.addEventListener('click', () => {
+                                            const faqAnswer = button.nextElementSibling;
+                                            const isOpen = button.classList.contains('active');
+
+                                            if (isOpen) {
+                                                button.classList.remove('active');
+                                                faqAnswer.style.maxHeight = null;
+                                            } else {
+                                                button.classList.add('active');
+                                                faqAnswer.style.maxHeight = faqAnswer.scrollHeight + "px";
+                                            }
+                                        });
+                                    });
+
+                                    // Set first color button as active by default
+                                    if (hasExteriorColors && hasInteriorColors) {
+                                        const firstColorBtn = document.querySelector('.color-btn[data-color-type="exterior"]');
+                                        if (firstColorBtn) {
+                                            firstColorBtn.classList.add('active');
+                                            document.getElementById('exterior-content').classList.add('active');
+                                        }
+                                    } else if (hasExteriorColors && !hasInteriorColors) {
+                                        document.getElementById('exterior-content').classList.add('active');
+                                    } else if (!hasExteriorColors && hasInteriorColors) {
+                                        document.getElementById('interior-content').classList.add('active');
+                                    }
+
+                                    // Options Buttons - Open Modals
+                                    document.querySelectorAll('.option-btn').forEach(btn => {
+                                        btn.addEventListener('click', function () {
+                                            const option = this.getAttribute('data-option');
+                                            openModal(option + '-modal');
+                                        });
+                                    });
+
+                                    // Color Buttons - Using inline styles to guarantee white active state
+                                    function applyColorBtnStyles() {
+                                        document.querySelectorAll('.color-btn').forEach(btn => {
+                                            if (btn.classList.contains('active')) {
+                                                btn.style.cssText = 'background:#ffffff !important;background-color:#ffffff !important;color:#000000 !important;padding:0.5rem 1.8rem;border:none;border-radius:50px;cursor:pointer;font-weight:600;font-size:0.85rem;font-family:Poppins,sans-serif;transition:all 0.25s ease;box-shadow:none;outline:none;display:inline-block;';
+                                            } else {
+                                                btn.style.cssText = 'background:transparent !important;background-color:transparent !important;color:rgba(255,255,255,0.55) !important;padding:0.5rem 1.8rem;border:none;border-radius:50px;cursor:pointer;font-weight:600;font-size:0.85rem;font-family:Poppins,sans-serif;transition:all 0.25s ease;box-shadow:none;outline:none;display:inline-block;';
+                                            }
+                                        });
+                                    }
+
+                                    // Add hover effect via JS since CSS can't override Tailwind
+                                    document.querySelectorAll('.color-btn').forEach(btn => {
+                                        btn.addEventListener('mouseenter', function() {
+                                            if (!this.classList.contains('active')) {
+                                                this.style.background = 'rgba(255,255,255,0.12)';
+                                                this.style.backgroundColor = 'rgba(255,255,255,0.12)';
+                                                this.style.color = '#ffffff';
+                                            }
+                                        });
+                                        btn.addEventListener('mouseleave', function() {
+                                            if (!this.classList.contains('active')) {
+                                                this.style.background = 'transparent';
+                                                this.style.backgroundColor = 'transparent';
+                                                this.style.color = 'rgba(255,255,255,0.55)';
+                                            }
+                                        });
+                                    });
+
+                                    if (hasExteriorColors && hasInteriorColors) {
+                                        document.querySelectorAll('.color-btn').forEach(btn => {
+                                            btn.addEventListener('click', function () {
+                                                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                                                document.querySelectorAll('.color-content').forEach(c => c.classList.remove('active'));
+
+                                                this.classList.add('active');
+                                                const colorType = this.getAttribute('data-color-type');
+                                                document.getElementById(colorType + '-content').classList.add('active');
+
+                                                // Re-apply inline styles after toggling
+                                                applyColorBtnStyles();
+                                            });
+                                        });
+                                    }
+
+                                    // Apply styles on page load
+                                    applyColorBtnStyles();
+
+                                    // Image loading handling
+                                    const images = document.querySelectorAll('img');
+                                    images.forEach(img => {
+                                        if (!img.complete) {
+                                            img.classList.add('loading');
+                                        }
+
+                                        img.addEventListener('load', function () {
+                                            this.classList.remove('loading');
+                                            this.style.display = 'block';
+                                        });
+
+                                        img.addEventListener('error', function () {
+                                            this.style.display = 'none';
+                                            const fallback = this.nextElementSibling;
+                                            if (fallback && fallback.classList.contains('bg-gray-600')) {
+                                                fallback.style.display = 'block';
+                                            }
+                                        });
+                                    });
+                                });
+
+                                // Modal Functions
+                                function openModal(id) {
+                                    document.getElementById(id).classList.add('active');
+                                    document.body.style.overflow = 'hidden';
+                                }
+
+                                function closeModal(id) {
+                                    document.getElementById(id).classList.remove('active');
+                                    document.body.style.overflow = 'auto';
+                                }
+
+                                // Close modals when clicking outside
+                                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                                    modal.addEventListener('click', function (e) {
+                                        if (e.target === this) {
+                                            closeModal(this.id);
+                                        }
+                                    });
+                                });
+
+                                // Image Modal Functions
+                                function openImageModalWithSlideshow(imageSrc, index, colorType, colorId) {
+                                    let colorImages = [];
+                                    if (colorType === 'exterior') {
+                                        colorImages = modelDetails.exteriorColorImages ? modelDetails.exteriorColorImages.filter(img => img.exterior_color_id == colorId) : [];
+                                    } else {
+                                        colorImages = modelDetails.interiorColorImages ? modelDetails.interiorColorImages.filter(img => img.interior_color_id == colorId) : [];
+                                    }
+
+                                    currentSlides = colorImages.map(img => img.image_path);
+                                    currentSlideIndex = index;
+
+                                    openImageModal(currentSlides[currentSlideIndex]);
+                                    updateModalCounter();
+                                }
+
+                                function openImageModal(imageSrc) {
+                                    const modal = document.getElementById('imageModal');
+                                    const modalImage = document.getElementById('modalImage');
+                                    modalImage.src = imageSrc;
+                                    modal.classList.add('active');
+                                    document.body.style.overflow = 'hidden';
+                                    updateModalCounter();
+                                }
+
+                                function closeImageModal() {
+                                    const modal = document.getElementById('imageModal');
+                                    modal.classList.remove('active');
+                                    currentSlides = [];
+                                    currentSlideIndex = 0;
+                                    document.body.style.overflow = 'auto';
+                                }
+
+                                function changeSlide(direction) {
+                                    if (currentSlides.length === 0) return;
+
+                                    currentSlideIndex += direction;
+
+                                    if (currentSlideIndex >= currentSlides.length) {
+                                        currentSlideIndex = 0;
+                                    } else if (currentSlideIndex < 0) {
+                                        currentSlideIndex = currentSlides.length - 1;
+                                    }
+
+                                    const modalImage = document.getElementById('modalImage');
+                                    modalImage.src = currentSlides[currentSlideIndex];
+                                    updateModalCounter();
+                                }
+
+                                function updateModalCounter() {
+                                    const counter = document.getElementById('modalCounterTop');
+                                    counter.textContent = (currentSlideIndex + 1) + ' / ' + currentSlides.length;
+                                }
+
+                                // Open variant details page
+                                function openVariantDetails(variantName) {
+                                    const vehicletypename = '<%= vehicletypename %>';
+                                    const brandname = '<%= brandname %>';
+                                    const modelname = '<%= modelname %>';
+                                    const variantSlug = variantName.toLowerCase().replace(/\s+/g, '-');
+                                    const countryPrefix = '<%= country ? "/" + country.country_name.toLowerCase() : "" %>';
+
+                                    const variantUrl = `${countryPrefix}/${vehicletypename}/brand/${brandname}/${modelname}/${variantSlug}/`;
+
+                                    window.location.href = variantUrl;
+                                }
+
+                                // Sources and Share Modal Functions
+                                function openSourcesModal() {
+                                    document.getElementById('sourcesModal').style.display = 'flex';
+                                }
+
+                                function closeSourcesModal() {
+                                    document.getElementById('sourcesModal').style.display = 'none';
+                                }
+
+                                function openShareModal() {
+                                    document.getElementById('shareModal').style.display = 'flex';
+                                }
+
+                                function closeShareModal() {
+                                    document.getElementById('shareModal').style.display = 'none';
+                                }
+
+                                // Social Share Functions
+                                function shareOnTwitter() {
+                                    const url = encodeURIComponent(window.location.href);
+                                    const text = encodeURIComponent('<%= model.brand_name %> <%= model.model_name %> - Check out this amazing vehicle!');
+                                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                                    closeShareModal();
+                                }
+
+                                function shareOnFacebook() {
+                                    const url = encodeURIComponent(window.location.href);
+                                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                                    closeShareModal();
+                                }
+
+                                function shareOnLinkedIn() {
+                                    const url = encodeURIComponent(window.location.href);
+                                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                                    closeShareModal();
+                                }
+
+                                function shareOnWhatsApp() {
+                                    const url = encodeURIComponent(window.location.href);
+                                    const text = encodeURIComponent('<%= model.brand_name %> <%= model.model_name %> - Check out this amazing vehicle!');
+                                    window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+                                    closeShareModal();
+                                }
+
+                                function copyToClipboard(event) {
+                                    const url = window.location.href;
+                                    navigator.clipboard.writeText(url).then(() => {
+                                        const btn = event.target.closest('.copy-link');
+                                        const span = btn.querySelector('span');
+                                        const originalText = span.textContent;
+                                        span.textContent = 'Copied!';
+
+                                        setTimeout(() => {
+                                            span.textContent = originalText;
+                                        }, 2000);
+                                    });
+                                }
+
+                                // Close modals when clicking outside
+                                window.onclick = function (event) {
+                                    const sourcesModal = document.getElementById('sourcesModal');
+                                    const shareModal = document.getElementById('shareModal');
+
+                                    if (event.target === sourcesModal) {
+                                        closeSourcesModal();
+                                    }
+                                    if (event.target === shareModal) {
+                                        closeShareModal();
+                                    }
+                                }
+
+                                // Keyboard navigation for slideshow
+                                document.addEventListener('keydown', function (e) {
+                                    const imageModal = document.getElementById('imageModal');
+                                    if (imageModal.classList.contains('active')) {
+                                        if (e.key === 'ArrowLeft') {
+                                            changeSlide(-1);
+                                        } else if (e.key === 'ArrowRight') {
+                                            changeSlide(1);
+                                        } else if (e.key === 'Escape') {
+                                            closeImageModal();
+                                        }
+                                    }
+                                });
+                            </script>
+                </body>
+
+                </html>

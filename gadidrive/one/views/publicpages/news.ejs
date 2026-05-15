@@ -1,0 +1,237 @@
+<%- include('../partials/head', { 
+    title: title || 'Latest Automotive News | GadiDrive',
+    description: description || 'Stay updated with the latest automobile news in Nepal. Read about new bike launches, car reviews, and price updates.',
+    keywords: keywords || 'automotive news, car news nepal, bike news nepal, vehicle launches',
+    url: currentUrl,
+    image: 'https://gadidrive.com/images/news-og.jpg',
+    path: path,
+    country: country
+}) %>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Latest Automobile News in <%= countryDisplay %>",
+  "description": "Stay updated with the latest bike and car news, launches, and reviews in <%= countryDisplay %>.",
+  "url": "<%= currentUrl %>",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      <% if (articles && articles.length > 0) { %>
+        <% articles.forEach((article, index) => { %>
+        {
+          "@type": "ListItem",
+          "position": <%= index + 1 %>,
+          "url": "https://gadidrive.com<%= countryPrefix %>/news/<%= article.Article_id %>-<%= article.Article_title.toLowerCase().replace(/[^a-z0-9]+/g, '-') %>",
+          "name": "<%= article.Article_title.replace(/"/g, '\\"') %>"
+        }<%= index < articles.length - 1 ? ',' : '' %>
+        <% }) %>
+      <% } %>
+    ]
+  }
+}
+</script>
+
+<style>
+    body {
+        background-color: #000000;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    /* News Grid */
+    .news-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    /* Country badge हटाइयो */
+    
+    /* Page Title */
+    .page-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(to right, #ffffff, #e5e5e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: #9ca3af;
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
+    
+    /* Stats हटाइयो */
+    
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 3rem;
+        gap: 0.5rem;
+    }
+
+    .pagination-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        padding: 0 10px;
+        font-weight: bold;
+        border-radius: 0.375rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        background-color: #111;
+        color: #fff;
+        border: 1px solid #333;
+    }
+
+    .pagination-button.active {
+        background-color: #DC2626 !important;
+        border-color: #DC2626 !important;
+        color: white !important;
+    }
+
+    .pagination-button:hover:not(.active) {
+        border-color: #DC2626;
+        color: #DC2626;
+        transform: translateY(-2px);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 1rem;
+        color: #6b7280;
+        grid-column: 1 / -1;
+        width: 100%;
+        border-top: 1px solid #2a2a2a;
+        border-bottom: 1px solid #2a2a2a;
+    }
+    
+    .empty-state p {
+        font-size: 1.3rem;
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+        color: #9ca3af;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .news-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 2.2rem;
+        }
+        
+        .pagination-container {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    
+    <%- include('../partials/navbar', { 
+        currentPage: 'news',
+        country: country,
+        allVehicleTypes: []
+    }) %>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+        
+        <!-- Country badge हटाइयो -->
+
+        <!-- Header -->
+        <header class="mb-10 text-center">
+            <h1 class="page-title">
+                Latest Automotive News in <%= countryDisplay %>
+            </h1>
+            <!-- Stats हटाइयो -->
+        </header>
+
+        <!-- News Grid -->
+        <section class="news-grid" role="list">
+            <% if (articles && articles.length > 0) { %>
+                <% articles.forEach(article => { %>
+                    <div role="listitem">
+                        <%- include('../partials/articlebox', { 
+                            article: article, 
+                            country: country 
+                        }) %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <svg class="mx-auto h-12 w-12 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p>No news available at the moment</p>
+                    <div class="small text-gray-600">Check back soon for updates</div>
+                </div>
+            <% } %>
+        </section>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <nav class="pagination-container" aria-label="News pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="<%= countryPrefix %>/news?page=<%= currentPage - 1 %>" class="pagination-button" aria-label="Previous Page">«</a>
+                <% } %>
+
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="<%= countryPrefix %>/news?page=<%= i %>" 
+                       class="pagination-button <%= i === currentPage ? 'active' : '' %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="<%= countryPrefix %>/news?page=<%= currentPage + 1 %>" class="pagination-button" aria-label="Next Page">»</a>
+                <% } %>
+            </nav>
+        <% } %>
+    </main>
+
+    <%- include('../partials/footer', { 
+        country: country,
+        allCountries: allCountries,
+        allVehicleTypes: []
+    }) %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle broken images
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.src = '/images/fallback-news.jpg';
+                    this.onerror = null;
+                });
+            });
+
+            // Highlight active nav link
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === '/news' || 
+                    link.getAttribute('href') === '<%= countryPrefix %>/news') {
+                    link.classList.add('bg-red-600', 'text-white');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head', { 
+        title: 'gadidrive - Sign In',
+        description: 'Sign in to GadiDrive employee portal',
+        keywords: 'GadiDrive signin, employee login, automotive portal Nepal',
+        path: '/signin',
+        country: null
+    }) %>
+    <link href="/output.css" rel="stylesheet">
+    <style>
+        /* Import Poppins Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        /* Pure Black Background */
+        body {
+            background-color: #000000;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Signin Form Styles */
+        .signin-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #111111;
+            border-radius: 16px;
+            border: 1px solid #222222;
+        }
+        
+        .signin-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #ffffff;
+        }
+        
+        .signin-title span {
+            color: #DC2626;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #DC2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+        }
+        
+        .input-field::placeholder {
+            color: #6B7280;
+        }
+        
+        .btn-primary {
+            background-color: #DC2626;
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #B91C1C;
+        }
+        
+        .btn-secondary {
+            background-color: #2D2D2D;
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3D3D3D;
+        }
+        
+        /* Navbar - Left Aligned with Original Style */
+        .navbar-minimal {
+            padding: 1.5rem 0;
+        }
+        
+        .navbar-minimal .logo {
+            text-align: left;
+        }
+        
+        .navbar-minimal .logo a {
+            font-size: 2rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .navbar-minimal .logo span {
+            color: #DC2626;
+        }
+        
+        /* Footer - Red with Border Radius and Content */
+        .footer-red {
+            background-color: #DC2626;
+            margin-top: 3rem;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 2rem 0;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .footer-logo span {
+            color: #000000;
+        }
+        
+        .footer-text {
+            color: #ffffff;
+            font-size: 1rem;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .footer-copyright {
+            color: #ffffff;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        .footer-divider {
+            width: 100px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0.5rem 0;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            color: #DC2626;
+        }
+        
+        .breadcrumb span {
+            color: #DC2626;
+            margin: 0 0.5rem;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #111111;
+            border: 1px solid #222222;
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-minimal .logo {
+                text-align: center;
+            }
+            
+            .signin-title {
+                font-size: 2rem;
+            }
+            
+            .signin-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .footer-content {
+                padding: 0 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .signin-title {
+                font-size: 1.8rem;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .footer-logo {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins']" style="background-color: #000000;">
+
+    <!-- Navbar - Exact same as index.ejs (Left Aligned) -->
+    <nav class="navbar-minimal">
+        <div class="container mx-auto px-4">
+            <div class="logo">
+                <a href="/">
+                    Gadi<span>Drive</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <!-- Signin Form Container -->
+        <div class="signin-container">
+            <h1 class="signin-title">
+                Sign <span>In</span>
+            </h1>
+            
+            <% if (error_msg) { %>
+                <div class="bg-red-600 text-white p-3 rounded-lg text-sm text-center mb-6 animate-pulse">
+                    <%= error_msg %>
+                </div>
+            <% } %>
+            
+            <% if (success_msg) { %>
+                <div class="bg-green-600 text-white p-3 rounded-lg text-sm text-center mb-6">
+                    <%= success_msg %>
+                </div>
+            <% } %>
+            
+            <% if (message) { %>
+                <div class="bg-blue-600 text-white p-3 rounded-lg text-sm text-center mb-6">
+                    <%= message %>
+                </div>
+            <% } %>
+            
+            <form action="/signin" method="POST">
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       placeholder="Username" 
+                       value="<%= username %>"
+                       class="input-field" 
+                       required 
+                       autocomplete="username">
+                
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Password" 
+                       class="input-field" 
+                       required 
+                       autocomplete="current-password">
+                
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <input type="checkbox" 
+                           id="remember" 
+                           name="remember" 
+                           style="width: 1rem; height: 1rem; accent-color: #DC2626; margin-right: 0.5rem;">
+                    <label for="remember" style="color: #9CA3AF; font-size: 0.9rem;">Remember me</label>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; gap: 1rem;">
+                    <a href="/" class="btn-secondary" style="text-decoration: none; text-align: center;">Cancel</a>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Clean Employee Info - Exact same style as index.ejs country selector but for employee info -->
+        <div class="glass-card">
+            <p style="color: #9CA3AF; margin-bottom: 1rem;">
+                This login is for <span style="color: #DC2626; font-weight: 600;">gadidrive</span> employees only
+            </p>
+            <p style="color: #6B7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                Want to join the team?<br>
+                Send your CV to:
+            </p>
+            <a href="mailto:contacttogadidrivenepal@gmail.com" 
+               style="color: #DC2626; font-weight: 600; font-size: 1.1rem; text-decoration: underline; text-decoration-color: rgba(220, 38, 38, 0.3);">
+                contacttogadidrivenepal@gmail.com
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer - Exact same as index.ejs (Red with Border Radius) -->
+    <footer class="footer-red">
+        <div class="footer-content">
+            <div class="footer-logo">
+                Gadi<span>Drive</span>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-text">
+                Your Global Gateway to Automotive Information
+            </div>
+            <div class="footer-copyright">
+                © 2025 GadiDrive. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Signing In...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

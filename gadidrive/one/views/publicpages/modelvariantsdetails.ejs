@@ -1,0 +1,1013 @@
+<% 
+    // Server-side date calculation 
+    const now = new Date(); 
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+    const currentYear = now.getFullYear(); 
+    const updatedDate = months[now.getMonth()] + " " + currentYear; 
+    
+    // Safety check for variables
+    const displayCountry = (typeof country !== 'undefined' && country) ? country.country_name : 'Nepal'; 
+    const variantTitle = (model && variant) ? (model.brand_name + " " + model.model_name + " " + variant.name) : 'Vehicle Variant'; 
+    const currency = (typeof currencySymbol !== 'undefined') ? currencySymbol : 'Rs.'; 
+    const vType = (model && model.vehicle_type_name ? model.vehicle_type_name.toLowerCase() : 'car'); 
+    
+    // Formatting price
+    const displayPrice = (variant && variant.price) ? (currency + " " + new Intl.NumberFormat('en-IN').format(variant.price)) : 'Coming Soon'; 
+    const countryPrefix = (typeof country !== 'undefined' && country) ? '/' + country.country_name.toLowerCase() : ''; 
+    
+    // --- HYBRID SEO LOGIC ---
+    const catchyTitle = variantTitle + " Price in " + displayCountry + " " + currentYear + " | Full Specs, Variants & Buying Guide"; 
+    const categoryName = (model && model.category_name) || 'vehicles'; 
+    const catchyDescription = "Find the latest " + variantTitle + " " + vType + " price in " + displayCountry + " for " + currentYear + ". Explore " + variantTitle + " on-road price, mileage, detailed specifications, and key features. Check out our complete buying guide for " + variant.name + " only on GadiDrive."; 
+    
+    // Keywords: Dynamic & Variant-based
+    var kArray = [
+        variantTitle, 
+        variantTitle + " " + displayCountry, 
+        variantTitle + " price", 
+        variantTitle + " price in " + displayCountry, 
+        (model && model.brand_name ? model.brand_name : '') + " price in " + displayCountry, 
+        (model && model.brand_name ? model.brand_name : '') + " " + vType + " price in " + displayCountry, 
+        variantTitle + " on road price", 
+        "Buying guide for " + variantTitle, 
+        variantTitle + " " + currentYear + " specifications"
+    ]; 
+    if (model && model.category_name) { 
+        kArray.push(model.category_name + " price in " + displayCountry); 
+        kArray.push(model.brand_name + " " + model.category_name + " " + vType + " price in " + displayCountry); 
+    } 
+    const catchyKeywords = kArray.join(', ');
+%>
+
+<%- include('../partials/head', { title: catchyTitle, description: catchyDescription, keywords: catchyKeywords, url:
+    typeof canonicalUrl !=='undefined' ? canonicalUrl : '' , image: (model && model.model_image) ? model.model_image
+    : '' , author: 'GadiDrive' , publishedTime: (model && model.published_date) ? model.published_date : new
+    Date().toISOString(), type: 'article' , path: typeof path !=='undefined' ? path : '' , country: typeof country
+    !=='undefined' ? country : null }) %>
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "<%= model.brand_name %> <%= model.model_name %> <%= variant.name %>",
+  "image": "<%= model.model_image || 'https://www.gadidrive.com/default-image.jpg' %>",
+  "description": "<%= catchyDescription.replace(/"/g, '\\"') %>",
+  "brand": {
+    "@type": "Brand",
+    "name": "<%= model.brand_name %>"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "https://gadidrive.com<%= typeof path !== 'undefined' ? path : '' %>",
+    "priceCurrency": "<%= typeof country !== 'undefined' && country && country.currency_code ? country.currency_code : 'NPR' %>",
+    "price": "<%= variant && variant.price ? variant.price : '0' %>",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "<%= (variant && variant.price) ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder' %>"
+  }
+}
+</script>
+
+    <style>
+        :root {
+            --primary-red: #dc2626;
+            --dark-red: #b91c1c;
+            --primary-blue: #3b82f6;
+            --dark-blue: #1d4ed8;
+            --dark-bg: #000000;
+            --card-bg: #111111;
+            --text-light: #e5e5e5;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: white;
+        }
+
+        /* Country badge हटाइयो */
+
+        /* Brand Link */
+        .brand-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .brand-link:hover {
+            color: var(--primary-red);
+        }
+
+        .brand-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+
+        .brand-link:hover::after {
+            width: 100%;
+        }
+
+        .variant-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .variant-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-family: 'Poppins', sans-serif;
+            text-align: justify;
+        }
+
+        /* Action Buttons - Same style as model details */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 3rem auto 2rem auto;
+            padding: 1.5rem;
+            max-width: 500px;
+            background: var(--card-bg);
+            border-radius: 60px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .back-to-model,
+        .share-btn {
+            padding: 1rem 2.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: transparent;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            min-width: 160px;
+            justify-content: center;
+            border: 2px solid transparent;
+            text-decoration: none;
+        }
+
+        .back-to-model {
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .back-to-model:hover {
+            background: var(--primary-red);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+        }
+
+        .share-btn {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .share-btn:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .back-to-model svg,
+        .share-btn svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-to-model:hover svg,
+        .share-btn:hover svg {
+            transform: rotate(10deg);
+        }
+
+        /* Modal Styles - Same as model details */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal .modal-content {
+            background: #111111;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid #333;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal .modal-header {
+            background: #1a1a1a;
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--primary-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .modal .close-btn {
+            background: var(--primary-red);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal .close-btn:hover {
+            background: var(--dark-red);
+            transform: scale(1.1);
+        }
+
+        .modal .modal-body {
+            padding: 2rem;
+            background: #111111;
+        }
+
+        .share-icons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .share-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            background: #1a1a1a;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #333;
+            color: white;
+            gap: 0.75rem;
+        }
+
+        .share-icon:hover {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .share-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .share-icon span {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .copy-link {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 50px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .copy-link:hover {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        .copy-link span {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .copy-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .variant-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #ffffff, #e5e5e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .content-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 2px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .content-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #60a5fa;
+            transition: width 0.3s ease;
+        }
+
+        .content-link:hover {
+            color: #3b82f6;
+        }
+
+        .content-link:hover::after {
+            width: 100%;
+        }
+
+        /* Price and Image Container */
+        .price-image-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 2rem;
+        }
+
+        /* Price Section */
+        .variant-price-box {
+            flex: 1;
+            text-align: center;
+        }
+
+        .variant-price-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .variant-price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Image Section */
+        .variant-image-box {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .variant-image-box img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* EMI Link */
+        .emi-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+        }
+
+        .emi-link:hover {
+            background: white;
+            color: black;
+            transform: translateY(-2px);
+        }
+
+        /* Other Variants Section */
+        .other-variants-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+
+        .other-variants-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .other-variants-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            border-radius: 2px;
+        }
+
+        .variants-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .variant-card {
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            border: 1px solid #374151;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .variant-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-2px);
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .variant-card-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .variant-card-price {
+            color: var(--primary-red);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Recommended Models Box Styles */
+        .recommended-model-box {
+            border-radius: 12px;
+            background: linear-gradient(to bottom, var(--primary-red), var(--dark-bg));
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .recommended-model-box:hover {
+            transform: scale(1.02);
+            border-color: var(--primary-red);
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            .main-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 3rem;
+                align-items: start;
+            }
+
+            .variant-content {
+                grid-column: 1;
+            }
+
+            .recommendations-sidebar {
+                grid-column: 2;
+                position: sticky;
+                top: 2rem;
+            }
+        }
+
+        /* Mobile Layout */
+        @media (max-width: 1023px) {
+            .main-grid {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .recommendations-sidebar {
+                order: 2;
+                margin-top: 3rem;
+            }
+
+            .variant-content {
+                order: 1;
+            }
+
+            .variant-title {
+                font-size: 2rem;
+            }
+
+            .price-image-container {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+
+            .variant-price-amount {
+                font-size: 2.5rem;
+            }
+
+            .variant-image-box img {
+                max-height: 200px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+
+            .back-to-model,
+            .share-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .variants-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .justified-text {
+            text-align: justify;
+        }
+
+        .loading {
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 0.7;
+            }
+        }
+    </style>
+    </head>
+
+    <body class="min-h-screen flex flex-col bg-black text-white" itemscope itemtype="https://schema.org/Article">
+
+        <%- include('../partials/navbar', { currentPage: 'modeldetails' , country: country, allVehicleTypes:
+            [vehicleType] }) %>
+
+            <!-- Main Content -->
+            <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+
+                <!-- Country badge हटाइयो -->
+                <!-- Breadcrumb हटाइयो -->
+
+                <!-- Main Grid Layout -->
+                <div class="main-grid">
+                    <!-- Left Side - Variant Content -->
+                    <div class="variant-content">
+                        <!-- Variant Title -->
+                        <article class="mb-8">
+                            <h1 class="variant-title" itemprop="headline">
+                                <%= variantTitle + " Price in " + displayCountry + " " + currentYear %>
+                            </h1>
+
+                            <!-- Description -->
+                            <p class="justified-text" style="font-size: 1.1rem; line-height: 1.7; margin-bottom: 2rem;">
+                                Detailed specifications and features of <b>
+                                    <%= variantTitle %>
+                                </b>
+                                <% if (variant && variant.price) { %>
+                                    priced at <b>
+                                        <%= currency %>
+                                            <%= new Intl.NumberFormat('en-IN').format(variant.price) %>
+                                    </b> in <%= displayCountry %>.
+                                        <% } else { %>
+                                            Price coming soon.
+                                            <% } %>
+                                                This variant offers premium features and specifications. Check out all
+                                                technical details about this specific variant.
+                            </p>
+
+                            <!-- Price Box WITH IMAGE INSIDE -->
+                            <div class="price-image-container">
+                                <!-- Price Section - Left -->
+                                <div class="variant-price-box">
+                                    <h2 class="variant-price-title">
+                                        <%= variant && variant.name ? variant.name : '' %> Price in <%= displayCountry
+                                                %>
+                                    </h2>
+                                    <% if (variant && variant.price) { %>
+                                        <div class="variant-price-amount">
+                                            <%= currency %>
+                                                <%= new Intl.NumberFormat('en-IN').format(variant.price) %>
+                                        </div>
+                                        <a href="<%= countryPrefix %>/emicalculator?price=<%= variant.price %>" class="emi-link">
+                                            <b>Calculate EMI Monthly/Yearly</b>
+                                        </a>
+                                        <% } else { %>
+                                            <div class="variant-price-amount">Price Coming Soon</div>
+                                            <% } %>
+                                </div>
+
+                                <!-- Image Section - Right -->
+                                <% if (model.model_image) { %>
+                                    <div class="variant-image-box">
+                                        <img src="<%= model.model_image %>"
+                                            alt="<%= model.brand_name %> <%= model.model_name %> <%= variant.name %> main image"
+                                            loading="lazy" onload="this.classList.remove('loading')"
+                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                        <div class="w-full h-full bg-gray-600 flex items-center justify-center"
+                                            style="display: none;">
+                                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="variant-image-box">
+                                            <div
+                                                class="w-48 h-48 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex items-center justify-center">
+                                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1"
+                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <!-- Action Buttons - Same style as model details -->
+                            <div class="action-buttons">
+                                <!-- Back to Model Button -->
+                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                                    class="back-to-model" aria-label="Back to model details">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to Model
+                                </a>
+
+                                <!-- Enhanced Share Button -->
+                                <button class="share-btn" onclick="openShareModal()" aria-label="Share this variant">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                    </svg>
+                                    Share
+                                </button>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Right Side - Recommendations Sidebar -->
+                    <div class="recommendations-sidebar">
+                        <!-- Current Model Info -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
+                                <%= model.brand_name %>
+                                    <%= model.model_name %>
+                                        <span
+                                            class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
+                            </h2>
+                            <!-- MADE THE ENTIRE MODEL BOX CLICKABLE -->
+                            <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                                class="block">
+                                <div
+                                    class="recommended-model-box mb-6 cursor-pointer transition-transform hover:scale-105">
+                                    <div class="flex flex-row items-start p-2 rounded-xl">
+                                        <% if (model.model_image) { %>
+                                            <img src="<%= model.model_image %>"
+                                                alt="<%= model.brand_name %> <%= model.model_name %>"
+                                                class="w-24 h-24 bg-white rounded-lg flex-shrink-0 object-cover"
+                                                onload="this.classList.remove('loading')"
+                                                onerror="this.style.display='none'">
+                                            <% } else { %>
+                                                <div
+                                                    class="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex-shrink-0 flex items-center justify-center">
+                                                    <svg width="24" height="24" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                    </svg>
+                                                </div>
+                                                <% } %>
+                                                    <div class="content ml-4 flex-grow text-white">
+                                                        <div class="font-semibold text-lg mb-2 line-clamp-2">
+                                                            <%= model.brand_name %>
+                                                                <%= model.model_name %>
+                                                        </div>
+                                                        <div class="text-sm text-gray-300 font-semibold">
+                                                            <%= model.vehicle_type_name %>
+                                                        </div>
+                                                        <% if (model.starting_price) { %>
+                                                            <div class="text-sm text-red-400 font-bold mt-1">
+                                                                <%= currencySymbol %>
+                                                                    <%= model.starting_price.toLocaleString() %>
+                                                            </div>
+                                                            <% } %>
+                                                    </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Other Variants -->
+                        <% if (otherVariants && otherVariants.length> 0) { %>
+                            <div class="other-variants-section">
+                                <h2 class="other-variants-title">Other Variants</h2>
+                                <div class="variants-list">
+                                    <% otherVariants.forEach(otherVariant=> { %>
+                                        <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/<%= otherVariant.name.toLowerCase().replace(/\s+/g, '-') %>/"
+                                            class="variant-card">
+                                            <div class="variant-card-name">
+                                                <%= otherVariant.name %>
+                                            </div>
+                                            <% if (otherVariant.price) { %>
+                                                <div class="variant-card-price">
+                                                    <%= currencySymbol %>
+                                                        <%= new Intl.NumberFormat('en-IN').format(otherVariant.price) %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="variant-card-price">Coming Soon</div>
+                                                    <% } %>
+                                        </a>
+                                        <% }); %>
+                                </div>
+                            </div>
+                            <% } else { %>
+                                <!-- Show message if no other variants -->
+                                <div class="other-variants-section">
+                                    <h2 class="other-variants-title">Other Variants</h2>
+                                    <p style="color: #9ca3af; text-align: center; padding: 1rem;">
+                                        No other variants available for this model.
+                                    </p>
+                                </div>
+                                <% } %>
+
+                                    <!-- Similar Models Section -->
+                                    <% if (similarModels && similarModels.length> 0) { %>
+                                        <div class="other-variants-section mt-6">
+                                            <h2 class="other-variants-title">Similar Models</h2>
+                                            <div class="variants-list">
+                                                <% similarModels.slice(0, 3).forEach(similar=> { %>
+                                                    <a href="<%= countryPrefix %>/<%= similar.vehicle_type_name %>/brand/<%= similar.brand_name.replace(/\s+/g, '-') %>/<%= similar.model_name.replace(/\s+/g, '-') %>/"
+                                                        class="variant-card">
+                                                        <div class="variant-card-name">
+                                                            <%= similar.brand_name %>
+                                                                <%= similar.model_name %>
+                                                        </div>
+                                                        <% if (similar.starting_price) { %>
+                                                            <div class="variant-card-price">
+                                                                <%= currencySymbol %>
+                                                                    <%= similar.starting_price.toLocaleString() %>
+                                                            </div>
+                                                            <% } %>
+                                                    </a>
+                                                    <% }); %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Share Modal -->
+            <div id="shareModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Share this Variant</h3>
+                        <button class="close-btn" onclick="closeShareModal()"
+                            aria-label="Close share modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="share-icons">
+                            <button class="share-icon" onclick="shareOnTwitter()" aria-label="Share on Twitter">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                                </svg>
+                                <span>Twitter</span>
+                            </button>
+
+                            <button class="share-icon" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                                </svg>
+                                <span>Facebook</span>
+                            </button>
+
+                            <button class="share-icon" onclick="shareOnLinkedIn()" aria-label="Share on LinkedIn">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                                    <rect x="2" y="9" width="4" height="12" />
+                                    <circle cx="4" cy="4" r="2" />
+                                </svg>
+                                <span>LinkedIn</span>
+                            </button>
+
+                            <button class="share-icon" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M17.6 6.3A7.9 7.9 0 0 0 12 4a8 8 0 0 0-6.9 11.9l-1 3.6 3.7-1a8 8 0 0 0 4.2 1.2 8 8 0 0 0 8-8 7.9 7.9 0 0 0-2.4-5.4zM12 19.5a7.5 7.5 0 0 1-3.8-1l-0.3-0.2-2.2.6 0.6-2.2-0.2-0.3a7.5 7.5 0 1 1 5.9 3.1z" />
+                                </svg>
+                                <span>WhatsApp</span>
+                            </button>
+                        </div>
+
+                        <div class="copy-link" onclick="copyToClipboard()">
+                            <span>Copy link</span>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <%- include('../partials/footer', { country: country, allCountries: allCountries, allVehicleTypes:
+                [vehicleType] }) %>
+
+                <script>
+                    // Modal Functions
+                    function openShareModal() {
+                        document.getElementById('shareModal').style.display = 'flex';
+                    }
+
+                    function closeShareModal() {
+                        document.getElementById('shareModal').style.display = 'none';
+                    }
+
+                    // Close modals when clicking outside
+                    window.onclick = function (event) {
+                        const shareModal = document.getElementById('shareModal');
+                        if (event.target === shareModal) {
+                            closeShareModal();
+                        }
+                    }
+
+                    // Social Share Functions
+                    function shareOnTwitter() {
+                        const url = encodeURIComponent(window.location.href);
+                        const text = encodeURIComponent('<%= variant.name %> of <%= model.brand_name %> <%= model.model_name %> in <%= country ? country.country_name : 'Nepal' %>');
+                        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                        closeShareModal();
+                    }
+
+                    function shareOnFacebook() {
+                        const url = encodeURIComponent(window.location.href);
+                        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                        closeShareModal();
+                    }
+
+                    function shareOnLinkedIn() {
+                        const url = encodeURIComponent(window.location.href);
+                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                        closeShareModal();
+                    }
+
+                    function shareOnWhatsApp() {
+                        const url = encodeURIComponent(window.location.href);
+                        const text = encodeURIComponent('<%= variant.name %> of <%= model.brand_name %> <%= model.model_name %> in <%= country ? country.country_name : 'Nepal' %>');
+                        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+                        closeShareModal();
+                    }
+
+                    function copyToClipboard() {
+                        const url = window.location.href;
+                        navigator.clipboard.writeText(url).then(() => {
+                            const btn = event.currentTarget;
+                            const span = btn.querySelector('span');
+                            const originalText = span.textContent;
+                            span.textContent = 'Copied!';
+
+                            setTimeout(() => {
+                                span.textContent = originalText;
+                            }, 2000);
+                        });
+                    }
+
+                    // Add loading class to images
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const images = document.querySelectorAll('img');
+                        images.forEach(img => {
+                            if (!img.complete) {
+                                img.classList.add('loading');
+                            }
+                        });
+                    });
+                </script>
+    </body>
+
+    </html>

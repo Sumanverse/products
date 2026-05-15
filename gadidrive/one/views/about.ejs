@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { 
+        title: 'About GadiDrive | Global Automotive Information Hub',
+        description: 'Learn about GadiDrive, your trusted global source for automotive information. We provide accurate vehicle specifications, comparisons, and latest news for enthusiasts worldwide.',
+        keywords: 'About GadiDrive, automotive platform, vehicle enthusiasts, car specifications, global automotive',
+        path: '/about',
+        country: null
+    }) %>
+    
+    <style>
+    
+    <style>
+        :root {
+            --primary-red: #dc2626;
+            --card-bg: #111111;
+            --border-gray: #374151;
+        }
+        body { background: #000; color: white; font-family: 'Poppins', sans-serif; margin: 0; }
+
+        /* Navbar - Left Aligned with Original Style (exactly like index.ejs) */
+        .navbar-minimal {
+            padding: 1.5rem 0;
+        }
+        
+        .navbar-minimal .logo {
+            text-align: left;
+        }
+        
+        .navbar-minimal .logo a {
+            font-size: 2rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .navbar-minimal .logo span {
+            color: #DC2626;
+        }
+
+        .custom-title { 
+            font-size: 4.5rem; 
+            font-weight: 900; 
+            text-align: center; 
+            letter-spacing: -2px; 
+            line-height: 1; 
+            margin-bottom: 1.5rem; 
+        }
+        @media (min-width: 768px) { 
+            .custom-title { 
+                font-size: 6.5rem; 
+            } 
+        }
+        .custom-title .about { 
+            color: white; 
+        }
+        .custom-title .gadi { 
+            color: #dc2626; 
+            font-weight: 900; 
+        }
+        .custom-title .drive { 
+            color: white; 
+        }
+
+        .about-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 2rem;
+            border-left: 5px solid var(--primary-red);
+        }
+
+        .section-title {
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            text-align: center; 
+            margin-bottom: 4rem; 
+            position: relative; 
+            color: white;
+        }
+        .section-title::after {
+            content: ''; 
+            position: absolute; 
+            bottom: -15px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            width: 100px; 
+            height: 4px; 
+            background: var(--primary-red); 
+            border-radius: 2px;
+        }
+
+        /* WHY CHOOSE US - FIXED WITH CSS ICONS */
+        .why-item { 
+            text-align: center; 
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .why-icon-container { 
+            width: 140px; 
+            height: 140px; 
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+        .why-icon-bg {
+            width: 100%; 
+            height: 100%; 
+            background: #f92b2b !important;
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(249, 43, 43, 0.3);
+        }
+        
+        /* Custom Icons using CSS (always visible) */
+        .icon-accuracy::before {
+            content: "✓";
+            font-size: 4rem;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .icon-fast::before {
+            content: "⚡";
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .icon-global::before {
+            content: "🌍";
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .icon-free::before {
+            content: "💰";
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .why-content h4 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem; 
+            color: white; 
+            margin-top: 1rem;
+        }
+        .why-content p { 
+            color: #d1d5db; 
+            line-height: 1.6; 
+            font-size: 1rem; 
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* SIMPLE MODERN SIGNIN BUTTON */
+        .signin-btn {
+            display: inline-block;
+            background: #DC2626;
+            color: white;
+            padding: 1rem 3rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            letter-spacing: 0.5px;
+        }
+        
+        .signin-btn:hover { 
+            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25);
+        }
+
+        /* Footer - Red with Border Radius and Content (exactly like index.ejs) */
+        .footer-red {
+            background-color: #DC2626;
+            margin-top: 3rem;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 2rem 0;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .footer-logo span {
+            color: #000000;
+        }
+        
+        .footer-text {
+            color: #ffffff;
+            font-size: 1rem;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .footer-copyright {
+            color: #ffffff;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        .footer-divider {
+            width: 100px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 0.5rem 0;
+        }
+
+        /* Mobile View FIX - IMPORTANT */
+        @media (max-width: 768px) {
+            .custom-title { 
+                font-size: 3.5rem; 
+            }
+            
+            .navbar-minimal .logo {
+                text-align: center;
+            }
+            
+            /* WHY CHOOSE US - MOBILE FIX */
+            .why-item {
+                padding: 1.5rem 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .why-icon-container { 
+                width: 120px !important; 
+                height: 120px !important;
+                margin-bottom: 1rem;
+            }
+            
+            .why-icon-bg {
+                background: #f92b2b !important;
+                width: 100%;
+                height: 100%;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            .icon-accuracy::before,
+            .icon-fast::before,
+            .icon-global::before,
+            .icon-free::before {
+                font-size: 3rem !important;
+            }
+            
+            .why-content h4 {
+                font-size: 1.3rem;
+            }
+            
+            .why-content p {
+                font-size: 0.95rem;
+                max-width: 280px;
+            }
+            
+            .section-title { 
+                font-size: 2rem; 
+                margin-bottom: 3rem;
+            }
+            
+            /* Signin button mobile adjustment */
+            .signin-btn {
+                padding: 0.9rem 2.5rem;
+                font-size: 1.1rem;
+            }
+            
+            /* Grid adjustment for mobile */
+            .grid-cols-4 {
+                grid-template-columns: repeat(1, 1fr) !important;
+                gap: 2rem !important;
+            }
+            
+            .footer-content {
+                padding: 0 1rem;
+            }
+            
+            .footer-logo {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Tablet View */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .why-icon-container { 
+                width: 130px; 
+                height: 130px; 
+            }
+            .icon-accuracy::before,
+            .icon-fast::before,
+            .icon-global::before,
+            .icon-free::before {
+                font-size: 3.5rem; 
+            }
+        }
+
+        .contact-item i { 
+            font-size: 2.5rem; 
+            color: var(--primary-red); 
+        }
+        .contact-item a { 
+            color: #9ca3af; 
+            text-decoration: none; 
+        }
+        .contact-item a:hover { 
+            color: var(--primary-red); 
+        }
+        
+        /* Fix for grid layout */
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        @media (max-width: 768px) {
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col" style="background-color: #000000;">
+
+    <!-- Navbar - Left Aligned with Original Style (exactly like index.ejs) -->
+    <nav class="navbar-minimal">
+        <div class="container mx-auto px-4">
+            <div class="logo">
+                <a href="/">
+                    Gadi<span>Drive</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-7xl">
+
+        <!-- Hero -->
+        <section class="text-center py-12 sm:py-16 mb-8 sm:mb-10">
+            <h1 class="custom-title">
+                <span class="about">About</span> <span class="text-red-600">Gadi</span><span class="drive">Drive</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed px-4">
+                Your Global Gateway to Automotive Information — Built for Vehicle Enthusiasts Worldwide
+            </p>
+        </section>
+
+        <!-- Our Story -->
+        <section id="our-story" class="mb-8 sm:mb-10">
+            <h2 class="section-title">Our Story</h2>
+            <div class="about-card max-w-5xl mx-auto text-center">
+                <p class="text-lg leading-relaxed text-gray-300">
+                    Founded by a team of passionate car and bike enthusiasts, <strong class="text-red-500">GadiDrive</strong> started with one goal: 
+                    to create a clean, fast, and reliable global platform for vehicle information — without confusing ads or outdated data.
+                </p>
+                <p class="mt-6 text-gray-400">
+                    Today, we're proud to be a trusted source for automotive information worldwide, helping thousands of enthusiasts make better vehicle choices every day.
+                </p>
+            </div>
+        </section>
+
+        <!-- Mission & Vision -->
+        <section class="mb-8 sm:mb-10">
+            <div class="grid md:grid-cols-2 gap-6 sm:gap-12">
+                <div class="about-card">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-4">
+                        <span class="text-red-600 text-3xl sm:text-4xl">🎯</span> Our Mission
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        To empower every vehicle enthusiast with accurate, up-to-date information — through detailed specifications, fair comparisons, and the latest industry news from around the world.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-4" id="vision">
+                        <span class="text-red-600 text-3xl sm:text-4xl">👁️</span> Our Vision
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        To become the world's most trusted name in automotive information, connecting enthusiasts with the data they need to make confident decisions.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- What We Offer - GLOBAL CONTENT -->
+        <section id="services" class="mb-8 sm:mb-10">
+            <h2 class="section-title">What We Offer</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                <div class="about-card text-center">
+                    <div class="text-red-600 text-5xl mb-6">🚗</div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-4">Detailed Specifications</h3>
+                    <p class="text-gray-400">Complete technical details, features, and pricing for vehicle models from multiple countries.</p>
+                </div>
+                <div class="about-card text-center">
+                    <div class="text-red-600 text-5xl mb-6">⚖️</div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-4">Easy Comparison</h3>
+                    <p class="text-gray-400">Compare any two vehicles side-by-side with our powerful comparison tool.</p>
+                </div>
+                <div class="about-card text-center">
+                    <div class="text-red-600 text-5xl mb-6">📰</div>
+                    <h3 class="text-xl sm:text-2xl font-bold mb-4">Latest News & Updates</h3>
+                    <p class="text-gray-400">New launches, price changes, industry news, and automotive trends from around the world.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose GadiDrive - GLOBAL CONTENT (4 items) -->
+        <section class="mb-8 sm:mb-10 py-8 sm:py-10">
+            <h2 class="section-title">Why Choose GadiDrive?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 max-w-7xl mx-auto">
+
+                <!-- 1. Accuracy -->
+                <div class="why-item">
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg icon-accuracy"></div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Highly Accurate</h4>
+                        <p>We verify every spec to ensure you get the most reliable data from trusted sources.</p>
+                    </div>
+                </div>
+
+                <!-- 2. Fast -->
+                <div class="why-item">
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg icon-fast"></div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Lightning Fast</h4>
+                        <p>Optimized for speed on any device, anywhere in the world.</p>
+                    </div>
+                </div>
+
+                <!-- 3. Global Coverage -->
+                <div class="why-item">  
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg icon-global"></div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Global Coverage</h4>
+                        <p>Information from multiple countries with local prices, specs, and regional details.</p>
+                    </div>
+                </div>
+
+                <!-- 4. Completely Free -->
+                <div class="why-item">  
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg icon-free"></div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Completely Free</h4>
+                        <p>No login, no paywall — everything is 100% free forever for everyone.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact, Privacy, Terms, Sign In -->
+        <section id="contact" class="mb-8 sm:mb-10">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="about-card max-w-4xl mx-auto text-center">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                    <div class="contact-item">
+                        <span class="text-red-600 text-4xl">✉️</span>
+                        <p class="font-semibold mt-2">Email</p>
+                        <a href="mailto:info@gadidrive.com" class="text-sm sm:text-base">info@gadidrive.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <span class="text-red-600 text-4xl">📞</span>
+                        <p class="font-semibold mt-2">Phone</p>
+                        <p class="text-gray-400 text-sm sm:text-base">Coming soon</p>
+                    </div>
+                    <div class="contact-item">
+                        <span class="text-red-600 text-4xl">📍</span>
+                        <p class="font-semibold mt-2">Location</p>
+                        <p class="text-gray-400 text-sm sm:text-base">Global</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="privacy" class="mb-8 sm:mb-10">
+            <div class="about-card">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-4">
+                    <span class="text-red-600 text-4xl">🛡️</span> Privacy Policy
+                </h2>
+                <p class="text-gray-300">
+                    We value your privacy. GadiDrive does not require sign-up and never sells your data. Your information is safe with us.
+                </p>
+            </div>
+        </section>
+
+        <section id="terms" class="mb-8 sm:mb-10">
+            <div class="about-card">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-4">
+                    <span class="text-red-600 text-4xl">📄</span> Terms of Service
+                </h2>
+                <p class="text-gray-300">
+                    All information is for reference only. Prices and specifications may vary by country, region, and local dealers.
+                </p>
+            </div>
+        </section>
+
+        <!-- Simple Modern Sign In Button -->
+        <div class="text-center my-8 sm:my-10">
+            <a href="/signin" class="signin-btn">
+                <span>👤</span> Sign In
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer - Red with Border Radius and Content (exactly like index.ejs) -->
+    <footer class="footer-red">
+        <div class="footer-content">
+            <div class="footer-logo">
+                Gadi<span>Drive</span>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-text">
+                Your Global Gateway to Automotive Information
+            </div>
+            <div class="footer-copyright">
+                © 2026 GadiDrive. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const href = a.getAttribute('href');
+                if (href.startsWith('#')) { 
+                    e.preventDefault(); 
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({behavior: 'smooth'});
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

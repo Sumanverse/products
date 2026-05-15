@@ -1,0 +1,847 @@
+<%- include('../partials/head', { 
+    title: 'Category Admin',
+    description: 'GadiDrive Category Management - Add, edit, and manage vehicle categories',
+    keywords: 'category admin, vehicle categories, automotive categories, manage categories',
+    path: '/admin/category',
+    country: null
+}) %>
+
+<style>
+    body { background-color: #000000; }
+    select option {
+        background-color: white;
+        color: black;
+    }
+    select option:hover {
+        background-color: #DC2626;
+        color: white;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+    .icon-button { transition: transform 0.2s; }
+    .icon-button:hover { transform: scale(1.1); }
+    .filter-button:hover { background-color: #DC2626; color: #FFFFFF; }
+    .country-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .country-badge.global {
+        background-color: #8B5CF6;
+        color: white;
+    }
+    .country-badge.specific {
+        background-color: #3B82F6;
+        color: white;
+    }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+        will-change: transform, opacity;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active { display: block; }
+    .error-message {
+        background-color: #7F1D1D;
+        border-left: 4px solid #EF4444;
+        color: #FECACA;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<!-- Subnavbar -->
+<nav class="bg-gray-800 py-4">
+    <div class="container mx-auto px-4 flex justify-center space-x-6">
+        <a href="/admin/category" class="text-white text-lg font-semibold hover:text-red-600 transition border-b-2 border-red-600">Category</a>
+        <a href="/admin/brand" class="text-white text-lg font-semibold hover:text-red-600 transition">Brands</a>
+        <a href="/admin/model" class="text-white text-lg font-semibold hover:text-red-600 transition">Model</a>
+        <a href="/admin/article" class="text-white text-lg font-semibold hover:text-red-600 transition">Article</a>
+    </div>
+</nav>
+
+<!-- Main Section -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <!-- Upload Category Section -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-6">Upload Your Category</h2>
+
+        <!-- Category Creation Form -->
+        <form id="category-form" action="/admin/category" method="POST" enctype="multipart/form-data" class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div>
+                <label for="category-image" class="block text-sm font-medium text-gray-300 mb-1">Category Image *</label>
+                <input type="file" id="category-image" name="categoryImage" accept="image/*" required class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+            </div>
+            <div>
+                <label for="category-name" class="block text-sm font-medium text-gray-300 mb-1">Category Name *</label>
+                <input type="text" id="category-name" name="categoryName" placeholder="Enter category name" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            
+            <!-- Country Selector -->
+            <div>
+                <label for="country-select" class="block text-sm font-medium text-gray-300 mb-1">Select Country</label>
+                <select id="country-select" name="countryId" class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="">Global (All Countries)</option>
+                    <% if (countries && countries.length > 0) { %>
+                        <% countries.forEach(country => { %>
+                            <option value="<%= country.id %>"><%= country.country_name %> (<%= country.currency_symbol %>)</option>
+                        <% }) %>
+                    <% } %>
+                </select>
+                <p class="text-xs text-gray-400 mt-1">Select country to filter vehicle types. Global categories are available in all countries.</p>
+            </div>
+            
+            <!-- Vehicle Type Selector (dynamic) -->
+            <div>
+                <label for="vehicle-type" class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type *</label>
+                <select id="vehicle-type" name="vehicleType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+                        <% vehicleTypes.forEach(type => { %>
+                            <option value="<%= type.vehicle_type_id %>" 
+                                    data-country="<%= type.country_id || 'global' %>"
+                                    data-country-name="<%= type.country_name || 'Global' %>">
+                                <%= type.vehicle_type_name %> 
+                                <%= type.country_name ? `(${type.country_name})` : '(Global)' %>
+                            </option>
+                        <% }) %>
+                    <% } else { %>
+                        <option value="" disabled>No vehicle types available</option>
+                    <% } %>
+                </select>
+                <p class="text-xs text-gray-400 mt-1">Only vehicle types matching your country selection will be shown.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button type="submit" class="flex-1 bg-red-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition">Create or Publish Category</button>
+                <button type="button" id="open-import-cat-modal-btn" class="flex-1 bg-blue-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition">Import Existing Category</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Import Category Modal -->
+    <div id="import-cat-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Import Category</h3>
+                <button type="button" id="close-import-cat-modal-btn" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="import-cat-form" class="space-y-6">
+                <!-- Source Section -->
+                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-lg font-semibold text-blue-400 mb-4">1. Select Source (Where from?)</h4>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Source Country</label>
+                            <select id="import-src-country" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="" disabled selected>Select Source Country</option>
+                                <option value="global">Global Only</option>
+                                <% if (countries && countries.length > 0) { %>
+                                    <% countries.forEach(country => { %>
+                                        <option value="<%= country.id %>"><%= country.country_name %></option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Source Vehicle Type</label>
+                            <select id="import-src-vehicle-type" disabled class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="" disabled selected>Select Vehicle Type First</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Source Category</label>
+                            <select id="import-src-cat" name="sourceCategoryId" disabled required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="" disabled selected>Select Category First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Section -->
+                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                    <h4 class="text-lg font-semibold text-red-400 mb-4">2. Select Target (Where to?)</h4>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Target Country</label>
+                            <select id="import-tgt-country" name="targetCountryId" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                                <option value="">Global (All Countries)</option>
+                                <% if (countries && countries.length > 0) { %>
+                                    <% countries.forEach(country => { %>
+                                        <option value="<%= country.id %>"><%= country.country_name %></option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Target Vehicle Type</label>
+                            <select id="import-tgt-vehicle-type" name="targetVehicleTypeId" required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                                <option value="" disabled selected>Select Vehicle Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white text-lg font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Import Category</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Already Published Categories -->
+    <section>
+        <h2 class="text-3xl font-bold text-white mb-6">Already Published Category</h2>
+        
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap gap-4 mb-4">
+            <select id="filter-country" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                <option value="" disabled selected>Select Country</option>
+                <option value="global">Global Only</option>
+                <% if (countries && countries.length > 0) { %>
+                    <% countries.forEach(country => { %>
+                        <option value="<%= country.id %>"><%= country.country_name %></option>
+                    <% }) %>
+                <% } %>
+            </select>
+            
+            <select id="published-vehicle-type-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" disabled>
+                <option value="" disabled selected>Select Vehicle Type</option>
+            </select>
+
+            <button id="clear-filters-cat" class="w-full md:w-auto bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" style="display:none;">Clear Filters</button>
+        </div>
+        
+        <div id="published-category-boxes" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div id="cat-empty-message" class="text-gray-400 text-center py-8 col-span-full">Select country and vehicle type to view categories</div>
+            <% if (categories && categories.length > 0) { %>
+                <% categories.forEach(cat => { %>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md" 
+                         data-vehicle-type="<%= cat.vehicle_type_id %>"
+                         data-country="<%= cat.country_id || 'global' %>">
+                        <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent">
+                            <img src="<%= cat.image_path %>" alt="<%= cat.name %>" class="w-full h-full object-cover rounded-lg">
+                        </div>
+                        <div class="text-white font-semibold text-lg line-clamp-1"><b><%= cat.name %></b></div>
+                        <div class="text-gray-300 text-sm">By <%= cat.author_name %></div>
+                        <div class="mt-1">
+                            <% if (cat.country_name) { %>
+                                <span class="country-badge specific"><%= cat.country_name %></span>
+                            <% } else { %>
+                                <span class="country-badge global">Global</span>
+                            <% } %>
+                        </div>
+                        <div class="flex justify-center space-x-2 mt-2">
+                            <button class="edit-cat-btn bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 transition" data-cat-id="<%= cat.category_id %>">Edit</button>
+                            <button class="delete-cat-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" data-cat-id="<%= cat.category_id %>">Delete</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-gray-400 col-span-full text-center">No categories published yet.</p>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded - Category Admin');
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay?.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop?.classList.toggle('active');
+        };
+
+        mobileMenuButton?.addEventListener('click', toggleMenu);
+        closeMobileMenuButton?.addEventListener('click', toggleMenu);
+        mobileMenuBackdrop?.addEventListener('click', toggleMenu);
+
+        // Dynamic Vehicle Types based on Country Selection
+        const countrySelect = document.getElementById('country-select');
+        const vehicleTypeSelect = document.getElementById('vehicle-type');
+
+        // Store all vehicle types with their country info
+        const allVehicleTypes = <%- JSON.stringify(vehicleTypes) %>;
+
+        // Function to filter vehicle types based on country
+        const filterVehicleTypesByCountry = (selectedCountry) => {
+            // Clear current options
+            vehicleTypeSelect.innerHTML = '<option value="" disabled selected>Select Vehicle Type</option>';
+            
+            // Filter vehicle types based on selected country
+            const filteredTypes = allVehicleTypes.filter(type => {
+                if (!selectedCountry) {
+                    // If no country selected, show ALL vehicle types
+                    return true;
+                } else {
+                    // If country selected, show:
+                    // 1. Vehicle types that belong to this country
+                    // 2. Global vehicle types (country_id is null)
+                    return type.country_id == selectedCountry || type.country_id === null;
+                }
+            });
+            
+            console.log('Filtered types for country', selectedCountry, ':', filteredTypes);
+            
+            // Add filtered options
+            if (filteredTypes.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.disabled = true;
+                option.textContent = selectedCountry ? 'No vehicle types available for this country' : 'No vehicle types available';
+                vehicleTypeSelect.appendChild(option);
+            } else {
+                filteredTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.vehicle_type_id;
+                    
+                    // Show country info in parentheses
+                    if (type.country_name) {
+                        option.textContent = `${type.vehicle_type_name} (${type.country_name})`;
+                    } else {
+                        option.textContent = `${type.vehicle_type_name} (Global)`;
+                    }
+                    
+                    // Store country_id as data attribute for additional validation
+                    option.setAttribute('data-country', type.country_id || 'global');
+                    option.setAttribute('data-country-name', type.country_name || 'Global');
+                    
+                    vehicleTypeSelect.appendChild(option);
+                });
+            }
+        };
+
+        // Initial load - show all vehicle types
+        filterVehicleTypesByCountry(countrySelect.value);
+
+        // On country change
+        countrySelect.addEventListener('change', (e) => {
+            filterVehicleTypesByCountry(e.target.value);
+        });
+
+        // Category Form Submission with validation
+        const categoryForm = document.getElementById('category-form');
+        categoryForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Frontend validation before sending
+            const selectedCountry = countrySelect.value;
+            const selectedVehicleType = vehicleTypeSelect.value;
+            const selectedVehicleTypeOption = vehicleTypeSelect.options[vehicleTypeSelect.selectedIndex];
+            
+            if (!selectedVehicleTypeOption || selectedVehicleTypeOption.disabled) {
+                alert('Please select a valid vehicle type.');
+                return;
+            }
+            
+            const vehicleTypeCountry = selectedVehicleTypeOption.getAttribute('data-country');
+            const vehicleTypeName = selectedVehicleTypeOption.textContent.split('(')[0].trim();
+            
+            // Validation Rule 1: If country is selected, vehicle type must belong to that country or be global
+            if (selectedCountry && vehicleTypeCountry !== 'global' && vehicleTypeCountry !== selectedCountry) {
+                const countryName = countrySelect.options[countrySelect.selectedIndex]?.textContent.split('(')[0].trim() || 'selected country';
+                alert(`Error: "${vehicleTypeName}" belongs to a different country and cannot be used for ${countryName}.`);
+                return;
+            }
+            
+            // Validation Rule 2: If no country selected (Global), vehicle type must be global
+            if (!selectedCountry && vehicleTypeCountry !== 'global') {
+                const vehicleCountry = selectedVehicleTypeOption.getAttribute('data-country-name');
+                alert(`Error: Cannot use country-specific vehicle type "${vehicleTypeName}" (${vehicleCountry}) for Global category. Please select a country or use a Global vehicle type.`);
+                return;
+            }
+            
+            const formData = new FormData(categoryForm);
+            
+            // Show loading state
+            const submitBtn = categoryForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Creating...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/admin/category', { method: 'POST', body: formData });
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    categoryForm.reset();
+                    // Reset vehicle types to show all
+                    filterVehicleTypesByCountry('');
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed. Please try again.');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Filter Published Categories
+        const filterCountry = document.getElementById('filter-country');
+        const publishedVehicleTypeSelector = document.getElementById('published-vehicle-type-selector');
+        const publishedCategoryBoxes = document.querySelectorAll('#published-category-boxes > div');
+        const clearFiltersBtnCat = document.getElementById('clear-filters-cat');
+
+        const updatePublishedVehicleTypes = () => {
+            const selectedCountry = filterCountry?.value;
+            const currentSelectedVT = publishedVehicleTypeSelector?.value;
+
+            if (publishedVehicleTypeSelector) {
+                if (!selectedCountry) {
+                    publishedVehicleTypeSelector.innerHTML = '<option value="" disabled selected>Select Vehicle Type</option>';
+                    publishedVehicleTypeSelector.disabled = true;
+                    return;
+                }
+
+                publishedVehicleTypeSelector.disabled = false;
+                publishedVehicleTypeSelector.innerHTML = '<option value="" disabled selected>Select Vehicle Type</option>';
+
+                const filteredTypes = allVehicleTypes.filter(type => {
+                    if (selectedCountry === 'global') {
+                        return type.country_id === null;
+                    } else {
+                        return type.country_id == selectedCountry || type.country_id === null;
+                    }
+                });
+
+                filteredTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.vehicle_type_id;
+                    option.textContent = type.vehicle_type_name;
+                    if (type.vehicle_type_id == currentSelectedVT) {
+                        option.selected = true;
+                    }
+                    publishedVehicleTypeSelector.appendChild(option);
+                });
+            }
+        };
+
+        const filterCategories = () => {
+            const selectedCountry = filterCountry?.value;
+            const selectedVehicleType = publishedVehicleTypeSelector?.value;
+            
+            // Handle category boxes
+            publishedCategoryBoxes.forEach(box => {
+                if (box.id === 'cat-empty-message') return;
+
+                const boxVehicleType = box.getAttribute('data-vehicle-type');
+                const boxCountry = box.getAttribute('data-country');
+                
+                let showByCountry = false;
+                if (!selectedCountry) {
+                    showByCountry = false; // Hidden initially
+                } else if (selectedCountry === 'global') {
+                    showByCountry = boxCountry === 'global';
+                } else {
+                    showByCountry = boxCountry === selectedCountry || boxCountry === 'global';
+                }
+                
+                const showByVehicleType = !selectedVehicleType ? false : selectedVehicleType === boxVehicleType;
+                
+                if (showByCountry && showByVehicleType) {
+                    box.classList.remove('hidden');
+                } else {
+                    box.classList.add('hidden');
+                }
+            });
+
+            // Handle message display
+            const messageEl = document.getElementById('cat-empty-message');
+            if (messageEl) {
+                if (!selectedCountry) {
+                    messageEl.textContent = 'Select country and vehicle type to view categories';
+                    messageEl.style.display = 'block';
+                } else if (!selectedVehicleType) {
+                    messageEl.textContent = 'Select vehicle type to view categories';
+                    messageEl.style.display = 'block';
+                } else {
+                    let anyVisible = false;
+                    publishedCategoryBoxes.forEach(box => {
+                        if (box.id !== 'cat-empty-message' && !box.classList.contains('hidden')) {
+                            anyVisible = true;
+                        }
+                    });
+                    if (!anyVisible) {
+                        messageEl.textContent = 'No categories found for the selected filter';
+                        messageEl.style.display = 'block';
+                    } else {
+                        messageEl.style.display = 'none';
+                    }
+                }
+            }
+        };
+
+        clearFiltersBtnCat?.addEventListener('click', () => {
+            if (filterCountry) filterCountry.value = "";
+            if (publishedVehicleTypeSelector) {
+                publishedVehicleTypeSelector.value = "";
+                publishedVehicleTypeSelector.disabled = true;
+            }
+            if (clearFiltersBtnCat) clearFiltersBtnCat.style.display = 'none';
+            updatePublishedVehicleTypes();
+            filterCategories();
+        });
+
+        filterCountry?.addEventListener('change', () => {
+            if (filterCountry.value && clearFiltersBtnCat) {
+                clearFiltersBtnCat.style.display = 'block';
+            }
+            updatePublishedVehicleTypes();
+            filterCategories();
+        });
+        
+        publishedVehicleTypeSelector?.addEventListener('change', filterCategories);
+        
+        // Initial setup
+        updatePublishedVehicleTypes();
+        filterCategories();
+
+        // Event Delegation for Edit/Delete
+        document.getElementById('published-category-boxes')?.addEventListener('click', async (e) => {
+            const target = e.target;
+
+            // === EDIT ===
+            if (target.classList.contains('edit-cat-btn')) {
+                const catId = target.getAttribute('data-cat-id');
+                try {
+                    const res = await fetch(`/admin/category/${catId}`);
+                    const data = await res.json();
+                    if (!data.success) throw new Error(data.message);
+
+                    const category = data.category;
+                    const countries = data.countries || [];
+                    const vehicleTypes = data.vehicleTypes || [];
+                    
+                    const editForm = document.createElement('div');
+                    editForm.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                    editForm.innerHTML = `
+                        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <h3 class="text-2xl font-bold text-white mb-4">Edit Category</h3>
+                            <form id="edit-category-form" enctype="multipart/form-data" class="space-y-6">
+                                <input type="hidden" name="categoryId" value="${category.category_id}">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Current Image</label>
+                                    <img src="${category.image_path}" class="w-48 h-32 object-contain rounded-md mb-2">
+                                    <input type="file" name="categoryImage" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Category Name</label>
+                                    <input type="text" name="categoryName" value="${category.name}" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Select Country</label>
+                                    <select name="countryId" id="edit-country-select" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg">
+                                        <option value="">Global (All Countries)</option>
+                                        ${countries.map(c => `<option value="${c.id}" ${category.country_id == c.id ? 'selected' : ''}>${c.country_name} (${c.currency_symbol})</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                                    <select name="vehicleType" id="edit-vehicle-type" required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg">
+                                        <option value="" disabled>Select Vehicle Type</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-end space-x-2">
+                                    <button type="button" class="close-edit-form bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
+                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+
+                    document.body.appendChild(editForm);
+
+                    // Function to filter vehicle types for edit form
+                    const filterEditVehicleTypes = (countryValue) => {
+                        const editVehicleTypeSelect = editForm.querySelector('#edit-vehicle-type');
+                        editVehicleTypeSelect.innerHTML = '<option value="" disabled>Select Vehicle Type</option>';
+                        
+                        const filteredTypes = vehicleTypes.filter(type => {
+                            if (!countryValue) return true;
+                            return type.country_id == countryValue || type.country_id === null;
+                        });
+                        
+                        filteredTypes.forEach(type => {
+                            const option = document.createElement('option');
+                            option.value = type.vehicle_type_id;
+                            
+                            // Show country info
+                            if (type.country_name) {
+                                option.textContent = `${type.vehicle_type_name} (${type.country_name})`;
+                                option.setAttribute('data-country', type.country_id);
+                            } else {
+                                option.textContent = `${type.vehicle_type_name} (Global)`;
+                                option.setAttribute('data-country', 'global');
+                            }
+                            
+                            if (type.vehicle_type_id == category.vehicle_type_id) {
+                                option.selected = true;
+                            }
+                            editVehicleTypeSelect.appendChild(option);
+                        });
+                    };
+                    
+                    // Initial load
+                    filterEditVehicleTypes(category.country_id || '');
+                    
+                    // On country change in edit form
+                    const editCountrySelect = editForm.querySelector('#edit-country-select');
+                    editCountrySelect.addEventListener('change', (e) => {
+                        filterEditVehicleTypes(e.target.value);
+                    });
+
+                    // Close
+                    editForm.querySelector('.close-edit-form').onclick = () => editForm.remove();
+
+                    // Submit Edit with validation
+                    editForm.querySelector('#edit-category-form').onsubmit = async (ev) => {
+                        ev.preventDefault();
+                        
+                        // Validate edit form
+                        const editCountry = editCountrySelect.value;
+                        const editVehicleSelect = editForm.querySelector('#edit-vehicle-type');
+                        const editVehicleOption = editVehicleSelect.options[editVehicleSelect.selectedIndex];
+                        
+                        if (editVehicleOption) {
+                            const vehicleCountry = editVehicleOption.getAttribute('data-country');
+                            const vehicleName = editVehicleOption.textContent.split('(')[0].trim();
+                            
+                            if (editCountry && vehicleCountry !== 'global' && vehicleCountry !== editCountry) {
+                                alert('Error: Selected vehicle type does not belong to the chosen country!');
+                                return;
+                            }
+                            
+                            if (!editCountry && vehicleCountry !== 'global') {
+                                alert('Error: Cannot use country-specific vehicle type for Global category.');
+                                return;
+                            }
+                        }
+                        
+                        const formData = new FormData(ev.target);
+                        try {
+                            const editRes = await fetch('/admin/category/update', { method: 'POST', body: formData });
+                            const result = await editRes.json();
+                            alert(result.message);
+                            if (result.success) {
+                                editForm.remove();
+                                window.location.reload();
+                            }
+                        } catch (err) {
+                            alert('Update failed.');
+                        }
+                    };
+                } catch (err) {
+                    alert('Failed to load category.');
+                }
+            }
+
+            // === DELETE ===
+            if (target.classList.contains('delete-cat-btn')) {
+                const catId = target.getAttribute('data-cat-id');
+                if (confirm('Delete this category? This cannot be undone.')) {
+                    try {
+                        const res = await fetch('/admin/category/delete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ categoryId: catId })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            target.closest('div[data-vehicle-type]').remove();
+                            alert(result.message);
+                        } else {
+                            alert(result.message);
+                        }
+                    } catch (err) {
+                        alert('Delete failed.');
+                    }
+                }
+            }
+        });
+
+        // ================= IMPORT CATEGORY LOGIC =================
+        const allCategoriesData = <%- JSON.stringify(categories || []) %>;
+        const allVehicleTypesData = <%- JSON.stringify(vehicleTypes || []) %>;
+        const importModal = document.getElementById('import-cat-modal');
+        const openImportBtn = document.getElementById('open-import-cat-modal-btn');
+        const closeImportBtn = document.getElementById('close-import-cat-modal-btn');
+        
+        // Import Dropdowns
+        const srcCountrySel = document.getElementById('import-src-country');
+        const srcVTSel = document.getElementById('import-src-vehicle-type');
+        const srcCatSel = document.getElementById('import-src-cat');
+        
+        const tgtCountrySel = document.getElementById('import-tgt-country');
+        const tgtVTSel = document.getElementById('import-tgt-vehicle-type');
+
+        // Helper to filter vehicle types for a specific dropdown
+        const populateVehicleTypes = (countryValue, selectElem) => {
+            selectElem.innerHTML = '<option value="" disabled selected>Select Vehicle Type</option>';
+            const filteredTypes = allVehicleTypesData.filter(type => {
+                if (!countryValue || countryValue === 'global') return type.country_id === null;
+                return type.country_id == countryValue || type.country_id === null;
+            });
+            
+            filteredTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type.vehicle_type_id;
+                opt.textContent = type.country_name ? `${type.vehicle_type_name} (${type.country_name})` : `${type.vehicle_type_name} (Global)`;
+                opt.setAttribute('data-country', type.country_id || 'global');
+                selectElem.appendChild(opt);
+            });
+            selectElem.disabled = filteredTypes.length === 0;
+        };
+
+        // Open Modal
+        openImportBtn?.addEventListener('click', () => {
+            importModal.classList.remove('hidden');
+            importModal.classList.add('flex');
+            populateVehicleTypes(tgtCountrySel.value, tgtVTSel); // Init target VTs
+        });
+
+        // Close Modal
+        closeImportBtn?.addEventListener('click', () => {
+            importModal.classList.add('hidden');
+            importModal.classList.remove('flex');
+        });
+
+        // Source Country Change
+        srcCountrySel?.addEventListener('change', (e) => {
+            populateVehicleTypes(e.target.value, srcVTSel);
+            srcCatSel.innerHTML = '<option value="" disabled selected>Select Category</option>';
+            srcCatSel.disabled = true;
+        });
+
+        // Source Vehicle Type Change
+        srcVTSel?.addEventListener('change', (e) => {
+            const countryVal = srcCountrySel.value;
+            const vtVal = e.target.value;
+            
+            srcCatSel.innerHTML = '<option value="" disabled selected>Select Category</option>';
+            
+            const filteredCats = allCategoriesData.filter(c => {
+                const cMatch = (countryVal === 'global' && c.country_id === null) || 
+                               (countryVal !== 'global' && c.country_id == countryVal);
+                const vMatch = c.vehicle_type_id == vtVal;
+                return cMatch && vMatch;
+            });
+
+            filteredCats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.category_id;
+                opt.textContent = c.name;
+                srcCatSel.appendChild(opt);
+            });
+            
+            srcCatSel.disabled = filteredCats.length === 0;
+        });
+
+        // Target Country Change
+        tgtCountrySel?.addEventListener('change', (e) => {
+            populateVehicleTypes(e.target.value, tgtVTSel);
+        });
+
+        // Import Submit
+        document.getElementById('import-cat-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const sourceCategoryId = srcCatSel.value;
+            const targetCountryId = tgtCountrySel.value;
+            const targetVehicleTypeId = tgtVTSel.value;
+
+            // Validation
+            if (!sourceCategoryId) return alert('Please select a source category to import.');
+            if (!targetVehicleTypeId) return alert('Please select a target vehicle type.');
+
+            const tgtVTOption = tgtVTSel.options[tgtVTSel.selectedIndex];
+            const vtCountry = tgtVTOption.getAttribute('data-country');
+
+            if (targetCountryId && vtCountry !== 'global' && vtCountry !== targetCountryId) {
+                return alert('Error: Selected target vehicle type does not belong to the target country.');
+            }
+            if (!targetCountryId && vtCountry !== 'global') {
+                return alert('Error: Cannot use country-specific vehicle type for a Global target category.');
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const origText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Importing...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/admin/category/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sourceCategoryId, targetCountryId, targetVehicleTypeId })
+                });
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) window.location.reload();
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('Import failed. Please try again.');
+            } finally {
+                submitBtn.innerHTML = origText;
+                submitBtn.disabled = false;
+            }
+        });
+        // ======================================================
+    });
+</script>
+</body>
+</html>

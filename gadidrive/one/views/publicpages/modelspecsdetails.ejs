@@ -1,0 +1,933 @@
+<% 
+    // Server-side date calculation
+    var now = new Date(); 
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+    var currentYear = now.getFullYear(); 
+    var updatedDate = months[now.getMonth()] + " " + currentYear; 
+    
+    // Display variables
+    var displayCountry = (typeof country !== 'undefined' && country) ? country.country_name : 'Nepal';
+    var displayCountryCapitalized = displayCountry.charAt(0).toUpperCase() + displayCountry.slice(1);
+    var displayCountryLower = displayCountry.toLowerCase();
+    var modelTitle = model ? (model.brand_name + " " + (model.model_name || "")) : 'Vehicle'; 
+    var specTitle = (specification && specification.title) ? specification.title : 'Specifications'; 
+    var currency = (typeof currencySymbol !== 'undefined') ? currencySymbol : 'Rs.'; 
+    var currencyCode = (typeof country !== 'undefined' && country && country.currency_code) ? country.currency_code : 'INR';
+    var vType = (model && model.vehicle_type_name ? model.vehicle_type_name.toLowerCase() : 'car'); 
+    var baseUrl = 'https://gadidrive.com';
+    
+    // URL variables
+    var vehicletypename = vType;
+    var brandname = model && model.brand_name ? model.brand_name.toLowerCase().replace(/ /g, '-') : '';
+    var modelname = model && model.model_name ? model.model_name.toLowerCase().replace(/ /g, '-') : '';
+    var countryPrefix = displayCountry ? '/' + displayCountryLower : '';
+    var currentUrl = countryPrefix + '/' + vehicletypename + '/brand/' + brandname + '/' + modelname + '/specs/' + specTitle.toLowerCase().replace(/\s+/g, '-') + '/';
+    
+    // SEO Title & Description
+    var catchyTitle = modelTitle + " " + specTitle + " Specifications & Features in " + displayCountryCapitalized + " " + currentYear;
+    var catchyDescription = "Get detailed " + specTitle + " specifications for " + modelTitle + " in " + displayCountryCapitalized + ". Check technical features, engine specs, safety details, and everything you need to know about " + modelTitle + " for " + currentYear + " on GadiDrive.";
+
+    // Keywords
+    var kArray = [
+        modelTitle + " " + specTitle,
+        modelTitle + " full specifications",
+        modelTitle + " price in " + displayCountryCapitalized,
+        modelTitle + " " + specTitle + " " + currentYear,
+        specTitle + " of " + modelTitle + " in " + displayCountryCapitalized,
+        (model && model.brand_name ? model.brand_name : '') + " technical specs",
+        modelTitle + " features in " + displayCountryCapitalized,
+        vType + " specifications in " + displayCountryCapitalized
+    ];
+    var catchyKeywords = kArray.join(', ');
+    
+    // OG Image
+    var ogImagePath = (model && model.model_image) ? model.model_image : null;
+%>
+
+<%- include('../partials/head', { 
+    title: catchyTitle, 
+    description: catchyDescription, 
+    keywords: catchyKeywords, 
+    path: typeof path !== 'undefined' ? path : currentUrl,
+    country: typeof country !== 'undefined' ? country : null,
+    ogImage: ogImagePath
+}) %>
+
+<!-- Enhanced Schema - Product, Car, and Breadcrumb -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": ["Product", "Car"],
+  "name": "<%= modelTitle %> - <%= specTitle %> Specifications",
+  "sku": "<%= model && model.brand_name ? model.brand_name.toUpperCase() : '' %>-<%= model && model.model_name ? model.model_name.toUpperCase().replace(/\s+/g, '-') : '' %>-SPECS-<%= specTitle.toUpperCase().replace(/\s+/g, '-') %>",
+  "image": "<%= model && model.model_image ? (model.model_image.startsWith('http') ? model.model_image : baseUrl + model.model_image) : baseUrl + '/images/mainlogo.png' %>",
+  "description": "<%= catchyDescription.replace(/"/g, '\\"') %>",
+  "brand": {
+    "@type": "Brand",
+    "name": "<%= model && model.brand_name ? model.brand_name : '' %>"
+  },
+  "manufacturer": {
+    "@type": "Organization",
+    "name": "<%= model && model.brand_name ? model.brand_name : '' %>"
+  },
+  "model": "<%= model && model.model_name ? model.model_name : '' %>",
+  "vehicleEngine": {
+    "@type": "EngineSpecification",
+    "fuelType": "<%= model && model.engine_type ? model.engine_type : 'Electric' %>"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "<%= baseUrl %><%= currentUrl %>",
+    "priceCurrency": "<%= currencyCode %>",
+    "price": "<%= model && model.starting_price ? model.starting_price : '0' %>",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "<%= baseUrl %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "<%= displayCountryCapitalized %>",
+      "item": "<%= baseUrl %>/<%= displayCountryLower %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "<%= model && model.brand_name ? model.brand_name : '' %>",
+      "item": "<%= baseUrl %>/<%= displayCountryLower %>/<%= vehicletypename %>/brand/<%= brandname %>/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "<%= model && model.model_name ? model.model_name : '' %>",
+      "item": "<%= baseUrl %>/<%= displayCountryLower %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 5,
+      "name": "<%= specTitle %>",
+      "item": "<%= baseUrl %><%= currentUrl %>"
+    }
+  ]
+}
+</script>
+
+<style>
+
+<style>
+    :root {
+        --primary-red: #dc2626;
+        --dark-red: #b91c1c;
+        --primary-blue: #3b82f6;
+        --dark-blue: #1d4ed8;
+        --dark-bg: #000000;
+        --card-bg: #111111;
+        --text-light: #e5e5e5;
+        --text-muted: #9ca3af;
+        --border-color: #374151;
+    }
+
+    * {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background: var(--dark-bg);
+        color: white;
+    }
+
+    .specs-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .specs-content p {
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+        color: var(--text-light);
+        font-size: 1.1rem;
+        font-family: 'Poppins', sans-serif;
+        text-align: justify;
+    }
+
+    .specs-content h2 {
+        color: #ffffff;
+        margin: 2rem 0 1rem 0;
+        font-weight: 600;
+        font-size: 1.75rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+        font-family: 'Poppins', sans-serif;
+        counter-increment: spec-list;
+    }
+
+    .specs-content h2::before {
+        content: counter(spec-list) ". ";
+        color: var(--primary-red);
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+
+    .specs-content h2::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+        border-radius: 2px;
+    }
+
+    .spec-image {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 1.5rem 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-source-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .image-source-badge:hover {
+        background: rgba(220, 38, 38, 0.9);
+        transform: translateY(-2px);
+    }
+
+    .content-block {
+        margin-bottom: 2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        margin: 3rem auto 2rem auto;
+        padding: 1.5rem;
+        max-width: 500px;
+        background: var(--card-bg);
+        border-radius: 60px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .back-to-model,
+    .share-btn {
+        padding: 1rem 2.5rem;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: transparent;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+        min-width: 160px;
+        justify-content: center;
+        border: 2px solid transparent;
+        text-decoration: none;
+    }
+
+    .back-to-model {
+        border-color: var(--primary-red);
+        color: var(--primary-red);
+    }
+
+    .back-to-model:hover {
+        background: var(--primary-red);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+    }
+
+    .share-btn {
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+    }
+
+    .share-btn:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    .back-to-model svg,
+    .share-btn svg {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .back-to-model:hover svg,
+    .share-btn:hover svg {
+        transform: rotate(10deg);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .modal .modal-content {
+        background: #111111;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 500px;
+        border: 1px solid #333;
+        overflow: hidden;
+        animation: modalFadeIn 0.3s ease;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal .modal-header {
+        background: #1a1a1a;
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid var(--primary-red);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal .modal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+    }
+
+    .modal .close-btn {
+        background: var(--primary-red);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .modal .close-btn:hover {
+        background: var(--dark-red);
+        transform: scale(1.1);
+    }
+
+    .modal .modal-body {
+        padding: 2rem;
+        background: #111111;
+    }
+
+    .share-icons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .share-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        background: #1a1a1a;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #333;
+        color: white;
+        gap: 0.75rem;
+    }
+
+    .share-icon:hover {
+        background: var(--primary-red);
+        border-color: var(--primary-red);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+    }
+
+    .share-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .share-icon span {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .copy-link {
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 50px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .copy-link:hover {
+        background: var(--primary-red);
+        border-color: var(--primary-red);
+    }
+
+    .copy-link span {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .copy-link svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .spec-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        background: linear-gradient(to right, #ffffff, #e5e5e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .content-link {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        padding-bottom: 2px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .content-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #60a5fa;
+        transition: width 0.3s ease;
+    }
+
+    .content-link:hover {
+        color: #3b82f6;
+    }
+
+    .content-link:hover::after {
+        width: 100%;
+    }
+
+    .author-date {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1rem 0 2rem 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .author-name {
+        color: var(--text-light);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .author-name:hover {
+        color: #dc2626 !important;
+    }
+
+    .separator {
+        color: #6b7280;
+    }
+
+    .recommended-model-box {
+        border-radius: 12px;
+        background: linear-gradient(to bottom, var(--primary-red), var(--dark-bg));
+        padding: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .recommended-model-box:hover {
+        transform: scale(1.02);
+        border-color: var(--primary-red);
+    }
+
+    .spec-recommendation-box {
+        border-radius: 8px;
+        background: #1a1a1a;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-red);
+        transition: all 0.3s ease;
+        border: 1px solid #333;
+    }
+
+    .spec-recommendation-box:hover {
+        background: rgba(220, 38, 38, 0.1);
+        transform: translateX(5px);
+        border-color: var(--primary-red);
+    }
+
+    @media (min-width: 1024px) {
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .specs-content {
+            grid-column: 1;
+        }
+
+        .recommendations-sidebar {
+            grid-column: 2;
+            position: sticky;
+            top: 2rem;
+        }
+    }
+
+    @media (max-width: 1023px) {
+        .main-grid {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recommendations-sidebar {
+            order: 2;
+            margin-top: 3rem;
+        }
+
+        .specs-content {
+            order: 1;
+        }
+
+        .spec-title {
+            font-size: 2rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .back-to-model,
+        .share-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .justified-text {
+        text-align: justify;
+    }
+
+    .specs-content {
+        counter-reset: spec-list;
+    }
+
+    .loading {
+        opacity: 0.7;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 0.4; }
+        100% { opacity: 0.7; }
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-black text-white" itemscope itemtype="https://schema.org/Article">
+
+<%- include('../partials/navbar', { 
+    currentPage: 'modeldetails', 
+    country: country, 
+    allVehicleTypes: [vehicleType] 
+}) %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+
+    <div class="main-grid">
+        <div class="specs-content">
+            <article class="mb-8">
+                <h1 class="spec-title" itemprop="headline">
+                    <%= specTitle + " of " + modelTitle + " in " + displayCountryCapitalized %>
+                </h1>
+
+                <section class="specs-content mb-8" itemprop="articleBody">
+                    <% if (specificationLists && specificationLists.length > 0) { %>
+                        <% specificationLists.forEach((list, listIndex) => { %>
+                            <div class="mb-10 border-b border-gray-800 pb-6">
+                                <h2 class="text-2xl font-bold text-red-500 mb-4">
+                                    <%= list.title %>
+                                </h2>
+
+                                <% const listContents = specContents.filter(content => content.list_id === list.id); %>
+                                <div class="space-y-4">
+                                    <% listContents.forEach((content) => { %>
+                                        <% if (content.type === 'article' || content.type === 'text') { %>
+                                            <p class="leading-relaxed text-gray-300 justified-text">
+                                                <%= content.value %>
+                                            </p>
+                                        <% } else if (content.type === 'photo' && content.image_path) { %>
+                                            <figure class="spec-image group">
+                                                <img src="<%= content.image_path %>"
+                                                    alt="<%= model.brand_name %> <%= model.model_name %> <%= list.title %> details"
+                                                    class="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                                                    loading="lazy"
+                                                    onload="this.classList.remove('loading')"
+                                                    onerror="this.style.display='none'">
+                                                <% if (content.source) { %>
+                                                    <a href="<%= content.source.startsWith('http') ? content.source : 'https://' + content.source %>"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        class="image-source-badge">
+                                                        Source
+                                                    </a>
+                                                <% } %>
+                                                <figcaption class="hidden">
+                                                    <%= list.title %> of <%= model.model_name %>
+                                                </figcaption>
+                                            </figure>
+                                        <% } else if (content.type === 'link' && content.value) { %>
+                                            <div class="content-block">
+                                                <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="content-link">
+                                                    <%= content.value %>
+                                                </a>
+                                            </div>
+                                        <% } %>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-gray-400 text-center py-8">No specification details available.</p>
+                    <% } %>
+                </section>
+
+                <div class="action-buttons">
+                    <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                        class="back-to-model" aria-label="Back to model details">
+                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to <%= model.model_name %>
+                    </a>
+
+                    <button class="share-btn" onclick="openShareModal()"
+                        aria-label="Share this specification">
+                        <svg width="20" height="20" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Share
+                    </button>
+                </div>
+            </article>
+        </div>
+
+        <div class="recommendations-sidebar">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
+                    <%= model.brand_name %> <%= model.model_name %>
+                    <span class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
+                </h2>
+                <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                    class="block">
+                    <div class="recommended-model-box mb-6 cursor-pointer transition-transform hover:scale-105">
+                        <div class="flex flex-row items-start p-2 rounded-xl">
+                            <% if (model.model_image) { %>
+                                <img src="<%= model.model_image %>"
+                                    alt="<%= model.brand_name %> <%= model.model_name %>"
+                                    class="w-24 h-24 bg-white rounded-lg flex-shrink-0 object-cover"
+                                    onload="this.classList.remove('loading')"
+                                    onerror="this.style.display='none'">
+                            <% } else { %>
+                                <div class="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex-shrink-0 flex items-center justify-center">
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                </div>
+                            <% } %>
+                            <div class="content ml-4 flex-grow text-white">
+                                <div class="font-semibold text-lg mb-2 line-clamp-2">
+                                    <%= model.brand_name %> <%= model.model_name %>
+                                </div>
+                                <div class="text-sm text-gray-300 font-semibold">
+                                    <%= model.vehicle_type_name %>
+                                </div>
+                                <% if (model.starting_price) { %>
+                                    <div class="text-sm text-red-400 font-bold mt-1">
+                                        <%= currency %> <%= model.starting_price.toLocaleString() %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <% if (otherSpecifications && otherSpecifications.length > 0) { %>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
+                        Other Specifications
+                        <span class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
+                    </h2>
+                    <div class="space-y-4">
+                        <% otherSpecifications.forEach(otherSpec => { %>
+                            <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/specs/<%= otherSpec.title.toLowerCase().replace(/\s+/g, '-') %>/"
+                                class="block">
+                                <div class="spec-recommendation-box">
+                                    <div class="font-semibold text-white text-lg mb-1 line-clamp-2">
+                                        <%= otherSpec.title %>
+                                    </div>
+                                    <div class="text-sm text-gray-300">
+                                        <%= model.brand_name %> <%= model.model_name %>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+
+            <% if (similarModels && similarModels.length > 0) { %>
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
+                        Similar Models
+                        <span class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
+                    </h2>
+                    <div class="space-y-4">
+                        <% similarModels.slice(0, 3).forEach(similar => { %>
+                            <a href="<%= countryPrefix %>/<%= similar.vehicle_type_name %>/brand/<%= similar.brand_name.replace(/\s+/g, '-') %>/<%= similar.model_name.replace(/\s+/g, '-') %>/"
+                                class="block">
+                                <div class="spec-recommendation-box">
+                                    <div class="font-semibold text-white text-lg mb-1 line-clamp-2">
+                                        <%= similar.brand_name %> <%= similar.model_name %>
+                                    </div>
+                                    <% if (similar.starting_price) { %>
+                                        <div class="text-sm text-gray-300">
+                                            <%= currency %> <%= similar.starting_price.toLocaleString() %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </a>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+<!-- Share Modal -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Share this Specification</h3>
+            <button class="close-btn" onclick="closeShareModal()" aria-label="Close share modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="share-icons">
+                <button class="share-icon" onclick="shareOnTwitter()" aria-label="Share on Twitter">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+                    </svg>
+                    <span>Twitter</span>
+                </button>
+                <button class="share-icon" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                    <span>Facebook</span>
+                </button>
+                <button class="share-icon" onclick="shareOnLinkedIn()" aria-label="Share on LinkedIn">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                        <rect x="2" y="9" width="4" height="12" />
+                        <circle cx="4" cy="4" r="2" />
+                    </svg>
+                    <span>LinkedIn</span>
+                </button>
+                <button class="share-icon" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.6 6.3A7.9 7.9 0 0 0 12 4a8 8 0 0 0-6.9 11.9l-1 3.6 3.7-1a8 8 0 0 0 4.2 1.2 8 8 0 0 0 8-8 7.9 7.9 0 0 0-2.4-5.4zM12 19.5a7.5 7.5 0 0 1-3.8-1l-0.3-0.2-2.2.6 0.6-2.2-0.2-0.3a7.5 7.5 0 1 1 5.9 3.1z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                </button>
+            </div>
+            <div class="copy-link" onclick="copyToClipboard()">
+                <span>Copy link</span>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer', { 
+    country: country, 
+    allCountries: allCountries, 
+    allVehicleTypes: [vehicleType] 
+}) %>
+
+<script>
+    function openShareModal() {
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        const shareModal = document.getElementById('shareModal');
+        if (event.target === shareModal) {
+            closeShareModal();
+        }
+    }
+
+    function shareOnTwitter() {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('<%= specTitle %> of <%= modelTitle %> in <%= displayCountryCapitalized %>');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnLinkedIn() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnWhatsApp() {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('<%= specTitle %> of <%= modelTitle %> in <%= displayCountryCapitalized %>');
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function copyToClipboard() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = event.currentTarget;
+            const span = btn.querySelector('span');
+            const originalText = span.textContent;
+            span.textContent = 'Copied!';
+            setTimeout(() => { span.textContent = originalText; }, 2000);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            if (!img.complete) {
+                img.classList.add('loading');
+            }
+        });
+    });
+</script>
+</body>
+</html>
