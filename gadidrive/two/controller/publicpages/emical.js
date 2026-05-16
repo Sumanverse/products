@@ -33,9 +33,9 @@ exports.getEmiCalculator = async (req, res, next) => {
         const countryPrefix = countryname ? '/' + countryname : '';
 
         res.render('publicpages/emical', {
-            title: `EMI Calculator | Calculate Your Vehicle Loan EMI in ${countryDisplay}`,
-            description: `Calculate your vehicle loan EMI in ${countryDisplay} with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.`,
-            keywords: `EMI calculator, car loan EMI, bike loan calculator, vehicle finance, loan calculator ${countryDisplay.toLowerCase()}`,
+            title: countryname ? `EMI Calculator | Calculate Your Vehicle Loan EMI in ${countryDisplay} | GadiDrive` : 'EMI Calculator | Calculate Your Vehicle Loan EMI | GadiDrive',
+            description: countryname ? `Calculate your vehicle loan EMI in ${countryDisplay} with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.` : 'Calculate your vehicle loan EMI with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.',
+            keywords: `EMI calculator, car loan EMI, bike loan calculator, vehicle finance, loan calculator${countryDisplay ? ' ' + countryDisplay.toLowerCase() : ''}`,
             ogImage: '/images/mainlogo.png',
             canonical: countryname ? `/${countryname}/emicalculator` : '/emicalculator',
             error: null,
@@ -111,9 +111,9 @@ exports.calculateEMI = async (req, res, next) => {
 
         // SEO variables for all responses
         const seoData = {
-            title: `EMI Calculator Results | Calculate Your Vehicle Loan EMI in ${countryDisplay}`,
-            description: `Calculate your vehicle loan EMI in ${countryDisplay} with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.`,
-            keywords: `EMI calculator, car loan EMI, bike loan calculator, vehicle finance, loan calculator ${countryDisplay.toLowerCase()}`,
+            title: countryname ? `EMI Calculator Results | Calculate Your Vehicle Loan EMI in ${countryDisplay} | GadiDrive` : 'EMI Calculator Results | Calculate Your Vehicle Loan EMI | GadiDrive',
+            description: countryname ? `Calculate your vehicle loan EMI in ${countryDisplay} with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.` : 'Calculate your vehicle loan EMI with our easy-to-use calculator. Get detailed breakdown and charts for car, bike, and other vehicle loans.',
+            keywords: `EMI calculator, car loan EMI, bike loan calculator, vehicle finance, loan calculator${countryDisplay ? ' ' + countryDisplay.toLowerCase() : ''}`,
             ogImage: '/images/mainlogo.png',
             canonical: countryname ? `/${countryname}/emicalculator` : '/emicalculator'
         };

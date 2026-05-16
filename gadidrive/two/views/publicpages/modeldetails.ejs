@@ -72,8 +72,8 @@ const startingPrice = (model && model.starting_price) ? (currency + " " + new In
     
     const breadcrumbs = [
         { name: vType.charAt(0).toUpperCase() + vType.slice(1) + 's', url: `${countryPrefix}/${vType}` },
-        { name: model && model.brand_name ? model.brand_name : 'Brand', url: `${countryPrefix}/${vType}/brand/${brandSlug}` },
-        { name: model && model.model_name ? model.model_name : 'Model', url: `${countryPrefix}/${vType}/brand/${brandSlug}/${modelSlug}` }
+        { name: model && model.brand_name ? model.brand_name : 'Brand', url: `${countryPrefix}/${vType}/${brandSlug}` },
+        { name: model && model.model_name ? model.model_name : 'Model', url: `${countryPrefix}/${vType}/${brandSlug}/${modelSlug}` }
     ];
     %>
 
@@ -84,7 +84,13 @@ const startingPrice = (model && model.starting_price) ? (currency + " " + new In
             <script type="application/ld+json">
                 <%- faqJsonLd %>
             </script>
-            <% } %>
+        <% } %>
+
+        <% if (typeof vehicleSchema !== 'undefined' && vehicleSchema) { %>
+            <script type="application/ld+json">
+                <%- vehicleSchema %>
+            </script>
+        <% } %>
 
                 <script type="application/ld+json">
     {
@@ -1912,7 +1918,7 @@ const startingPrice = (model && model.starting_price) ? (currency + " " + new In
                                             <!-- H1 Tag for SEO -->
                                             <h1 class="seo-h1-title">
                                                 <% if (model) { %>
-                                                    <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/"
+                                                    <a href="<%= countryPrefix %>/<%= vehicletypename %>/<%= brandname %>/"
                                                         class="h1-brand-link">
                                                         <%= model.brand_name %>
                                                     </a>
@@ -2174,7 +2180,7 @@ const startingPrice = (model && model.starting_price) ? (currency + " " + new In
                                                         modelDetails.specifications.length> 0) { %>
                                                         <div class="specs-grid-container">
                                                             <% modelDetails.specifications.forEach(function(spec) { %>
-                                                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/specs/<%= spec.title.toLowerCase().replace(/\s+/g, '-') %>/"
+                                                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/<%= brandname %>/<%= modelname %>/specs/<%= spec.title.toLowerCase().replace(/\s+/g, '-') %>/"
                                                                     class="spec-category-box">
                                                                     <h3 class="spec-category-title">
                                                                         <%= spec.title %>
@@ -3000,7 +3006,7 @@ const startingPrice = (model && model.starting_price) ? (currency + " " + new In
                                     const variantSlug = variantName.toLowerCase().replace(/\s+/g, '-');
                                     const countryPrefix = '<%= country ? "/" + country.country_name.toLowerCase() : "" %>';
 
-                                    const variantUrl = `${countryPrefix}/${vehicletypename}/brand/${brandname}/${modelname}/${variantSlug}/`;
+                                    const variantUrl = `${countryPrefix}/${vehicletypename}/${brandname}/${modelname}/${variantSlug}/`;
 
                                     window.location.href = variantUrl;
                                 }

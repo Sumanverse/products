@@ -743,7 +743,7 @@
                             <!-- Action Buttons - Same style as model details -->
                             <div class="action-buttons">
                                 <!-- Back to Model Button -->
-                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                                <a href="<%= countryPrefix %>/<%= vehicletypename %>/<%= brandname %>/<%= modelname %>/"
                                     class="back-to-model" aria-label="Back to model details">
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                         stroke-width="2">
@@ -777,7 +777,7 @@
                                             class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
                             </h2>
                             <!-- MADE THE ENTIRE MODEL BOX CLICKABLE -->
-                            <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/"
+                            <a href="<%= countryPrefix %>/<%= vehicletypename %>/<%= brandname %>/<%= modelname %>/"
                                 class="block">
                                 <div
                                     class="recommended-model-box mb-6 cursor-pointer transition-transform hover:scale-105">
@@ -825,7 +825,7 @@
                                 <h2 class="other-variants-title">Other Variants</h2>
                                 <div class="variants-list">
                                     <% otherVariants.forEach(otherVariant=> { %>
-                                        <a href="<%= countryPrefix %>/<%= vehicletypename %>/brand/<%= brandname %>/<%= modelname %>/<%= otherVariant.name.toLowerCase().replace(/\s+/g, '-') %>/"
+                                        <a href="<%= countryPrefix %>/<%= vehicletypename %>/<%= brandname %>/<%= modelname %>/<%= otherVariant.name.toLowerCase().replace(/\s+/g, '-') %>/"
                                             class="variant-card">
                                             <div class="variant-card-name">
                                                 <%= otherVariant.name %>
@@ -858,7 +858,7 @@
                                             <h2 class="other-variants-title">Similar Models</h2>
                                             <div class="variants-list">
                                                 <% similarModels.slice(0, 3).forEach(similar=> { %>
-                                                    <a href="<%= countryPrefix %>/<%= similar.vehicle_type_name %>/brand/<%= similar.brand_name.replace(/\s+/g, '-') %>/<%= similar.model_name.replace(/\s+/g, '-') %>/"
+                                                    <a href="<%= countryPrefix %>/<%= similar.vehicle_type_name %>/<%= similar.brand_name.replace(/\s+/g, '-') %>/<%= similar.model_name.replace(/\s+/g, '-') %>/"
                                                         class="variant-card">
                                                         <div class="variant-card-name">
                                                             <%= similar.brand_name %>

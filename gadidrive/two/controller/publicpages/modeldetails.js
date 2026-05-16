@@ -206,6 +206,46 @@ exports.getmodeldetails = async (req, res, next) => {
         const CONTROLLER_VERSION = "April-16-v5-STABLE";
         console.log(`🚀 RENDERING WITH VERSION: ${CONTROLLER_VERSION}`);
 
+        // Generate FAQ Schema
+        let faqJsonLd = null;
+        if (mergedFaqs && mergedFaqs.length > 0) {
+            faqJsonLd = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": mergedFaqs.map(faq => ({
+                    "@type": "Question",
+                    "name": faq.question,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": faq.answer
+                    }
+                }))
+            });
+        }
+
+        // Generate Vehicle Schema
+        const currencyCode = currentCountry ? currentCountry.currency_code : 'NPR';
+        const vehicleSchema = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Vehicle",
+            "name": `${model.brand_name} ${model.model_name}`,
+            "brand": {
+                "@type": "Brand",
+                "name": model.brand_name
+            },
+            "model": model.model_name,
+            "offers": {
+                "@type": "Offer",
+                "price": model.starting_price || 0,
+                "priceCurrency": currencyCode,
+                "availability": "https://schema.org/InStock"
+            },
+            "image": model.model_image ? `https://gadidrive.com${model.model_image}` : '',
+            "description": model.descriptions || `Detailed specifications and price of ${model.brand_name} ${model.model_name} in ${countryDisplay}.`,
+            "fuelType": model.engine_type || "",
+            "vehicleSeatingCapacity": model.seater || ""
+        });
+
         return res.render('publicpages/modeldetails', {
             error: null,
             model,
@@ -232,7 +272,9 @@ exports.getmodeldetails = async (req, res, next) => {
             title: `${model.brand_name} ${model.model_name} Price, Specs, Features in ${countryDisplay}`,
             description: model.descriptions || `Check out ${model.brand_name} ${model.model_name} detailed specifications, price, features, and reviews in ${countryDisplay}.`,
             keywords: `${model.brand_name} ${model.model_name}, ${model.brand_name} ${model.model_name} ${countryDisplay.toLowerCase()}, ${model.brand_name} ${model.model_name} price`,
-            path: canonicalUrl
+            path: canonicalUrl,
+            faqJsonLd,
+            vehicleSchema
         });
 
     } catch (error) {

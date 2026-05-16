@@ -4,5 +4,8 @@ Disallow: /admin/
 Disallow: /signin
 Disallow: /logout
 Disallow: /profile
+Disallow: /*?sort=
+Disallow: /*?filter=
+Disallow: /*?page=
 
 Sitemap: https://gadidrive.com/sitemap.xml
